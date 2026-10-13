@@ -49,7 +49,7 @@ class TicketController extends Controller
             'title' => 'required|string',
             'type' => 'required|in:Incident,Request',
             'category' => 'required|string',
-            'priority' => 'required|in:Low,Medium,High,Urgent', // Dibetulkan: Medium
+            'priority' => 'required|in:Low,Medium,High,Urgent',
             'location' => 'required|string',
             'description' => 'required|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
