@@ -26,7 +26,7 @@ class TicketController extends Controller
         $priorities = $this->getEnumValues('tickets', 'priority');
         
         // Senarai kategori (boleh ditambah/diubah mengikut keperluan)
-        $categories = ['Hardware', 'Software', 'Rangkaian', 'Fasiliti', 'Others'];
+        $categories = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
 
         return view('tickets.create', compact('types', 'priorities', 'categories'));
     }
