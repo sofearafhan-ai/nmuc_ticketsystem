@@ -14,7 +14,7 @@
         <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-bold text-gray-800">Hantar Aduan Baru</h1>
             <a href="{{ route('tickets.index') }}" class="text-sm text-indigo-600 hover:text-indigo-800">
-                &larr; Kembali ke Senarai
+                &larr; Back
             </a>
         </div>
 
