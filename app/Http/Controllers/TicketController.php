@@ -25,7 +25,7 @@ class TicketController extends Controller
         $types = $this->getEnumValues('tickets', 'type');
         $priorities = $this->getEnumValues('tickets', 'priority');
         
-        // Senarai kategori (boleh ditambah/diubah mengikut keperluan)
+        // Senarai kategori
         $categories = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
 
         return view('tickets.create', compact('types', 'priorities', 'categories'));
@@ -35,7 +35,7 @@ class TicketController extends Controller
     private function getEnumValues($table, $column)
     {
         $type = DB::select("SHOW COLUMNS FROM {$table} WHERE Field = '{$column}'")[0]->Type;
-        preg_match('/^enum\((.*)\)$/', $type, $matches);
+        preg_Match('/^enum\((.*)\)$/', $type, $matches);
         $enum = [];
         foreach (explode(',', $matches[1]) as $value) {
             $enum[] = trim($value, "'");
@@ -63,14 +63,14 @@ class TicketController extends Controller
         $user = Auth::user();
 
         Ticket::create([
-            'user_name' => $user->full_name ?? $user->name ?? 'Pengguna',
+            'user_name' => $user->full_name ?? $user->name ?? 'User',
             'user_email' => $user->email ?? 'user@nmuc.edu.my',
             'title' => $request->title,
             'description' => $request->description,
             'image' => $imagePath ?? 'no-image.png',
             'type' => $request->type,
             'category' => $request->category,
-            'date' => now()->toDateString(),
+            'date' => now()->toDateTimeString(),
             'status' => 'New',
             'priority' => $request->priority,
             'user_id' => $user->user_id ?? 1,
