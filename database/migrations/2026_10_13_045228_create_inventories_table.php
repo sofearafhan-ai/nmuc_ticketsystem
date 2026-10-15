@@ -18,10 +18,10 @@ return new class extends Migration
             $table->string('item_category', 255);
             $table->string('item_model', 255);
 
-            $table->enum('item_status', ['Active', 'Inactive']);
+            $table->enum('item_status', ['Active', 'Inactive'])->default('Active');
             $table->string('item_location', 255);
 
-            $table->string('user_id', 255)->nullable();
+            $table->foreignId('user_id')->constrained('users', 'user_id')->onDelete('cascade');
 
             $table->timestamp('created_at')->useCurrent();
         });

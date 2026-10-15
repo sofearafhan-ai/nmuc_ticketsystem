@@ -21,6 +21,8 @@ Route::get('/', function () {
 Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
 Route::get('/tickets/create', [TicketController::class, 'create'])->name('tickets.create');
 Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
+Route::get('/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
+Route::post('/tickets/{id}/reply', [TicketController::class, 'storeReply'])->name('tickets.reply');
 
 Route::get('/manage_ticket', function () {
     return view('manage_ticket');

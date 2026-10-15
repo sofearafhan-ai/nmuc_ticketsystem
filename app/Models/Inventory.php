@@ -17,10 +17,18 @@ class Inventory extends Model
 
     protected $fillable = [
         'item_name',
-        'iteam_category',
+        'item_category', // Pembetulan ejaan typo di sini
         'item_model',
         'item_status',
         'item_location',
         'user_id',
     ];
+
+    /**
+     * Setiap item inventori dimiliki oleh seorang User.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
 }

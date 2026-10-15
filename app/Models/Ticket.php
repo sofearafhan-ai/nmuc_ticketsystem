@@ -32,4 +32,9 @@ class Ticket extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
+
+    public function replies()
+    {
+        return $this->hasMany(TicketReply::class, 'ticket_id', 'ticket_id');
+    }
 }

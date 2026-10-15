@@ -17,17 +17,17 @@ return new class extends Migration
             $table->text('title');
             $table->text('description');
             
-            $table->string('image', 255)->nullable();
+            $table->string('image')->nullable();
             
             $table->enum('type', ['Incident', 'Request']);
             $table->string('category', 255);
             
             $table->date('date');
             
-            $table->enum('status', ['New', 'Processing', 'Pending', 'Close']);
-            $table->enum('priority', ['Low', 'Medium', 'High', 'Urgent']);
+            $table->enum('status', ['New', 'Processing', 'Pending', 'Close'])->default('New');
+            $table->enum('priority', ['Low', 'Medium', 'High', 'Urgent'])->default('Medium');
             
-            $table->unsignedBigInteger('user_id');
+            $table->foreignId('user_id')->constrained('users', 'user_id')->onDelete('cascade');
             
             $table->string('location', 255);
             
