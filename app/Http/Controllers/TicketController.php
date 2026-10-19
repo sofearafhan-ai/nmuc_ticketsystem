@@ -54,7 +54,7 @@ class TicketController extends Controller
             $query->whereYear('date', $request->year);
         }
 
-        $tickets = $query->latest()->get();
+        $tickets = $query->latest()->paginate(10)->withQueryString();
 
     // Senarai pilihan untuk dropdown filter
         $categories = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
@@ -158,35 +158,30 @@ public function storeReply(Request $request, $id)
 {
     $request->validate([
         'message' => 'required|string',
-        'status'  => 'nullable|string',
         'attachment' => 'nullable|file|mimes:jpeg,png,jpg,pdf,doc,docx|max:4096',
     ]);
 
     $ticket = Ticket::findOrFail($id);
+    $user = Auth::user();
 
     $attachmentPath = null;
     if ($request->hasFile('attachment')) {
         $attachmentPath = $request->file('attachment')->store('ticket_replies', 'public');
     }
 
-    $user = Auth::user();
+    $senderName = $user->full_name ?? $user->name ?? $ticket->user_name ?? 'User';
+    $senderRole = 'User';
 
-    // Simpan mesej balasan
     TicketReply::create([
         'ticket_id'   => $ticket->ticket_id,
         'user_id'     => $user->user_id ?? $user->id ?? null,
-        'sender_name' => $user->full_name ?? $user->name ?? 'Admin PIC',
-        'sender_role' => $user->role ?? 'Admin',
+        'sender_name' => $senderName,
+        'sender_role' => $senderRole,
         'message'     => $request->message,
         'attachment'  => $attachmentPath,
     ]);
 
-    // Kemaskini status tiket jika ditukar oleh Admin
-    if ($request->filled('status')) {
-        $ticket->update(['status' => $request->status]);
-    }
-
-    return redirect()->back()->with('success', 'Mesej balasan berjaya dihantar!');
+    return redirect()->back()->with('success', 'Reply message sent successfully!');
 }
 
 }

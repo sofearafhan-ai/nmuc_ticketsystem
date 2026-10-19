@@ -5,11 +5,11 @@
 @section('content')
     <div class="w-full max-w-6xl mx-auto">
 
-        <!-- Ralat Validasi -->
+        <!-- Validation Error -->
         @if ($errors->any())
             <div class="mb-4 bg-red-950/80 border-l-4 border-red-500 p-4 rounded shadow-sm text-red-200 w-full">
                 <div class="flex items-center gap-2 text-red-400 font-bold mb-1 text-sm">
-                    <i class="fa-solid fa-triangle-exclamation"></i> Sila semak ralat berikut:
+                    <i class="fa-solid fa-triangle-exclamation"></i> Please check the following errors:
                 </div>
                 <ul class="list-disc pl-5 text-xs text-red-300 space-y-1">
                     @foreach ($errors->all() as $error)
@@ -19,11 +19,11 @@
             </div>
         @endif
 
-        <!-- Container Borang (GLPI Style 2 Ruangan) -->
+        <!-- Form Container  -->
         <form action="{{ route('tickets.store') }}" method="POST" enctype="multipart/form-data" class="w-full bg-white border border-orange-200 rounded-lg shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[650px] text-slate-700">
             @csrf
 
-            <!-- RUANGAN KIRI: Borang Utama (8 Columns) -->
+            <!-- LEFT SECTION: Main Form (8 Columns) -->
             <div class="lg:col-span-8 p-4 md:p-6 border-b lg:border-b-0 lg:border-r border-slate-200 bg-slate-50/50 flex flex-col justify-between">
                 
                 <div class="space-y-5">
@@ -32,7 +32,7 @@
                             {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 2)) }}
                         </div>
 
-                        <div class="flex-1 bg-orange-50/60 border border-slate-200 rounded-lg p-4 md:p-5 relative">
+                        <div class="flex-1 bg-orange-50/60 border border-orange-200 rounded-lg p-4 md:p-5 relative">
                             <div class="hidden md:block absolute -left-2 top-4 w-0 h-0 border-t-8 border-t-transparent border-r-8 border-r-orange-100 border-b-8 border-b-transparent"></div>
 
                             <div class="text-sm font-bold text-slate-800 mb-3 flex items-center justify-between">
@@ -48,7 +48,7 @@
                             <!-- Title Input -->
                             <div class="mb-5">
                                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Title <span class="text-red-500">*</span></label>
-                                <input type="text" name="title" required value="{{ old('title') }}" placeholder="Cth: Komputer Makmal 2 Tidak Boleh Dihidupkan"
+                                <input type="text" name="title" required value="{{ old('title') }}"
                                     class="w-full bg-white border border-slate-300 rounded p-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition">
                             </div>
 
@@ -85,7 +85,7 @@
 
             </div>
 
-            <!-- RUANGAN KANAN: Metadata Sidebar (4 Columns) -->
+            <!-- RIGHT SPACE: Metadata Sidebar (4 Columns) -->
             <div class="lg:col-span-4 p-4 md:p-6 bg-white flex flex-col justify-between">
                 <div class="space-y-4">
                     
@@ -109,7 +109,7 @@
                     <!-- Name -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 mb-1">Name</label>
-                        <input type="text" name="user_name" required value="{{ old('user_name', Auth::user()->name ?? '') }}" placeholder="Nama Pengguna"
+                        <input type="text" name="user_name" required value="{{ old('user_name', Auth::user()->name ?? '') }}" 
                             class="w-full border border-slate-300 rounded p-2 text-sm text-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
                     </div>
 
@@ -144,8 +144,8 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <button type="button" class="border border-l-0 border-slate-300 bg-slate-50 px-2.5 py-2 text-slate-500 hover:bg-slate-100 text-xs" title="Maklumat Kategori">i</button>
-                            <button type="button" class="border border-l-0 border-slate-300 bg-slate-50 px-2.5 py-2 text-slate-500 hover:bg-slate-100 rounded-r text-xs" title="Tambah Kategori Baru">+</button>
+                            <button type="button" class="border border-l-0 border-slate-300 bg-slate-50 px-2.5 py-2 text-slate-500 hover:bg-slate-100 text-xs" title="Category Information">i</button>
+                            <button type="button" class="border border-l-0 border-slate-300 bg-slate-50 px-2.5 py-2 text-slate-500 hover:bg-slate-100 rounded-r text-xs" title="Add New Category">+</button>
                         </div>
                     </div>
 
@@ -164,7 +164,7 @@
                     <!-- Location -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 mb-1">Location</label>
-                        <input type="text" name="location" placeholder="Cth: Makmal 2, Blok B" required value="{{ old('location') }}"
+                        <input type="text" name="location"  required value="{{ old('location') }}"
                             class="w-full border border-slate-300 rounded p-2 text-sm text-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
                     </div>
 

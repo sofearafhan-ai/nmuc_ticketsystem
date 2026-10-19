@@ -3,18 +3,17 @@
 @section('title', 'NMUC - Ticket List')
 
 @section('content')
-    <!-- Header Ringkasan & Butang -->
+    <!-- Header & Button -->
     <div class="flex justify-between items-center bg-orange-600 p-6 rounded-lg border border-orange-700 shadow-md text-white">
         <div>
             <h1 class="text-2xl font-bold text-white">Ticket List</h1>
-            <p class="text-xs text-orange-100 mt-1">Menguruskan senarai masalah, insiden, dan permohonan servis anda.</p>
         </div>
         <a href="{{ route('tickets.create') }}" class="px-4 py-2.5 bg-slate-950 hover:bg-slate-900 text-white text-sm font-semibold rounded-lg transition flex items-center gap-2 shadow-md cursor-pointer">
             <i class="fa-solid fa-plus text-xs text-orange-400"></i> New Ticket
         </a>
     </div>
 
-    <!-- Mesej Kejayaan -->
+    <!-- Success Message -->
     @if (session('success'))
         <div class="bg-emerald-900/90 border-l-4 border-emerald-400 text-emerald-100 px-4 py-3 rounded-lg shadow-sm text-sm flex items-center gap-2">
             <i class="fa-solid fa-circle-check text-emerald-300"></i>
@@ -22,11 +21,10 @@
         </div>
     @endif
 
-    <!-- SECTION PENAPIS (FILTER) & CARIAN -->
+    <!-- Filter & Search Section -->
     <div class="bg-white p-5 rounded-lg shadow-md border border-orange-200">
         <form method="GET" action="{{ route('tickets.index') }}" class="space-y-4">
             
-            <!-- Bar Carian Utama -->
             <div class="flex flex-col md:flex-row gap-3 items-center">
                 <div class="relative flex-1 w-full">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
@@ -46,7 +44,7 @@
                 </div>
             </div>
 
-            <!-- Dropdown Penapis Kategori & Tarikh -->
+            <!-- Category & Date Filter Dropdown -->
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 pt-2 border-t border-slate-100">
                 
                 <!-- Category -->
@@ -122,7 +120,7 @@
         </form>
     </div>
 
-    <!-- Jadual Tiket -->
+    <!-- Ticket Timetable -->
     <div class="bg-white rounded-lg shadow-xl overflow-hidden border border-orange-200 text-slate-800">
         <div class="p-6">
             <div class="overflow-x-auto">
@@ -181,13 +179,63 @@
                             <tr>
                                 <td colspan="7" class="p-8 text-center text-slate-500 font-medium">
                                     <i class="fa-solid fa-inbox text-2xl mb-2 text-slate-300 block"></i>
-                                    Tiada tiket dijumpai mengikut penapis carian ini.
+                                    No tickets found matching these search filters.
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+
+            @if ($tickets->hasPages())
+                <div class="mt-8 pt-4 flex flex-col items-center space-y-3">
+
+                    <div class="inline-flex items-center bg-whote p-2 rounded-2xl border-slate-200 shadow-sm gap-2">
+
+                        @if ($tickets->onFirstPage())
+                            <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-300 cursor-not-allowed">
+                                <i class="fa-solid fa-chevron-left text-xs"></i>
+                            </span>
+                        @else
+                            <a href="{{ $tickets->previousPageUrl() }}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition">
+                                <i class="fa-solid fa-chevron-left text-xs"></i>
+                            </a>
+                        @endif
+
+                        <div class="flex items-center gap-1.5 px-2">
+                            @foreach ($tickets->getUrlRange(1, $tickets->lastPage()) as $page => $url)
+                                @if ($page == $tickets->currentPage())
+                                    <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-orange-500 text-white font-bold text-sm shadow-md shadow-orange-500/30">
+                                        {{ $page }}
+                                    </span>
+                                @else
+                                    <a href="{{ $url }}" class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 font-bold text-sm transition">
+                                        {{ $page }}
+                                    </a>
+                                @endif
+                            @endforeach
+                        </div>
+
+                        @if ($tickets->hasMorePages())
+                            <a href="{{ $tickets->nextPageUrl() }}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 hover:bg-slate-800 text-white shadow-md transition">
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </a>
+                        @else
+                            <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-300 cursor-not-allowed">
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </span>
+                        @endif
+                    </div>
+
+                    <p class="text-xs text-slate-500 font-medium">
+                        Showing <span class="font-bold text-slate-800">{{ $tickets->firstItem() ?? 0 }}</span>
+                        - <span class="font-bold text-slate-800">{{ $tickets->lastItem() ?? 0 }}</span>
+                        of <span class="font-bold text-slate-800">{{ $tickets->total() }}</span> tickets
+                    </p>
+
+                </div>
+            @endif
+
         </div>
     </div>
 @endsection
