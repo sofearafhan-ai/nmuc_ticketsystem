@@ -27,7 +27,7 @@
 </head>
 <body x-data="{ sidebarOpen: true }" class="bg-orange-50 font-sans text-slate-800 min-h-screen flex flex-col overflow-x-hidden">
 
-    <!-- ==================== TOP HEADER BAR ==================== -->
+    <!-- TOP HEADER BAR -->
     <header class="w-full bg-slate-900 border-b border-slate-800 text-white h-16 px-6 flex items-center justify-between sticky top-0 z-50 shrink-0 shadow-sm">
         <div class="flex items-center gap-4">
             <button @click="sidebarOpen = !sidebarOpen" class="text-white hover:text-slate-100 p-1 text-lg transition focus:outline-none cursor-pointer">
@@ -50,7 +50,7 @@
         </div>
     </header>
 
-    <!-- ==================== (SIDEBAR + MAIN CONTENT AREA) ==================== -->
+    <!-- SIDEBAR + MAIN CONTENT AREA -->
     <div class="flex flex-1 min-h-[calc(100vh-4rem)] w-full relative items-stretch">
 
         <!-- BACKDROP OVERLAY MOBILE -->
@@ -74,14 +74,12 @@
             
             <!-- UPPER SIDEBAR CONTENT -->
             <div class="w-64 md:w-auto">
-                <!-- Header Logo Text & Mobile X Button -->
                 <div class="p-4 border-b border-slate-800 flex items-center justify-between overflow-hidden h-16 shrink-0">
                     <div x-show="sidebarOpen" x-transition.opacity class="whitespace-nowrap">
                         <h1 class="font-bold text-white tracking-wide text-base leading-none">NMUC <span class="text-orange-500">Helpdesk</span></h1>
                         <span class="text-[10px] text-slate-400 font-medium">Ticketing System</span>
                     </div>
 
-                    <!-- X Button (Mobile Only) -->
                     <button x-show="sidebarOpen" @click="sidebarOpen = false" class="md:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition">
                         <i class="fa-solid fa-xmark text-lg"></i>
                     </button>
@@ -168,24 +166,22 @@
 
                     </div>
 
-                    <!-- ==================== ADMIN SECTION MENU (ADDED) ==================== -->
+                    <!-- ADMIN SECTION MENU -->
                     @if(Auth::check() && in_array(Auth::user()->role, ['Admin', 'Super Admin']))
                         <div class="pt-3 mt-3 border-t border-slate-800/80 px-2 space-y-1">
                             <span x-show="sidebarOpen" class="block text-[10px] font-extrabold text-orange-500 uppercase tracking-wider mb-2">
                                 Admin Area ({{ Auth::user()->department ?? 'IT' }})
                             </span>
 
-                            <!-- Admin Dashboard Link -->
                             <a href="{{ route('admin.dashboard') }}" title="Dashboard"
-                            class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition shadow-sm cursor-pointer block
-                                    {{ request()->routeIs('admin.dashboard') 
-                                        ? 'bg-slate-950 text-white border border-slate-800' 
-                                        : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                               class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition shadow-sm cursor-pointer block
+                                      {{ request()->routeIs('admin.dashboard') 
+                                          ? 'bg-slate-950 text-white border border-slate-800' 
+                                          : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
                                 <i class="fa-solid fa-chart-line text-xs {{ request()->routeIs('admin.dashboard') ? 'text-orange-500' : 'text-slate-400' }}"></i>
                                 <span x-show="sidebarOpen" class="whitespace-nowrap">Dashboard</span>
                             </a>
 
-                            <!-- Admin Tickets Link -->
                             <a href="{{ route('admin.tickets.index') }}" title="Admin Tickets"
                                class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition shadow-sm cursor-pointer block
                                       {{ request()->routeIs('admin.tickets.*') 
@@ -195,7 +191,6 @@
                                 <span x-show="sidebarOpen" class="whitespace-nowrap">Admin Tickets</span>
                             </a>
 
-                            <!-- Department Inventory Link -->
                             <a href="{{ route('admin.inventory.index') }}" title="Department Inventory"
                                class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition shadow-sm cursor-pointer block
                                       {{ request()->routeIs('admin.inventory.*') 
@@ -214,15 +209,12 @@
             <div class="p-3 border-t border-slate-800 shrink-0">
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
-                    
-                    <!-- Paparan apabila Sidebar Terbuka -->
                     <button x-show="sidebarOpen" type="submit" 
                             class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/20 font-semibold text-xs transition shadow-sm cursor-pointer">
                         <i class="fa-solid fa-right-from-bracket text-sm"></i>
-                        <span class="whitespace-nowrap">Log Keluar</span>
+                        <span class="whitespace-nowrap">Log Out</span>
                     </button>
 
-                    <!-- Paparan apabila Sidebar Dikuncupkan (Collapsed) -->
                     <button x-show="!sidebarOpen" type="submit" title="Log Keluar"
                             class="hidden md:flex w-full justify-center p-3 rounded-xl bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/20 transition cursor-pointer">
                         <i class="fa-solid fa-right-from-bracket text-sm"></i>

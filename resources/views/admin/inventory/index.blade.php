@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Admin - ' . $adminDept . ' Inventory')
 
@@ -6,34 +6,97 @@
 <div class="space-y-6">
 
     <!-- Header Section -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 p-6 rounded-xl text-white shadow-md gap-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-[#0d1527] p-6 rounded-2xl text-white shadow-md gap-4">
         <div>
             <div class="flex items-center gap-2">
-                <span class="bg-orange-500 text-white text-[10px] font-extrabold px-2 py-0.5 rounded tracking-wide uppercase">{{ $adminDept }} Department</span>
+                <span class="bg-orange-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">{{ $adminDept }} DEPARTMENT</span>
                 <h1 class="text-2xl font-bold">Asset Inventory</h1>
             </div>
-            <p class="text-xs text-slate-400 mt-1">Managing the list of devices and assets under the {{ $adminDept }} Department's.</p>
+            <p class="text-xs text-slate-400 mt-1">Managing the list of devices and assets under the {{ $adminDept }} Department.</p>
         </div>
 
-        <button onclick="document.getElementById('addModal').classList.remove('hidden')" class="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-xs rounded-lg transition shadow-md flex items-center gap-2 cursor-pointer">
+        <!-- Link to New Inventory Form Page -->
+        <a href="{{ route('admin.inventory.create') }}" class="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-xs rounded-xl transition shadow-md flex items-center gap-2 cursor-pointer">
             <i class="fa-solid fa-plus"></i> Add Asset
-        </button>
+        </a>
     </div>
 
     @if (session('success'))
-        <div class="bg-emerald-900/90 border-l-4 border-emerald-400 text-emerald-100 px-4 py-3 rounded-lg shadow-sm text-sm flex items-center gap-2">
+        <div class="bg-emerald-900/90 border-l-4 border-emerald-400 text-emerald-100 px-4 py-3 rounded-xl shadow-sm text-sm flex items-center gap-2">
             <i class="fa-solid fa-circle-check text-emerald-300"></i>
             <span>{{ session('success') }}</span>
         </div>
     @endif
 
+    <!-- FILTER CARD SECTION -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80">
+        <form action="{{ route('admin.inventory.index') }}" method="GET" class="space-y-4">
+            
+            <!-- Top Search Input & Filter Button -->
+            <div class="flex flex-col sm:flex-row items-center gap-3">
+                <div class="relative flex-1 w-full">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" name="search" value="{{ request('search') }}" 
+                           placeholder="Search by name, model, or location..." 
+                           class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
+                </div>
+
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button type="submit" 
+                            class="flex-1 sm:flex-initial px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-filter"></i> Filter
+                    </button>
+
+                    @if(request()->hasAny(['search', 'category', 'status']))
+                        <a href="{{ route('admin.inventory.index') }}" 
+                           class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl transition flex items-center gap-1.5"
+                           title="Reset Filters">
+                            <i class="fa-solid fa-rotate-right"></i> Reset
+                        </a>
+                    @endif
+                </div>
+            </div>
+
+            <hr class="border-slate-100">
+
+            <!-- Bottom Dropdown Filters -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-1">
+                <!-- Category Filter -->
+                <div>
+                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Category</label>
+                    <select name="category" onchange="this.form.submit()" 
+                            class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer">
+                        <option value="">All Categories</option>
+                        <option value="Hardware" {{ request('category') == 'Hardware' ? 'selected' : '' }}>Hardware</option>
+                        <option value="Software" {{ request('category') == 'Software' ? 'selected' : '' }}>Software</option>
+                        <option value="Network" {{ request('category') == 'Network' ? 'selected' : '' }}>Network</option>
+                        <option value="Facility" {{ request('category') == 'Facility' ? 'selected' : '' }}>Facility</option>
+                        <option value="Others" {{ request('category') == 'Others' ? 'selected' : '' }}>Others</option>
+                    </select>
+                </div>
+
+                <!-- Status Filter -->
+                <div>
+                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Status</label>
+                    <select name="status" onchange="this.form.submit()" 
+                            class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer">
+                        <option value="">All Statuses</option>
+                        <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Active</option>
+                        <option value="Inactive" {{ request('status') == 'Inactive' ? 'selected' : '' }}>Inactive</option>
+                    </select>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
     <!-- Inventory Table Card -->
-    <div class="bg-white rounded-xl shadow-md border border-orange-200 overflow-hidden">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-6">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="border-b border-orange-200 bg-orange-100/60 text-orange-950 uppercase text-[11px] font-bold tracking-wider">
+                        <tr class="border-b border-slate-200 bg-slate-50 text-slate-700 uppercase text-[11px] font-bold tracking-wider">
                             <th class="p-3">Item ID</th>
                             <th class="p-3">Item Name</th>
                             <th class="p-3">Category</th>
@@ -41,15 +104,16 @@
                             <th class="p-3">Location</th>
                             <th class="p-3">Status</th>
                             <th class="p-3">Registered By</th>
+                            <th class="p-3 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 text-sm">
-                        @forelse ($inventories as $item)
-                            <tr class="hover:bg-orange-50/50 transition">
-                                <td class="p-3 font-bold text-slate-900">#{{ $item->item_id }}</td>
+                        @forelse ($inventories as $index => $item)
+                            <tr class="hover:bg-orange-50/40 transition">
+                                <td class="p-3 font-bold text-slate-900">#{{ $inventories->firstItem() + $index }}</td>
                                 <td class="p-3 font-semibold text-slate-800">{{ $item->item_name }}</td>
                                 <td class="p-3">
-                                    <span class="text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded border border-slate-200 font-medium">
+                                    <span class="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200 font-medium">
                                         {{ $item->item_category }}
                                     </span>
                                 </td>
@@ -58,7 +122,7 @@
                                     <i class="fa-solid fa-location-dot text-orange-500 mr-1"></i> {{ $item->item_location }}
                                 </td>
                                 <td class="p-3">
-                                    <span class="px-2.5 py-1 text-xs font-bold rounded text-white
+                                    <span class="px-2.5 py-1 text-[11px] font-bold rounded-lg text-white
                                         {{ $item->item_status == 'Active' ? 'bg-emerald-600' : 'bg-slate-500' }}">
                                         {{ $item->item_status }}
                                     </span>
@@ -66,10 +130,33 @@
                                 <td class="p-3 text-xs text-slate-500 font-medium">
                                     {{ $item->user->full_name ?? $item->user->name ?? 'Admin' }}
                                 </td>
+                                <td class="p-3">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <!-- Edit Button -->
+                                       <a href="{{ route('admin.inventory.edit', ['id' => $item->item_id, 'row_num' => $inventories->firstItem() + $index]) }}" 
+                                          class="px-2.5 py-1.5 bg-slate-100 hover:bg-orange-500 text-slate-600 hover:text-white rounded-lg text-xs font-semibold transition border border-slate-200 hover:border-orange-500 flex items-center gap-1 cursor-pointer">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                            <span>Edit</span>
+                                        </a>
+
+                                        <!-- Delete Button -->
+                                        <form action="{{ route('admin.inventory.destroy', $item->item_id) }}" method="POST" 
+                                              onsubmit="return confirm('Adakah anda pasti ingin memadamkan aset ini?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" 
+                                                    title="Delete Item"
+                                                    class="px-2.5 py-1.5 bg-red-50 hover:bg-red-600 text-red-600 hover:text-white rounded-lg text-xs font-semibold transition border border-red-200 hover:border-red-600 flex items-center gap-1 cursor-pointer">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                                <span>Delete</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="p-8 text-center text-slate-500 font-medium">
+                                <td colspan="8" class="p-8 text-center text-slate-500 font-medium">
                                     <i class="fa-solid fa-boxes-stacked text-2xl mb-2 text-slate-300 block"></i>
                                     No inventory data registered for the {{ $adminDept }} Department.
                                 </td>
@@ -87,62 +174,5 @@
         </div>
     </div>
 
-</div>
-
-<!-- ADD ASSET MODULE -->
-<div id="addModal" class="hidden fixed inset-0 bg-slate-950/60 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-orange-200">
-        <div class="flex justify-between items-center border-b pb-3">
-            <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                <i class="fa-solid fa-laptop-code text-orange-500"></i> Add New ({{ $adminDept }}) Inventory
-            </h3>
-            <button onclick="document.getElementById('addModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-        </div>
-
-        <form action="{{ route('admin.inventory.store') }}" method="POST" class="space-y-3 text-xs">
-            @csrf
-            <div>
-                <label class="block font-bold text-slate-700 mb-1">Item Name</label>
-                <input type="text" name="item_name" required placeholder="e.g. Dell Latitude 3420" class="w-full p-2.5 bg-slate-50 border rounded-lg">
-            </div>
-
-            <div class="grid grid-cols-2 gap-2">
-                <div>
-                    <label class="block font-bold text-slate-700 mb-1">Category</label>
-                    <select name="item_category" required class="w-full p-2.5 bg-slate-50 border rounded-lg">
-                        <option value="Hardware">Hardware</option>
-                        <option value="Software">Software</option>
-                        <option value="Network">Network</option>
-                        <option value="Facility">Facility</option>
-                        <option value="Others">Others</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-700 mb-1">Status</label>
-                    <select name="item_status" required class="w-full p-2.5 bg-slate-50 border rounded-lg">
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                    </select>
-                </div>
-            </div>
-
-            <div>
-                <label class="block font-bold text-slate-700 mb-1">Model / Specs</label>
-                <input type="text" name="item_model" required placeholder="e.g. Core i5 11th Gen / 16GB RAM" class="w-full p-2.5 bg-slate-50 border rounded-lg">
-            </div>
-
-            <div>
-                <label class="block font-bold text-slate-700 mb-1">Location</label>
-                <input type="text" name="item_location" required placeholder="e.g. Server Room / Bilik IT" class="w-full p-2.5 bg-slate-50 border rounded-lg">
-            </div>
-
-            <div class="flex justify-end gap-2 pt-2">
-                <button type="button" onclick="document.getElementById('addModal').classList.add('hidden')" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded-lg">Cancel</button>
-                <button type="submit" class="px-4 py-2 bg-orange-500 text-white font-bold rounded-lg shadow">Save</button>
-            </div>
-        </form>
-    </div>
 </div>
 @endsection

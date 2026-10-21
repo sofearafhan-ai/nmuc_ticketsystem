@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Admin - ' . $adminDept . ' Tickets')
 
@@ -6,57 +6,155 @@
 <div class="space-y-6">
 
     <!-- Header Section -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 p-6 rounded-xl text-white shadow-md gap-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-[#0d1527] p-6 rounded-2xl text-white shadow-md gap-4">
         <div>
             <div class="flex items-center gap-2">
-                <span class="bg-orange-500 text-white text-[10px] font-extrabold px-2 py-0.5 rounded tracking-wide uppercase">{{ $adminDept }} Department</span>
+                <span class="bg-orange-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">{{ $adminDept }} DEPARTMENT</span>
                 <h1 class="text-2xl font-bold">Manage Support Tickets</h1>
             </div>
-            <p class="text-xs text-slate-400 mt-1">Senarai tiket aduan yang dihantar untuk tindakan Jabatan {{ $adminDept }}.</p>
+            <p class="text-xs text-slate-400 mt-1">Review, filter, and manage student/staff support tickets.</p>
         </div>
     </div>
 
     @if (session('success'))
-        <div class="bg-emerald-900/90 border-l-4 border-emerald-400 text-emerald-100 px-4 py-3 rounded-lg shadow-sm text-sm flex items-center gap-2">
+        <div class="bg-emerald-900/90 border-l-4 border-emerald-400 text-emerald-100 px-4 py-3 rounded-xl shadow-sm text-sm flex items-center gap-2">
             <i class="fa-solid fa-circle-check text-emerald-300"></i>
             <span>{{ session('success') }}</span>
         </div>
     @endif
 
-    <!-- Search & Filter Bar -->
-    <div class="bg-white p-5 rounded-lg shadow-md border border-orange-200">
-        <form method="GET" action="{{ route('admin.tickets.index') }}" class="flex flex-col md:flex-row gap-3 items-center">
-            <div class="relative flex-1 w-full">
-                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
-                <input type="text" name="search" value="{{ request('search') }}" 
-                       placeholder="Cari ID tiket, tajuk, atau nama pengadu..." 
-                       class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-orange-500 outline-none transition">
-            </div>
+    <!-- FILTER CARD SECTION (Menyerupai Design UI Sasaran) -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80">
+        <form action="{{ route('admin.tickets.index') }}" method="GET" class="space-y-4">
             
-            <div class="w-full md:w-48">
-                <select name="status" onchange="this.form.submit()" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 outline-none">
-                    <option value="">Semua Status</option>
-                    <option value="New" {{ request('status') == 'New' ? 'selected' : '' }}>New</option>
-                    <option value="Processing" {{ request('status') == 'Processing' ? 'selected' : '' }}>Processing</option>
-                    <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="Solved" {{ request('status') == 'Solved' ? 'selected' : '' }}>Solved</option>
-                    <option value="Closed" {{ request('status') == 'Closed' ? 'selected' : '' }}>Closed</option>
-                </select>
+            <!-- Top Search Input & Filter / Reset Buttons -->
+            <div class="flex flex-col sm:flex-row items-center gap-3">
+                <div class="relative flex-1 w-full">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" name="search" value="{{ request('search') }}" 
+                           placeholder="Search..." 
+                           class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
+                </div>
+
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button type="submit" 
+                            class="flex-1 sm:flex-initial px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-filter"></i> Filter
+                    </button>
+
+                    @if(request()->hasAny(['search', 'category', 'type', 'priority', 'status', 'month', 'year']))
+                        <a href="{{ route('admin.tickets.index') }}" 
+                           class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl transition flex items-center gap-1.5"
+                           title="Reset Filters">
+                            <i class="fa-solid fa-rotate-right"></i> Reset
+                        </a>
+                    @endif
+                </div>
             </div>
 
-            <button type="submit" class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-lg transition shadow-sm cursor-pointer">
-                <i class="fa-solid fa-filter text-xs"></i> Tapis
-            </button>
+            <hr class="border-slate-100">
+
+            <!-- Bottom 6 Dropdown Filters Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 pt-1">
+                
+                <!-- 1. CATEGORY -->
+                <div>
+                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Category</label>
+                    <select name="category" onchange="this.form.submit()" 
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer">
+                        <option value="">All Categories</option>
+                        <option value="Hardware" {{ request('category') == 'Hardware' ? 'selected' : '' }}>Hardware</option>
+                        <option value="Software" {{ request('category') == 'Software' ? 'selected' : '' }}>Software</option>
+                        <option value="Network" {{ request('category') == 'Network' ? 'selected' : '' }}>Network</option>
+                        <option value="Facility" {{ request('category') == 'Facility' ? 'selected' : '' }}>Facility</option>
+                        <option value="Others" {{ request('category') == 'Others' ? 'selected' : '' }}>Others</option>
+                    </select>
+                </div>
+
+                <!-- 2. TYPE -->
+                <div>
+                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Type</label>
+                    <select name="type" onchange="this.form.submit()" 
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer">
+                        <option value="">All Types</option>
+                        <option value="Incident" {{ request('type') == 'Incident' ? 'selected' : '' }}>Incident</option>
+                        <option value="Request" {{ request('type') == 'Request' ? 'selected' : '' }}>Request</option>
+                    </select>
+                </div>
+
+                <!-- 3. PRIORITY -->
+                <div>
+                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Priority</label>
+                    <select name="priority" onchange="this.form.submit()" 
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer">
+                        <option value="">All Priorities</option>
+                        <option value="Low" {{ request('priority') == 'Low' ? 'selected' : '' }}>Low</option>
+                        <option value="Medium" {{ request('priority') == 'Medium' ? 'selected' : '' }}>Medium</option>
+                        <option value="High" {{ request('priority') == 'High' ? 'selected' : '' }}>High</option>
+                        <option value="Urgent" {{ request('priority') == 'Urgent' ? 'selected' : '' }}>Urgent</option>
+                    </select>
+                </div>
+
+                <!-- 4. STATUS -->
+                <div>
+                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Status</label>
+                    <select name="status" onchange="this.form.submit()" 
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer">
+                        <option value="">All Statuses</option>
+                        <option value="New" {{ request('status') == 'New' ? 'selected' : '' }}>New</option>
+                        <option value="Processing" {{ request('status') == 'Processing' ? 'selected' : '' }}>Processing</option>
+                        <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="Solved" {{ request('status') == 'Solved' ? 'selected' : '' }}>Solved</option>
+                        <option value="Closed" {{ request('status') == 'Closed' ? 'selected' : '' }}>Closed</option>
+                    </select>
+                </div>
+
+                <!-- 5. MONTH -->
+                <div>
+                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Month</label>
+                    <select name="month" onchange="this.form.submit()" 
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer">
+                        <option value="">All Months</option>
+                        <option value="1" {{ request('month') == '1' ? 'selected' : '' }}>January</option>
+                        <option value="2" {{ request('month') == '2' ? 'selected' : '' }}>February</option>
+                        <option value="3" {{ request('month') == '3' ? 'selected' : '' }}>March</option>
+                        <option value="4" {{ request('month') == '4' ? 'selected' : '' }}>April</option>
+                        <option value="5" {{ request('month') == '5' ? 'selected' : '' }}>May</option>
+                        <option value="6" {{ request('month') == '6' ? 'selected' : '' }}>June</option>
+                        <option value="7" {{ request('month') == '7' ? 'selected' : '' }}>July</option>
+                        <option value="8" {{ request('month') == '8' ? 'selected' : '' }}>August</option>
+                        <option value="9" {{ request('month') == '9' ? 'selected' : '' }}>September</option>
+                        <option value="10" {{ request('month') == '10' ? 'selected' : '' }}>October</option>
+                        <option value="11" {{ request('month') == '11' ? 'selected' : '' }}>November</option>
+                        <option value="12" {{ request('month') == '12' ? 'selected' : '' }}>December</option>
+                    </select>
+                </div>
+
+                <!-- 6. YEAR -->
+                <div>
+                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Year</label>
+                    <select name="year" onchange="this.form.submit()" 
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer">
+                        <option value="">All Years</option>
+                        <option value="2026" {{ request('year') == '2026' ? 'selected' : '' }}>2026</option>
+                        <option value="2025" {{ request('year') == '2025' ? 'selected' : '' }}>2025</option>
+                        <option value="2024" {{ request('year') == '2024' ? 'selected' : '' }}>2024</option>
+                        <option value="2023" {{ request('year') == '2023' ? 'selected' : '' }}>2023</option>
+                    </select>
+                </div>
+
+            </div>
+
         </form>
     </div>
 
     <!-- Tickets Table Card -->
-    <div class="bg-white rounded-xl shadow-md border border-orange-200 overflow-hidden">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-6">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="border-b border-orange-200 bg-orange-100/60 text-orange-950 uppercase text-[11px] font-bold tracking-wider">
+                        <tr class="border-b border-slate-200 bg-slate-50 text-slate-700 uppercase text-[11px] font-bold tracking-wider">
                             <th class="p-3">Ticket ID</th>
                             <th class="p-3">Title</th>
                             <th class="p-3">Submitted By</th>
@@ -69,11 +167,9 @@
                     </thead>
                     <tbody class="divide-y divide-slate-200 text-sm">
                         @forelse ($tickets as $ticket)
-                            <tr class="hover:bg-orange-50/50 transition">
+                            <tr class="hover:bg-orange-50/40 transition">
                                 <td class="p-3 font-bold text-slate-900">
-                                    <a href="{{ route('tickets.show', $ticket->ticket_id) }}" class="text-orange-600 hover:underline">
-                                        #{{ $ticket->ticket_id }}
-                                    </a>
+                                    #{{ $ticket->ticket_id }}
                                 </td>
                                 <td class="p-3 font-semibold text-slate-800">{{ $ticket->title }}</td>
                                 <td class="p-3 text-xs text-slate-600 font-medium">{{ $ticket->user_name }}</td>
@@ -97,18 +193,33 @@
                                         {{ $ticket->status }}
                                     </span>
                                 </td>
-                                <td class="p-3 text-xs text-slate-500 font-medium">{{ $ticket->date }}</td>
+                                <td class="p-3 text-xs text-slate-500 font-medium">{{ $ticket->date ?? $ticket->created_at?->format('Y-m-d') }}</td>
                                 <td class="p-3 text-center">
-                                    <a href="{{ route('tickets.show', $ticket->ticket_id) }}" class="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-md shadow transition">
-                                        <i class="fa-solid fa-eye text-[10px]"></i> View
-                                    </a>
+                                    <div class="flex items-center justify-center gap-2">
+                                        <a href="{{ route('tickets.show', $ticket->ticket_id) }}" 
+                                           class="px-2.5 py-1.5 bg-slate-100 hover:bg-orange-500 text-slate-600 hover:text-white rounded-lg text-xs font-semibold transition border border-slate-200 hover:border-orange-500 flex items-center gap-1 cursor-pointer">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                            <span>Edit</span>
+                                        </a>
+
+                                        <form action="{{ route('admin.tickets.destroy', $ticket->ticket_id) }}" method="POST" 
+                                              onsubmit="return confirm('Adakah anda pasti ingin memadamkan tiket ini?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" 
+                                                    class="px-2.5 py-1.5 bg-red-50 hover:bg-red-600 text-red-600 hover:text-white rounded-lg text-xs font-semibold transition border border-red-200 hover:border-red-600 flex items-center gap-1 cursor-pointer">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                                <span>Delete</span>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
                                 <td colspan="8" class="p-8 text-center text-slate-500 font-medium">
                                     <i class="fa-solid fa-inbox text-2xl mb-2 text-slate-300 block"></i>
-                                    Tiada aduan tiket dijumpai untuk Jabatan {{ $adminDept }}.
+                                    No ticket complaints found matching your search and filter criteria.
                                 </td>
                             </tr>
                         @endforelse
@@ -116,7 +227,6 @@
                 </table>
             </div>
 
-            <!-- Custom Pagination Navigation -->
             @if ($tickets->hasPages())
                 <div class="mt-6">
                     {{ $tickets->links() }}

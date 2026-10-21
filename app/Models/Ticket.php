@@ -10,6 +10,7 @@ class Ticket extends Model
     use HasFactory;
 
     protected $primaryKey = 'ticket_id';
+    public $timestamps = false;
 
     const UPDATED_AT = null;
 
@@ -35,6 +36,6 @@ class Ticket extends Model
 
     public function replies()
     {
-        return $this->hasMany(TicketReply::class, 'ticket_id', 'ticket_id');
+        return $this->hasMany(TicketReply::class, 'ticket_id', 'ticket_id')->orderBy('id', 'asc');
     }
 }
