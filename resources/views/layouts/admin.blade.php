@@ -131,7 +131,7 @@
                                 class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer
                                     {{ request()->routeIs('admin.messages.*') ? 'bg-[#080d19] text-white' : 'text-slate-400 hover:text-white hover:bg-[#152037]/60' }}">
                                 <i class="fa-solid fa-comments text-[11px] text-orange-500"></i>
-                                <span class="whitespace-nowrap">Message History</span>
+                                <span class="whitespace-nowrap">Message</span>
                             </a>
                         </div>
                     </div>

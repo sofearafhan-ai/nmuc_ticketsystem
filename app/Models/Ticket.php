@@ -26,6 +26,8 @@ class Ticket extends Model
         'status',
         'priority',
         'user_id',
+        'pic',
+        'department',
         'location',
     ];
 
@@ -34,8 +36,14 @@ class Ticket extends Model
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
-    public function replies()
+    public function picAdmin()
     {
-        return $this->hasMany(TicketReply::class, 'ticket_id', 'ticket_id')->orderBy('id', 'asc');
+        return $this->belongsTo(User::class, 'pic', 'user_id');
     }
+
+   public function replies()
+    {
+        return $this->hasMany(TicketReply::class, 'ticket_id', 'ticket_id');
+    }
+
 }

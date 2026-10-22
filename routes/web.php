@@ -29,6 +29,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/admin/tickets', [AdminController::class, 'tickets'])->name('admin.tickets.index');
     Route::get('/admin/tickets/create', [AdminController::class, 'createTicket'])->name('admin.tickets.create');
+    Route::get('/admin/tickets/{id}/edit', [AdminController::class, 'editTicket'])->name('admin.tickets.edit');
+    Route::put('/admin/tickets/{id}', [AdminController::class, 'updateTicket'])->name('admin.tickets.update');
     Route::post('/admin/tickets', [AdminController::class, 'storeTicket'])->name('admin.tickets.store');
     Route::delete('/admin/tickets/{id}', [AdminController::class, 'destroyTicket'])->name('admin.tickets.destroy');
 

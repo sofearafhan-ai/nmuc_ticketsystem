@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Ticket;
 use App\Models\Inventory;
+use App\Models\TicketReply;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,7 +21,6 @@ class AdminController extends Controller
         $ticketQuery = Ticket::query();
         
         if ($user->role !== 'Super Admin') {
-            // Filter follow Admin ID or Department
             $ticketQuery->where(function ($q) use ($currentAdminId, $adminDept) {
                 $q->where('user_id', $currentAdminId)
                   ->orWhere('category', $adminDept);
@@ -27,11 +28,11 @@ class AdminController extends Controller
         }
 
         $ticketStats = [
-            'new'        => (clone $ticketQuery)->where('status', 'New')->count(),
-            'processing' => (clone $ticketQuery)->where('status', 'Processing')->count(),
-            'pending'    => (clone $ticketQuery)->where('status', 'Pending')->count(),
-            'closed'     => (clone $ticketQuery)->whereIn('status', ['Closed', 'Solved', 'Resolved'])->count(),
-            'total'      => (clone $ticketQuery)->count(),
+            'new'        => Ticket::where('status', 'New')->count(),
+            'processing' => Ticket::where('status', 'Processing')->count(),
+            'pending'    => Ticket::where('status', 'Pending')->count(),
+            'close'      => Ticket::where('status', 'Close')->count(),
+            'total'      => Ticket::count(),
         ];
 
         $inventoryQuery = Inventory::query();
@@ -44,7 +45,7 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('adminDept', 'ticketStats', 'inventoryStats'));
     }
 
-    // 2. ADMIN TICKET LIST (With full filters)
+    // 2. ADMIN TICKET LIST
     public function tickets(Request $request)
     {
         $user = Auth::user();
@@ -53,7 +54,6 @@ class AdminController extends Controller
 
         $query = Ticket::query();
 
-        // Kawalan capaian mengikut jabatan/user
         if ($user->role !== 'Super Admin') {
             $query->where(function ($q) use ($currentAdminId, $adminDept) {
                 $q->where('user_id', $currentAdminId)
@@ -61,7 +61,6 @@ class AdminController extends Controller
             });
         }
 
-        // Carian teks (Title, Ticket ID, Submitted By)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -71,7 +70,6 @@ class AdminController extends Controller
             });
         }
 
-        // Penapis Dropdown
         if ($request->filled('category')) {
             $query->where('category', $request->category);
         }
@@ -88,12 +86,10 @@ class AdminController extends Controller
             $query->where('status', $request->status);
         }
 
-        // Penapis Bulan
         if ($request->filled('month')) {
             $query->whereMonth('created_at', $request->month);
         }
 
-        // Penapis Tahun
         if ($request->filled('year')) {
             $query->whereYear('created_at', $request->year);
         }
@@ -106,20 +102,17 @@ class AdminController extends Controller
     public function destroyTicket($id)
     {
         $ticket = Ticket::where('ticket_id', $id)->orWhere('id', $id)->firstOrFail();
-        
         $ticket->delete();
 
         return redirect()->route('admin.tickets.index')
             ->with('success', 'Ticket successfully deleted!');
     }
 
-    // Tunjukkan borang penambahan tiket baru oleh Admin
     public function createTicket()
     {
         $user = Auth::user();
         $adminDept = $user->department ?? 'IT';
 
-        // Pilihan dropdown untuk borang tiket
         $types = ['Incident', 'Request'];
         $categories = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
         $priorities = ['Low', 'Medium', 'High', 'Urgent'];
@@ -127,7 +120,59 @@ class AdminController extends Controller
         return view('admin.tickets.create', compact('adminDept', 'types', 'categories', 'priorities'));
     }
 
-    // Simpan tiket baru ke dalam pangkalan data
+    // Edit Ticket
+    public function editTicket($id)
+    {
+        $user = Auth::user();
+        $adminDept = $user->department ?? 'IT';
+
+        $ticket = Ticket::with(['replies', 'user', 'picAdmin'])->where('ticket_id', $id)->firstOrFail();
+
+        // Dapatkan semua Admin di bawah department yang sama
+        $adminsInDept = User::whereIn('role', ['Admin', 'Super Admin'])
+                            ->where('department', $adminDept)
+                            ->get();
+
+        $categories = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
+        $types = ['Incident', 'Request'];
+        $statuses = ['New', 'Processing', 'Pending', 'Close'];
+        $priorities = ['Low', 'Medium', 'High', 'Urgent'];
+
+        return view('admin.tickets.edit', compact('ticket', 'adminsInDept', 'categories', 'types', 'statuses', 'priorities'));
+    }
+
+    public function updateTicket(Request $request, $id)
+    {
+        $request->validate([
+            'category' => 'required|string',
+            'type'     => 'required|string',
+            'status'   => 'required|in:New,Processing,Pending,Close', 
+            'priority' => 'required|string',
+            'location' => 'required|string',
+            'pic'      => 'nullable|exists:users,user_id', // Memastikan user_id wujud
+        ]);
+
+        $ticket = Ticket::with(['replies', 'user'])->where('ticket_id', $id)->firstOrFail();
+
+        $ticket->update([
+            'category' => $request->category,
+            'type'     => $request->type,
+            'status'   => $request->status,
+            'priority' => $request->priority,
+            'location' => $request->location,
+            'pic'      => $request->pic, // Menyimpan user_id Admin PIC
+        ]);
+
+        return redirect()->back()->with('success', 'Ticket Information updated successfully!');
+    }
+
+    // Papar mesej perbualan spesifik mengikut ticket_id
+    public function showConversation($id)
+    {
+        // Menggunakan fungsi messages sedia ada dengan menghantar $id
+        return $this->messages(request(), $id);
+    }
+
     public function storeTicket(Request $request)
     {
         $request->validate([
@@ -144,7 +189,6 @@ class AdminController extends Controller
 
         $user = Auth::user();
 
-        // Mengendalikan muat naik imej lampiran
         $imagePath = null;
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('tickets', 'public');
@@ -169,36 +213,42 @@ class AdminController extends Controller
             ->with('success', 'New support ticket created successfully!');
     }
 
-    // 3. MESSAGE HISTORY ADMIN
-    public function messages($ticketId = null)
+    // 3. MESSAGE HISTORY ADMIN 
+    public function messages(Request $request, $ticketId = null)
     {
         $user = Auth::user();
+        $currentAdminId = $user->user_id ?? $user->id;
         $adminDept = $user->department ?? 'IT';
+        $filter = $request->query('status');
 
-        // Tarik semua tiket beserta relasi balasannya
-        $conversations = Ticket::with('replies')
-            ->when($user->role !== 'Super Admin', function($q) use ($adminDept) {
-                $q->where('category', $adminDept);
-            })
-            ->orderBy('ticket_id', 'desc')
-            ->get();
+        $query = Ticket::with(['user', 'replies', 'picAdmin'])
+                       ->where('pic', $currentAdminId);
 
-        // Pilih tiket aktif
+        if ($filter == 'Open') {
+            $query->whereIn('status', ['New', 'Processing', 'Pending']);
+        } elseif ($filter == 'Closed') {
+            $query->where('status', 'Close');
+        }
+
+        $conversations = $query->latest()->get();
+
+        $selectedId = $ticketId ?? $request->query('ticket_id');
+
         $activeTicket = null;
-        if ($ticketId) {
-            $activeTicket = Ticket::with('replies')->where('ticket_id', $ticketId)->first();
+        if ($selectedId) {
+            $activeTicket = Ticket::with(['user', 'replies', 'picAdmin'])->where('ticket_id', $selectedId)->first();
         } else if ($conversations->isNotEmpty()) {
             $activeTicket = $conversations->first();
         }
 
-        return view('admin.messages.index', compact('adminDept', 'conversations', 'activeTicket'));
+        return view('admin.messages.index', compact('adminDept', 'conversations', 'activeTicket'))
+            ->with('tickets', $conversations);
     }
 
-    // Simpan Balasan Mesej
-    public function replyMessage(Request $request, $ticketId)
+   public function replyMessage(Request $request, $ticketId)
     {
         $request->validate([
-            'message' => 'required|string',
+            'message'    => 'required|string',
             'attachment' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
@@ -209,17 +259,16 @@ class AdminController extends Controller
             $attachmentPath = $request->file('attachment')->store('chat_attachments', 'public');
         }
 
-        // Simpan balasan ke dalam jadual ticket_replies
-        \App\Models\TicketReply::create([
-            'ticket_id'  => $ticketId,
-            'user_id'    => $user->user_id ?? $user->id,
-            'user_name'  => $user->full_name ?? $user->name ?? 'Admin Support',
-            'message'    => $request->message,
-            'attachment' => $attachmentPath,
-            'created_at' => now(),
+        TicketReply::create([
+            'ticket_id'   => $ticketId,
+            'user_id'     => $user->user_id ?? $user->id,
+            'sender_name' => $user->full_name ?? $user->name ?? 'Admin Support',
+            'sender_role' => $user->role ?? 'Admin',
+            'message'     => $request->message,
+            'attachment'  => $attachmentPath,
         ]);
 
-        return redirect()->route('admin.messages.show', $ticketId)
+        return redirect()->route('admin.messages.index', ['ticket_id' => $ticketId])
             ->with('success', 'Message sent successfully.');
     }
 
@@ -231,12 +280,10 @@ class AdminController extends Controller
 
         $query = Inventory::with('user');
 
-        // Pengehadan mengikut user/jabatan jika bukan Super Admin
         if ($user->role !== 'Super Admin') {
             $query->where('user_id', $user->user_id ?? $user->id);
         }
 
-        // Filter 1: Carian Kata Kunci
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -247,12 +294,10 @@ class AdminController extends Controller
             });
         }
 
-        // Filter 2: Kategori
         if ($request->filled('category')) {
             $query->where('item_category', $request->category);
         }
 
-        // Filter 3: Status
         if ($request->filled('status')) {
             $query->where('item_status', $request->status);
         }
@@ -262,7 +307,6 @@ class AdminController extends Controller
         return view('admin.inventory.index', compact('inventories', 'adminDept'));
     }
 
-    // 5. NEW INVENTORY SAVE
     public function createInventory()
     {
         $user = Auth::user();
@@ -271,20 +315,17 @@ class AdminController extends Controller
         return view('admin.inventory.create', compact('adminDept'));
     }
 
-    // 6. EDIT INVENTORY
     public function editInventory(Request $request, $id)
     {
         $user = Auth::user();
         $adminDept = $user->department ?? 'IT';
 
         $item = Inventory::where('item_id', $id)->firstOrFail();
-
         $rowNum = $request->query('row_num', $item->item_id);
 
         return view('admin.inventory.edit', compact('item', 'adminDept', 'rowNum'));
     }
 
-    // 7. UPDATE INVENTORY
     public function updateInventory(Request $request, $id)
     {
         $request->validate([
@@ -309,7 +350,6 @@ class AdminController extends Controller
             ->with('success', 'Inventory assets have been successfully updated!');
     }
 
-    // 8. DELETE INVENTORY
     public function destroyInventory($id)
     {
         $item = Inventory::findOrFail($id);
@@ -319,7 +359,6 @@ class AdminController extends Controller
             ->with('success', 'Inventory asset successfully deleted!');
     }
 
-    // 9. SAVE MULTIPLE ITEMS
     public function storeInventory(Request $request)
     {
         $user = Auth::user();

@@ -12,7 +12,7 @@
                 <span class="bg-orange-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">{{ $adminDept }} DEPARTMENT</span>
                 <h1 class="text-2xl font-bold">Manage Support Tickets</h1>
             </div>
-            <p class="text-xs text-slate-400 mt-1">Review, filter, and manage student/staff support tickets.</p>
+            <p class="text-xs text-slate-400 mt-1">Review, filter, and manage support tickets.</p>
         </div>
     </div>
 
@@ -23,7 +23,7 @@
         </div>
     @endif
 
-    <!-- FILTER CARD SECTION (Menyerupai Design UI Sasaran) -->
+    <!-- FILTER CARD SECTION -->
     <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80">
         <form action="{{ route('admin.tickets.index') }}" method="GET" class="space-y-4">
             
@@ -104,7 +104,6 @@
                         <option value="New" {{ request('status') == 'New' ? 'selected' : '' }}>New</option>
                         <option value="Processing" {{ request('status') == 'Processing' ? 'selected' : '' }}>Processing</option>
                         <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="Solved" {{ request('status') == 'Solved' ? 'selected' : '' }}>Solved</option>
                         <option value="Closed" {{ request('status') == 'Closed' ? 'selected' : '' }}>Closed</option>
                     </select>
                 </div>
@@ -136,10 +135,12 @@
                     <select name="year" onchange="this.form.submit()" 
                             class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer">
                         <option value="">All Years</option>
-                        <option value="2026" {{ request('year') == '2026' ? 'selected' : '' }}>2026</option>
-                        <option value="2025" {{ request('year') == '2025' ? 'selected' : '' }}>2025</option>
-                        <option value="2024" {{ request('year') == '2024' ? 'selected' : '' }}>2024</option>
-                        <option value="2023" {{ request('year') == '2023' ? 'selected' : '' }}>2023</option>
+                        
+                        @foreach (range(date('Y') + 5, date('Y')) as $year)
+                            <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>
+                                {{ $year }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -155,26 +156,29 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200 bg-slate-50 text-slate-700 uppercase text-[11px] font-bold tracking-wider">
-                            <th class="p-3">Ticket ID</th>
-                            <th class="p-3">Title</th>
-                            <th class="p-3">Submitted By</th>
-                            <th class="p-3">Category</th>
-                            <th class="p-3">Priority</th>
-                            <th class="p-3">Status</th>
-                            <th class="p-3">Date</th>
-                            <th class="p-3 text-center">Action</th>
+                            <th class="p-2">Ticket ID</th>
+                            <th class="p-2">Title</th>
+                            <th class="p-2">Submitted By</th>
+                            <th class="p-2">Category</th>
+                            <th class="p-2">Priority</th>
+                            <th class="p-2">Status</th>
+                            <th class="p-2">PiC</th>
+                            <th class="p-2">Date</th>
+                            <th class="p-2 text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 text-sm">
                         @forelse ($tickets as $ticket)
                             <tr class="hover:bg-orange-50/40 transition">
-                                <td class="p-3 font-bold text-slate-900">
-                                    #{{ $ticket->ticket_id }}
+                                <td class="p-2 font-bold text-slate-900">#{{ $tickets->firstItem() + $loop->index }}</td>
+                                <td class="p-2 font-medium text-slate-900">
+                                    <a href="{{ route('admin.messages.show', $ticket->ticket_id) }}" class="hover:text-orange-600 hover:underline">
+                                        {{ $ticket->title }}
+                                    </a>
                                 </td>
-                                <td class="p-3 font-semibold text-slate-800">{{ $ticket->title }}</td>
-                                <td class="p-3 text-xs text-slate-600 font-medium">{{ $ticket->user_name }}</td>
-                                <td class="p-3 font-medium text-slate-700">{{ $ticket->category }}</td>
-                                <td class="p-3">
+                                <td class="p-2 text-xs text-slate-600 font-medium">{{ $ticket->user_name }}</td>
+                                <td class="p-2 font-medium text-slate-700">{{ $ticket->category }}</td>
+                                <td class="p-2">
                                     <span class="px-2.5 py-1 text-xs font-bold rounded 
                                         @if($ticket->priority == 'Urgent') bg-red-100 text-red-800
                                         @elseif($ticket->priority == 'High') bg-orange-200 text-orange-900
@@ -183,27 +187,30 @@
                                         {{ $ticket->priority }}
                                     </span>
                                 </td>
-                                <td class="p-3">
+                                <td class="p-2">
                                     <span class="px-2.5 py-1 text-xs font-bold rounded text-white inline-block
-                                        @if($ticket->status == 'New') bg-blue-600
-                                        @elseif($ticket->status == 'Processing') bg-amber-500
-                                        @elseif($ticket->status == 'Pending') bg-purple-600
-                                        @elseif($ticket->status == 'Closed') bg-slate-600
+                                        @if($ticket->status == 'New') bg-green-600
+                                        @elseif($ticket->status == 'Processing') bg-blue-500
+                                        @elseif($ticket->status == 'Pending') bg-amber-600
+                                        @elseif($ticket->status == 'Close') bg-red-600
                                         @else bg-emerald-600 @endif">
                                         {{ $ticket->status }}
                                     </span>
                                 </td>
-                                <td class="p-3 text-xs text-slate-500 font-medium">{{ $ticket->date ?? $ticket->created_at?->format('Y-m-d') }}</td>
-                                <td class="p-3 text-center">
+                                <td class="p-2 text-xs text-slate-500 font-medium">
+                                    {{ $ticket->picAdmin->full_name ?? $ticket->picAdmin->name ?? $ticket->pic ?? '-' }}
+                                </td>
+                                <td class="p-2 text-xs text-slate-500 font-medium">{{ $ticket->date ?? $ticket->created_at?->format('Y-m-d') }}</td>
+                                <td class="p-2 text-center">
                                     <div class="flex items-center justify-center gap-2">
-                                        <a href="{{ route('tickets.show', $ticket->ticket_id) }}" 
+                                        <a href="{{ route('admin.tickets.edit', $ticket->ticket_id) }}" 
                                            class="px-2.5 py-1.5 bg-slate-100 hover:bg-orange-500 text-slate-600 hover:text-white rounded-lg text-xs font-semibold transition border border-slate-200 hover:border-orange-500 flex items-center gap-1 cursor-pointer">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                             <span>Edit</span>
                                         </a>
 
                                         <form action="{{ route('admin.tickets.destroy', $ticket->ticket_id) }}" method="POST" 
-                                              onsubmit="return confirm('Adakah anda pasti ingin memadamkan tiket ini?');">
+                                              onsubmit="return confirm('Are you sure you want to delete this ticket?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" 

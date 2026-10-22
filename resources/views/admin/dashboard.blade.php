@@ -43,7 +43,7 @@
         <div class="bg-white p-4 rounded-xl shadow-sm border border-orange-200 flex items-center justify-between">
             <div>
                 <p class="text-xs font-medium text-slate-500">Closed</p>
-                <h3 class="text-2xl font-bold text-emerald-600 mt-0.5">{{ $ticketStats['closed'] }}</h3>
+                <h3 class="text-2xl font-bold text-emerald-600 mt-0.5">{{ $ticketStats['close'] }}</h3>
             </div>
             <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-base">
                 <i class="fa-solid fa-circle-check"></i>
@@ -96,13 +96,13 @@
         new Chart(ctxTicket, {
             type: 'doughnut',
             data: {
-                labels: ['New', 'Processing', 'Pending', 'Closed / Solved'],
+                labels: ['New', 'Processing', 'Pending', 'Close'],
                 datasets: [{
                     data: [
-                        {{ $ticketStats['new'] }},
-                        {{ $ticketStats['processing'] }},
-                        {{ $ticketStats['pending'] }},
-                        {{ $ticketStats['closed'] }}
+                        {{ $ticketStats['new'] ?? 0 }},
+                        {{ $ticketStats['processing'] ?? 0 }},
+                        {{ $ticketStats['pending'] ?? 0 }},
+                        {{ $ticketStats['close'] ?? $ticketStats['closed'] ?? 0 }}
                     ],
                     backgroundColor: ['#2563eb', '#f59e0b', '#9333ea', '#10b981'],
                     borderWidth: 2,

@@ -147,8 +147,11 @@ class TicketController extends Controller
 
     public function show($id)
 {
-    $ticket = Ticket::with('replies')->findOrFail($id);
-    $statuses = ['New', 'Processing', 'Pending', 'Solved', 'Closed'];
+    // Contoh jika anda mahu susun mengikut lajur created_at atau lajur lain yang wujud:
+    $ticket = Ticket::with(['replies' => function ($query) {
+        $query->orderBy('created_at', 'asc'); // Tukar 'created_at' mengikut lajur yang wujud
+    }])->findOrFail($id);
+    $statuses = ['New', 'Processing', 'Pending', 'Closed'];
 
     return view('tickets.show', compact('ticket', 'statuses'));
 }
