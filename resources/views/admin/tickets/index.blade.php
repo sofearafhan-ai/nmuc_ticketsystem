@@ -200,7 +200,7 @@
                                 <td class="p-2 text-xs text-slate-500 font-medium">
                                     {{ $ticket->picAdmin->full_name ?? $ticket->picAdmin->name ?? $ticket->pic ?? '-' }}
                                 </td>
-                                <td class="p-2 text-xs text-slate-500 font-medium">{{ $ticket->date ?? $ticket->created_at?->format('Y-m-d') }}</td>
+                                <td class="p-2 text-xs text-slate-500 font-medium">{{ $ticket->created_at ? \Carbon\Carbon::parse($ticket->created_at)->format('d M Y') : '-' }}</td>
                                 <td class="p-2 text-center">
                                     <div class="flex items-center justify-center gap-2">
                                         <a href="{{ route('admin.tickets.edit', $ticket->ticket_id) }}" 

@@ -42,7 +42,12 @@ class AdminController extends Controller
             'total'    => (clone $inventoryQuery)->count(),
         ];
 
-        return view('admin.dashboard', compact('adminDept', 'ticketStats', 'inventoryStats'));
+        $recentTickets = Ticket::where('department', $user->department_id) 
+            ->latest()
+            ->take(5) 
+            ->get();
+
+        return view('admin.dashboard', compact('ticketStats', 'inventoryStats', 'adminDept', 'recentTickets'));
     }
 
     // 2. ADMIN TICKET LIST
@@ -101,7 +106,7 @@ class AdminController extends Controller
 
     public function destroyTicket($id)
     {
-        $ticket = Ticket::where('ticket_id', $id)->orWhere('id', $id)->firstOrFail();
+        $ticket = Ticket::where('ticket_id', $id)->firstOrFail();
         $ticket->delete();
 
         return redirect()->route('admin.tickets.index')
@@ -128,7 +133,6 @@ class AdminController extends Controller
 
         $ticket = Ticket::with(['replies', 'user', 'picAdmin'])->where('ticket_id', $id)->firstOrFail();
 
-        // Dapatkan semua Admin di bawah department yang sama
         $adminsInDept = User::whereIn('role', ['Admin', 'Super Admin'])
                             ->where('department', $adminDept)
                             ->get();
@@ -149,7 +153,7 @@ class AdminController extends Controller
             'status'   => 'required|in:New,Processing,Pending,Close', 
             'priority' => 'required|string',
             'location' => 'required|string',
-            'pic'      => 'nullable|exists:users,user_id', // Memastikan user_id wujud
+            'pic'      => 'nullable|exists:users,user_id',
         ]);
 
         $ticket = Ticket::with(['replies', 'user'])->where('ticket_id', $id)->firstOrFail();
@@ -160,16 +164,14 @@ class AdminController extends Controller
             'status'   => $request->status,
             'priority' => $request->priority,
             'location' => $request->location,
-            'pic'      => $request->pic, // Menyimpan user_id Admin PIC
+            'pic'      => $request->pic, 
         ]);
 
         return redirect()->back()->with('success', 'Ticket Information updated successfully!');
     }
 
-    // Papar mesej perbualan spesifik mengikut ticket_id
     public function showConversation($id)
     {
-        // Menggunakan fungsi messages sedia ada dengan menghantar $id
         return $this->messages(request(), $id);
     }
 

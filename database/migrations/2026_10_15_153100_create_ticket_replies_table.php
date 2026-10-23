@@ -14,14 +14,13 @@ return new class extends Migration
         Schema::create('ticket_replies', function (Blueprint $table) {
             $table->id('reply_id');
             $table->unsignedBigInteger('ticket_id');
-            $table->unsignedBigInteger('user_id')->nullable(); // ID pengirim
+            $table->unsignedBigInteger('user_id')->nullable(); 
             $table->string('sender_name');
-            $table->string('sender_role')->default('Admin'); // 'Admin' atau 'User'
+            $table->string('sender_role')->default('Admin'); 
             $table->text('message');
             $table->string('attachment')->nullable();
             $table->timestamps();
 
-            // Foreign key ke jadual tickets
             $table->foreign('ticket_id')->references('ticket_id')->on('tickets')->onDelete('cascade');
         });
     }

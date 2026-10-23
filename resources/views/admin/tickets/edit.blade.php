@@ -3,7 +3,7 @@
 @section('title', 'Ticket Details #' . ($ticket->ticket_id ?? $ticket->id))
 
 @section('content')
-<div class="p-6 space-y-6">
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
 
     <!-- Flash Message Notification -->
     @if(session('success'))
