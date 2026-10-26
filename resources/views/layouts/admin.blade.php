@@ -24,10 +24,27 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-</head>
-<body x-data="{ sidebarOpen: true }" class="bg-[#faf6f0] font-sans text-slate-800 min-h-screen flex flex-col overflow-x-hidden">
 
-    <!-- TOP HEADER BAR -->
+    <!-- Custom Scrollbar Styling -->
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body x-data="{ sidebarOpen: true }" class="bg-[#faf6f0] font-sans text-slate-800 h-screen flex flex-col overflow-hidden">
+
+    <!-- TOP HEADER BAR (Static / Fixed) -->
     <header class="w-full bg-[#0d1527] text-white h-16 px-6 flex items-center justify-between sticky top-0 z-50 shrink-0 shadow-md">
         <div class="flex items-center gap-4">
             <button @click="sidebarOpen = !sidebarOpen" class="text-white hover:text-orange-400 p-1 text-lg transition focus:outline-none cursor-pointer">
@@ -60,7 +77,7 @@
     </header>
 
     <!-- MAIN CONTAINER (SIDEBAR + CONTENT) -->
-    <div class="flex flex-1 min-h-[calc(100vh-4rem)] w-full relative items-stretch">
+    <div class="flex flex-1 h-[calc(100vh-4rem)] w-full overflow-hidden relative">
 
         <!-- MOBILE BACKDROP -->
         <div x-show="sidebarOpen" 
@@ -73,18 +90,18 @@
              x-transition:leave-end="opacity-0"
              class="fixed inset-0 bg-slate-950/60 z-40 md:hidden"></div>
 
-        <!-- LEFT SIDEBAR -->
+        <!-- LEFT SIDEBAR (Static / Fixed Height dengan Scroll Sendiri jika menu panjang) -->
         <aside :class="{
                    'translate-x-0 w-64': sidebarOpen,
                    '-translate-x-full md:translate-x-0 md:w-16': !sidebarOpen
                }" 
-               class="fixed md:static inset-y-0 left-0 top-16 md:top-auto self-stretch bg-[#0d1527] flex flex-col justify-between shrink-0 text-slate-100 transition-all duration-300 z-50 md:z-30 overflow-hidden shadow-2xl md:shadow-none"
+               class="fixed md:static inset-y-0 left-0 top-16 md:top-auto h-full bg-[#0d1527] flex flex-col justify-between shrink-0 text-slate-100 transition-all duration-300 z-50 md:z-30 shadow-2xl md:shadow-none overflow-hidden"
                x-data="{ 
                     openTickets: {{ request()->routeIs('admin.tickets.*') || request()->routeIs('admin.messages.*') ? 'true' : 'false' }},
                     openInventory: {{ request()->routeIs('admin.inventory.*') ? 'true' : 'false' }}
                 }">
             
-            <div class="w-64 md:w-auto">
+            <div class="w-64 md:w-auto flex-1 flex flex-col overflow-y-auto custom-scrollbar">
                 <!-- Sidebar Title Section -->
                 <div class="p-5 overflow-hidden shrink-0" x-show="sidebarOpen">
                     <h1 class="font-bold text-white text-base leading-tight">NMUC <span class="text-orange-500">Helpdesk</span></h1>
@@ -92,7 +109,7 @@
                 </div>
 
                 <!-- Navigation List -->
-                <nav class="px-3 py-2 space-y-2 text-sm font-medium">
+                <nav class="px-3 py-2 space-y-2 text-sm font-medium flex-1">
 
                     <!-- Dashboard Link -->
                     <a href="{{ route('admin.dashboard') }}" 
@@ -167,8 +184,8 @@
                 </nav>
             </div>
 
-            <!-- Logout Button -->
-            <div class="p-4 shrink-0">
+            <!-- Logout Button (Fixed Bottom of Sidebar) -->
+            <div class="p-4 shrink-0 bg-[#0d1527] border-t border-slate-800/60">
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="submit" 
@@ -181,8 +198,7 @@
 
         </aside>
 
-        <!-- MAIN CONTENT AREA -->
-        <main class="flex-1 min-w-0 p-6 md:p-8 overflow-y-auto">
+        <main class="flex-1 min-w-0 h-full overflow-y-auto custom-scrollbar p-6 md:p-8">
             <div class="max-w-7xl mx-auto space-y-6">
                 @yield('content')
             </div>

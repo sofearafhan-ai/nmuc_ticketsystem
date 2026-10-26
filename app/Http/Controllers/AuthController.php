@@ -14,7 +14,6 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
@@ -25,11 +24,14 @@ class AuthController extends Controller
 
             $user = Auth::user();
 
-            if ($user->role === 'super_admin') {
+            // Tukar role ke lowercase supaya tidak sensitif pada huruf besar/kecil (contoh: 'Admin', 'admin', 'Super Admin')
+            $userRole = strtolower(trim($user->role ?? ''));
+
+            if ($userRole === 'super admin' || $userRole === 'super_admin') {
                 return redirect()->route('superadmin.dashboard')->with('success', 'Welcome Super Admin!');
             }
 
-            if ($user->role === 'admin') {
+            if ($userRole === 'admin') {
                 return redirect()->route('admin.dashboard')->with('success', 'Welcome Admin!');
             }
 

@@ -168,15 +168,23 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 text-sm">
-                        @forelse ($tickets as $ticket)
+                        @forelse ($tickets as $index => $ticket)
+                            @php
+                                $totalTickets = method_exists($tickets, 'total') ? $tickets->total() : count($tickets);
+                                $currentPage = method_exists($tickets, 'currentPage') ? $tickets->currentPage() : 1;
+                                $perPage = method_exists($tickets, 'perPage') ? $tickets->perPage() : count($tickets);
+                                
+                                $sequenceNo = $totalTickets - (($currentPage - 1) * $perPage + $index);
+                                $formattedTicketNo = '#TC-' . str_pad($sequenceNo, 4, '0', STR_PAD_LEFT);
+                            @endphp
                             <tr class="hover:bg-orange-50/40 transition">
-                                <td class="p-2 font-bold text-slate-900">#{{ $tickets->firstItem() + $loop->index }}</td>
+                                <td class="p-2 font-bold text-slate-900">{{ $formattedTicketNo }}</td>
                                 <td class="p-2 font-medium text-slate-900">
-                                    <a href="{{ route('admin.messages.show', $ticket->ticket_id) }}" class="hover:text-orange-600 hover:underline">
+                                    <a href="{{ route('admin.messages.index', ['ticket_id' => $ticket->ticket_id]) }}" class="hover:text-orange-600 hover:underline">
                                         {{ $ticket->title }}
                                     </a>
                                 </td>
-                                <td class="p-2 text-xs text-slate-600 font-medium">{{ $ticket->user_name }}</td>
+                                <td class="p-2 text-xs text-slate-600 font-medium">{{ $ticket->user_name ?? ($ticket->user->name ?? 'User') }}</td>
                                 <td class="p-2 font-medium text-slate-700">{{ $ticket->category }}</td>
                                 <td class="p-2">
                                     <span class="px-2.5 py-1 text-xs font-bold rounded 
@@ -200,7 +208,13 @@
                                 <td class="p-2 text-xs text-slate-500 font-medium">
                                     {{ $ticket->picAdmin->full_name ?? $ticket->picAdmin->name ?? $ticket->pic ?? '-' }}
                                 </td>
-                                <td class="p-2 text-xs text-slate-500 font-medium">{{ $ticket->created_at ? \Carbon\Carbon::parse($ticket->created_at)->format('d M Y') : '-' }}</td>
+                                <td class="p-2 text-xs text-slate-500 font-medium">
+                                    @if(!empty($ticket->created_at))
+                                        {{ is_string($ticket->created_at) ? \Carbon\Carbon::parse($ticket->created_at)->format('d M Y') : $ticket->created_at->format('d M Y') }}
+                                    @else
+                                        {{ $ticket->date ? \Carbon\Carbon::parse($ticket->date)->format('d M Y') : '-' }}
+                                    @endif
+                                </td>
                                 <td class="p-2 text-center">
                                     <div class="flex items-center justify-center gap-2">
                                         <a href="{{ route('admin.tickets.edit', $ticket->ticket_id) }}" 
@@ -224,7 +238,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="p-8 text-center text-slate-500 font-medium">
+                                <td colspan="9" class="p-8 text-center text-slate-500 font-medium">
                                     <i class="fa-solid fa-inbox text-2xl mb-2 text-slate-300 block"></i>
                                     No ticket complaints found matching your search and filter criteria.
                                 </td>
@@ -234,7 +248,7 @@
                 </table>
             </div>
 
-            @if ($tickets->hasPages())
+            @if (method_exists($tickets, 'hasPages') && $tickets->hasPages())
                 <div class="mt-6">
                     {{ $tickets->links() }}
                 </div>

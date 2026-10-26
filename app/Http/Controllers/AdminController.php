@@ -21,18 +21,15 @@ class AdminController extends Controller
         $ticketQuery = Ticket::query();
         
         if ($user->role !== 'Super Admin') {
-            $ticketQuery->where(function ($q) use ($currentAdminId, $adminDept) {
-                $q->where('user_id', $currentAdminId)
-                  ->orWhere('category', $adminDept);
-            });
+            $ticketQuery->where('pic', $currentAdminId);
         }
 
         $ticketStats = [
-            'new'        => Ticket::where('status', 'New')->count(),
-            'processing' => Ticket::where('status', 'Processing')->count(),
-            'pending'    => Ticket::where('status', 'Pending')->count(),
-            'close'      => Ticket::where('status', 'Close')->count(),
-            'total'      => Ticket::count(),
+            'new'        => (clone $ticketQuery)->where('status', 'New')->count(),
+            'processing' => (clone $ticketQuery)->where('status', 'Processing')->count(),
+            'pending'    => (clone $ticketQuery)->where('status', 'Pending')->count(),
+            'close'      => (clone $ticketQuery)->whereIn('status', ['Close', 'Closed'])->count(),
+            'total'      => (clone $ticketQuery)->count(),
         ];
 
         $inventoryQuery = Inventory::query();
@@ -42,28 +39,63 @@ class AdminController extends Controller
             'total'    => (clone $inventoryQuery)->count(),
         ];
 
-        $recentTickets = Ticket::where('department', $user->department_id) 
+        // --- KIRA DATA 12 BULAN (REAL-TIME AGGREGATION) ---
+        $currentYear = date('Y');
+        $activeMonthly = [];
+        $inactiveMonthly = [];
+        $ticketsMonthly = [];
+
+        for ($month = 1; $month <= 12; $month++) {
+            $activeCount = (clone $inventoryQuery)
+                ->where('item_status', 'Active')
+                ->whereYear('created_at', $currentYear)
+                ->whereMonth('created_at', $month)
+                ->count();
+
+            $inactiveCount = (clone $inventoryQuery)
+                ->where('item_status', 'Inactive')
+                ->whereYear('created_at', $currentYear)
+                ->whereMonth('created_at', $month)
+                ->count();
+
+            $ticketCount = (clone $ticketQuery)
+                ->whereYear('created_at', $currentYear)
+                ->whereMonth('created_at', $month)
+                ->count();
+
+            $activeMonthly[] = $activeCount > 0 ? $activeCount : null;
+            $inactiveMonthly[] = $inactiveCount > 0 ? $inactiveCount : null;
+            $ticketsMonthly[] = $ticketCount > 0 ? $ticketCount : null;
+        }
+
+        $recentTickets = (clone $ticketQuery)
             ->latest()
             ->take(5) 
             ->get();
 
-        return view('admin.dashboard', compact('ticketStats', 'inventoryStats', 'adminDept', 'recentTickets'));
+        return view('admin.dashboard', compact(
+            'ticketStats', 
+            'inventoryStats', 
+            'adminDept', 
+            'recentTickets',
+            'activeMonthly',
+            'inactiveMonthly',
+            'ticketsMonthly'
+        ));
     }
 
-    // 2. ADMIN TICKET LIST
+    // 2. ADMIN TICKET LIST (FILTER DISAMAKAN DENGAN MESSAGE)
     public function tickets(Request $request)
     {
         $user = Auth::user();
         $adminDept = $user->department ?? 'IT';
         $currentAdminId = $user->user_id ?? $user->id;
 
-        $query = Ticket::query();
+        $query = Ticket::with(['user', 'picAdmin']);
 
+        // Filter PIC: Mengambil tiket yang di-assign kepada Admin yang login (Sama seperti Message)
         if ($user->role !== 'Super Admin') {
-            $query->where(function ($q) use ($currentAdminId, $adminDept) {
-                $q->where('user_id', $currentAdminId)
-                  ->orWhere('category', $adminDept);
-            });
+            $query->where('pic', $currentAdminId);
         }
 
         if ($request->filled('search')) {
@@ -88,7 +120,12 @@ class AdminController extends Controller
         }
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $statusVal = $request->status;
+            if ($statusVal == 'Closed') {
+                $query->whereIn('status', ['Close', 'Closed']);
+            } else {
+                $query->where('status', $statusVal);
+            }
         }
 
         if ($request->filled('month')) {
@@ -145,6 +182,7 @@ class AdminController extends Controller
         return view('admin.tickets.edit', compact('ticket', 'adminsInDept', 'categories', 'types', 'statuses', 'priorities'));
     }
 
+    // Update Ticket & Record Status Change Log
     public function updateTicket(Request $request, $id)
     {
         $request->validate([
@@ -157,6 +195,36 @@ class AdminController extends Controller
         ]);
 
         $ticket = Ticket::with(['replies', 'user'])->where('ticket_id', $id)->firstOrFail();
+
+        $oldStatus = $ticket->status;
+        $newStatus = $request->status;
+        $oldPic    = $ticket->pic;
+        $newPic    = $request->pic;
+
+        // 1. Log jika PIC BERTUKAR / DIASSIGN
+        if ($oldPic != $newPic && !empty($newPic)) {
+            $assignedUser = User::where('user_id', $newPic)->first();
+            $picName = $assignedUser ? ($assignedUser->full_name ?? $assignedUser->name) : 'Admin';
+
+            TicketReply::create([
+                'ticket_id'   => $ticket->ticket_id,
+                'user_id'     => Auth::id(),
+                'sender_name' => 'System',
+                'sender_role' => 'System',
+                'message'     => 'PIC_CHANGE:' . $picName,
+            ]);
+        }
+
+        // 2. Log jika STATUS BERTUKAR
+        if ($oldStatus !== $newStatus) {
+            TicketReply::create([
+                'ticket_id'   => $ticket->ticket_id,
+                'user_id'     => Auth::id(),
+                'sender_name' => 'System',
+                'sender_role' => 'System',
+                'message'     => 'STATUS_CHANGE:' . $newStatus,
+            ]);
+        }
 
         $ticket->update([
             'category' => $request->category,
@@ -175,6 +243,7 @@ class AdminController extends Controller
         return $this->messages(request(), $id);
     }
 
+    // Store Ticket Baru
     public function storeTicket(Request $request)
     {
         $request->validate([
@@ -196,7 +265,7 @@ class AdminController extends Controller
             $imagePath = $request->file('image')->store('tickets', 'public');
         }
 
-        Ticket::create([
+        $ticket = Ticket::create([
             'user_id'     => $user->user_id ?? $user->id,
             'user_name'   => $request->user_name,
             'user_email'  => $request->user_email,
@@ -211,6 +280,14 @@ class AdminController extends Controller
             'image_path'  => $imagePath,
         ]);
 
+        TicketReply::create([
+            'ticket_id'   => $ticket->ticket_id ?? $ticket->id,
+            'user_id'     => $user->user_id ?? $user->id,
+            'sender_name' => 'System',
+            'sender_role' => 'System',
+            'message'     => 'STATUS_CHANGE:New',
+        ]);
+
         return redirect()->route('admin.tickets.index')
             ->with('success', 'New support ticket created successfully!');
     }
@@ -222,17 +299,27 @@ class AdminController extends Controller
         $currentAdminId = $user->user_id ?? $user->id;
         $adminDept = $user->department ?? 'IT';
         $filter = $request->query('status');
+        $sort = $request->query('sort', 'newest');
 
-        $query = Ticket::with(['user', 'replies', 'picAdmin'])
-                       ->where('pic', $currentAdminId);
+        $query = Ticket::with(['user', 'replies', 'picAdmin']);
+
+        if ($user->role !== 'Super Admin') {
+            $query->where('pic', $currentAdminId);
+        }
 
         if ($filter == 'Open') {
             $query->whereIn('status', ['New', 'Processing', 'Pending']);
         } elseif ($filter == 'Closed') {
-            $query->where('status', 'Close');
+            $query->whereIn('status', ['Close', 'Closed']);
         }
 
-        $conversations = $query->latest()->get();
+        if ($sort == 'oldest') {
+            $query->oldest();
+        } else {
+            $query->latest();
+        }
+
+        $conversations = $query->get();
 
         $selectedId = $ticketId ?? $request->query('ticket_id');
 
@@ -247,7 +334,7 @@ class AdminController extends Controller
             ->with('tickets', $conversations);
     }
 
-   public function replyMessage(Request $request, $ticketId)
+    public function replyMessage(Request $request, $ticketId)
     {
         $request->validate([
             'message'    => 'required|string',
