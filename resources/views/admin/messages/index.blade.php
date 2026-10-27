@@ -3,9 +3,9 @@
 @section('title', 'Admin - Message')
 
 @section('content')
-<!-- Styling Custom Scrollbar mirip WhatsApp -->
+
 <style>
-    /* Styling Scrollbar Panel Kiri & Kanan */
+    /* Styling Scrollbar */
     .custom-scrollbar::-webkit-scrollbar {
         width: 6px;
     }
@@ -200,9 +200,11 @@
                         </div>
                         
                         <div class="flex items-center gap-2 min-w-0">
-                            <h2 class="text-base font-bold text-slate-800 truncate">
-                                {{ $activeDisplayNo }} - {{ $activeTicket->title }}
-                            </h2>
+                            <h6 class="text-base font-bold text-slate-800 truncate">
+                                {{ $activeDisplayNo }}
+                                <br>
+                                {{ $activeTicket->title }}
+                            </h6>
                             <span class="text-slate-400">•</span>
                             <span class="px-2.5 py-1 rounded-full font-bold text-xs
                                 @if(($activeTicket->status ?? '') == 'New') bg-emerald-100 text-emerald-700

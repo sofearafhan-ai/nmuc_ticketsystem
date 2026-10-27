@@ -19,6 +19,7 @@ class Inventory extends Model
         'item_model',
         'item_status',
         'item_location',
+        'item_attachment',
         'user_id',
     ];
 

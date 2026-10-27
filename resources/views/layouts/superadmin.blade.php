@@ -56,7 +56,6 @@
 
             <!-- Super Admin Badge -->
             <span class="bg-purple-600 text-white font-extrabold text-[11px] px-3 py-1 rounded-full uppercase tracking-wider ml-2 shadow-sm flex items-center gap-1.5">
-                <i class="fa-solid fa-shield-halved text-[10px]"></i>
                 SUPER ADMIN PANEL
             </span>
         </div>
@@ -117,12 +116,11 @@
                     <a href="{{ route('superadmin.dashboard') }}" 
                        class="flex items-center gap-3 px-4 py-3 rounded-xl transition cursor-pointer
                               {{ request()->routeIs('superadmin.dashboard') ? 'bg-[#152037] text-white font-bold' : 'text-slate-300 hover:text-white hover:bg-[#152037]/60' }}">
-                        <i class="fa-solid fa-chart-pie text-orange-500"></i>
+                        <i class="fa-solid fa-chart-line text-orange-500"></i>
                         <span x-show="sidebarOpen" class="whitespace-nowrap">Dashboard</span>
                     </a>
 
                     <!-- 2. TICKETS ACCORDION -->
-                    <!-- Tickets Accordion -->
                     <div class="space-y-1">
                         <button type="button" @click="openTickets = !openTickets" 
                                 class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-[#152037]/80 hover:bg-[#152037] text-slate-200 transition cursor-pointer">
@@ -146,6 +144,12 @@
                                     {{ request()->routeIs('superadmin.tickets.create') ? 'bg-[#080d19] text-white' : 'text-slate-400 hover:text-white hover:bg-[#152037]/60' }}">
                                 <i class="fa-solid fa-plus text-[11px] text-orange-500"></i>
                                 <span class="whitespace-nowrap">New Ticket</span>
+                            </a>
+                            <a href="{{ route('superadmin.messages.index') }}" 
+                                class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer
+                                    {{ request()->routeIs('superadmin.messages.*') ? 'bg-[#080d19] text-white' : 'text-slate-400 hover:text-white hover:bg-[#152037]/60' }}">
+                                <i class="fa-solid fa-comments text-[11px] text-orange-500"></i>
+                                <span class="whitespace-nowrap">Message</span>
                             </a>
                         </div>
                     </div>

@@ -175,18 +175,18 @@
             <table class="w-full text-sm text-left text-slate-600">
                 <thead class="text-xs text-slate-500 uppercase bg-slate-50 rounded-lg">
                     <tr>
-                        <th scope="col" class="px-4 py-3">Ticket ID</th>
-                        <th scope="col" class="px-4 py-3">Subject</th>
-                        <th scope="col" class="px-4 py-3">User</th>
-                        <th scope="col" class="px-4 py-3">Status</th>
-                        <th scope="col" class="px-4 py-3">Date</th>
+                        <th scope="col" class="px-4 py-3 text-center">Ticket ID</th>
+                        <th scope="col" class="px-4 py-3 text-center">Subject</th>
+                        <th scope="col" class="px-4 py-3 text-center">User</th>
+                        <th scope="col" class="px-4 py-3 text-center">Status</th>
+                        <th scope="col" class="px-4 py-3 text-center">Date</th>
                         <th scope="col" class="px-4 py-3 text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($recentTickets as $index => $ticket)
                     <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
-                        <td class="py-3 px-4 text-xs font-extrabold text-slate-900">
+                        <td class="py-3 px-4 text-xs font-extrabold text-slate-900 text-center">
                             #TC-{{ str_pad(count($recentTickets) - $index, 4, '0', STR_PAD_LEFT) }}
                         </td>
                         <td class="py-3 px-4 text-xs text-slate-700 font-medium">
@@ -195,7 +195,7 @@
                         <td class="py-3 px-4 text-xs text-slate-700 font-medium">
                             {{ $ticket->user_name ?? ($ticket->user->name ?? 'User') }}
                         </td>
-                        <td class="py-3 px-4">
+                        <td class="py-3 px-4 text-center">
                             <span class="px-2.5 py-1 rounded-full font-bold text-xs
                                 @if($ticket->status == 'New') bg-emerald-100 text-emerald-700
                                 @elseif($ticket->status == 'Processing') bg-blue-100 text-blue-700
@@ -205,7 +205,7 @@
                                 {{ $ticket->status }}
                             </span>
                         </td>
-                        <td class="py-3 px-4 text-xs text-slate-500">
+                        <td class="py-3 px-4 text-xs text-slate-500 text-center">
                             @if(!empty($ticket->created_at))
                                 {{ is_string($ticket->created_at) ? \Carbon\Carbon::parse($ticket->created_at)->format('d M Y') : $ticket->created_at->format('d M Y') }}
                             @else

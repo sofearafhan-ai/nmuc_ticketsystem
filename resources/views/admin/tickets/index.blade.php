@@ -42,6 +42,12 @@
                         <i class="fa-solid fa-filter"></i> Filter
                     </button>
 
+                    <a href="{{ route('admin.tickets.export', request()->all()) }}"
+                       class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer"
+                       title="Export to Excel">
+                       <i class="fa-solid fa-file-excel"></i> Export Excel
+                    </a>
+
                     @if(request()->hasAny(['search', 'category', 'type', 'priority', 'status', 'month', 'year']))
                         <a href="{{ route('admin.tickets.index') }}" 
                            class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl transition flex items-center gap-1.5"
@@ -156,14 +162,14 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200 bg-slate-50 text-slate-700 uppercase text-[11px] font-bold tracking-wider">
-                            <th class="p-2">Ticket ID</th>
-                            <th class="p-2">Title</th>
-                            <th class="p-2">Submitted By</th>
-                            <th class="p-2">Category</th>
-                            <th class="p-2">Priority</th>
-                            <th class="p-2">Status</th>
-                            <th class="p-2">PiC</th>
-                            <th class="p-2">Date</th>
+                            <th class="p-2 text-center">Ticket ID</th>
+                            <th class="p-2 text-center">Title</th>
+                            <th class="p-2 text-center">Submitted By</th>
+                            <th class="p-2 text-center">Category</th>
+                            <th class="p-2 text-center">Priority</th>
+                            <th class="p-2 text-center">Status</th>
+                            <th class="p-2 text-center">PiC</th>
+                            <th class="p-2 text-center">Date</th>
                             <th class="p-2 text-center">Action</th>
                         </tr>
                     </thead>
@@ -184,9 +190,9 @@
                                         {{ $ticket->title }}
                                     </a>
                                 </td>
-                                <td class="p-2 text-xs text-slate-600 font-medium">{{ $ticket->user_name ?? ($ticket->user->name ?? 'User') }}</td>
-                                <td class="p-2 font-medium text-slate-700">{{ $ticket->category }}</td>
-                                <td class="p-2">
+                                <td class="p-2 text-xs text-slate-600 font-medium text-center">{{ $ticket->user_name ?? ($ticket->user->name ?? 'User') }}</td>
+                                <td class="p-2 font-medium text-slate-700 text-center">{{ $ticket->category }}</td>
+                                <td class="p-2 text-center">
                                     <span class="px-2.5 py-1 text-xs font-bold rounded 
                                         @if($ticket->priority == 'Urgent') bg-red-100 text-red-800
                                         @elseif($ticket->priority == 'High') bg-orange-200 text-orange-900
@@ -195,7 +201,7 @@
                                         {{ $ticket->priority }}
                                     </span>
                                 </td>
-                                <td class="p-2">
+                                <td class="p-2 text-center">
                                     <span class="px-2.5 py-1 text-xs font-bold rounded text-white inline-block
                                         @if($ticket->status == 'New') bg-green-600
                                         @elseif($ticket->status == 'Processing') bg-blue-500
@@ -205,10 +211,10 @@
                                         {{ $ticket->status }}
                                     </span>
                                 </td>
-                                <td class="p-2 text-xs text-slate-500 font-medium">
+                                <td class="p-2 text-xs text-slate-500 font-medium text-center">
                                     {{ $ticket->picAdmin->full_name ?? $ticket->picAdmin->name ?? $ticket->pic ?? '-' }}
                                 </td>
-                                <td class="p-2 text-xs text-slate-500 font-medium">
+                                <td class="p-2 text-xs text-slate-500 font-medium text-center">
                                     @if(!empty($ticket->created_at))
                                         {{ is_string($ticket->created_at) ? \Carbon\Carbon::parse($ticket->created_at)->format('d M Y') : $ticket->created_at->format('d M Y') }}
                                     @else

@@ -21,7 +21,8 @@
 
     <!-- Edit Form Card -->
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-        <form action="{{ route('admin.inventory.update', $item->item_id) }}" method="POST" class="space-y-4">
+
+        <form action="{{ route('admin.inventory.update', $item->item_id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             @method('PUT')
 
@@ -68,6 +69,42 @@
                 </div>
             </div>
 
+            <!-- ATTACHMENT -->
+            <div class="pt-2">
+                <label class="block text-xs font-bold text-slate-700 mb-1">Attachment (Optional)</label>
+
+                @if ($item->item_attachment)
+                    <div class="mb-3 p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <img src="{{ asset('storage/' . $item->item_attachment) }}" 
+                                 alt="Attachment" 
+                                 class="w-12 h-12 object-cover rounded-lg border border-slate-200 shadow-sm">
+                            <div>
+                                <p class="text-xs font-bold text-slate-700">Current Attachment</p>
+                                <p class="text-[11px] text-slate-400">Upload a new file below if you wish to replace it.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <a href="{{ asset('storage/' . $item->item_attachment) }}" target="_blank" 
+                               class="px-3 py-1.5 bg-slate-200 hover:bg-orange-500 hover:text-white text-slate-700 text-xs font-semibold rounded-lg transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-eye"></i> View
+                            </a>
+
+                            <button type="submit" 
+                                    form="delete-attachment-form" 
+                                    onclick="return confirm('Are you sure you want to delete this attachment?');"
+                                    class="px-3 py-1.5 bg-red-50 hover:bg-red-500 text-red-600 hover:text-white border border-red-200 text-xs font-semibold rounded-lg transition flex items-center gap-1.5 cursor-pointer">
+                                <i class="fa-solid fa-trash-can"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                @endif
+
+                <input type="file" name="item_attachment" 
+                       class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-orange-500 outline-none transition">
+            </div>
+
             <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">
                 <a href="{{ route('admin.inventory.index') }}" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition">
                     Cancel
@@ -78,6 +115,11 @@
             </div>
         </form>
     </div>
+
+<form id="delete-attachment-form" action="{{ route('admin.inventory.delete-attachment', $item->item_id) }}" method="POST" class="hidden">
+    @csrf
+    @method('DELETE')
+</form>
 
 </div>
 @endsection

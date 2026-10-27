@@ -47,6 +47,12 @@
                         <i class="fa-solid fa-filter"></i> Filter
                     </button>
 
+                    <a href="{{ route('admin.inventory.export', request()->all()) }}"
+                       class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer"
+                       title="Export to Excel">
+                       <i class="fa-solid fa-file-excel"></i> Export Excel
+                    </a>
+
                     @if(request()->hasAny(['search', 'category', 'status']))
                         <a href="{{ route('admin.inventory.index') }}" 
                            class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl transition flex items-center gap-1.5"
@@ -97,38 +103,77 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200 bg-slate-50 text-slate-700 uppercase text-[11px] font-bold tracking-wider">
-                            <th class="p-3">Item ID</th>
-                            <th class="p-3">Item Name</th>
-                            <th class="p-3">Category</th>
-                            <th class="p-3">Model / Specs</th>
-                            <th class="p-3">Location</th>
-                            <th class="p-3">Status</th>
-                            <th class="p-3">Registered By</th>
+                            <th class="p-3 text-center">Item ID</th>
+                            <th class="p-3 text-center">Item Name</th>
+                            <th class="p-3 text-center">Category</th>
+                            <th class="p-3 text-center">Model / Specs</th>
+                            <th class="p-3 text-center">Location</th>
+                            <th class="p-3 text-center">Status</th>
+                            <th class="p-3 text-center">Registered By</th>
+                            <th class="p-3 text-center">Attachment</th>
                             <th class="p-3 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 text-sm">
                         @forelse ($inventories as $index => $item)
                             <tr class="hover:bg-orange-50/40 transition">
-                                <td class="p-3 font-bold text-slate-900">#{{ $inventories->firstItem() + $index }}</td>
-                                <td class="p-3 font-semibold text-slate-800">{{ $item->item_name }}</td>
-                                <td class="p-3">
+                                <td class="py-3 px-4 text-xs font-extrabold text-slate-900">#{{ $inventories->firstItem() + $index }}</td>
+                                <td class="py-3 px-4 text-xs text-slate-900 text-center">{{ $item->item_name }}</td>
+                                <td class="py-3 px-4 text-xs font-extrabold text-slate-900 text-center">
                                     <span class="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200 font-medium">
                                         {{ $item->item_category }}
                                     </span>
                                 </td>
-                                <td class="p-3 text-xs text-slate-700 font-medium">{{ $item->item_model }}</td>
-                                <td class="p-3 text-xs text-slate-600 font-medium">
-                                    <i class="fa-solid fa-location-dot text-orange-500 mr-1"></i> {{ $item->item_location }}
-                                </td>
-                                <td class="p-3">
+                                <td class="py-3 px-4 text-xs text-slate-900 text-center">{{ $item->item_model }}</td>
+                                <td class="py-3 px-4 text-xs text-slate-900 text-center">{{ $item->item_location }}</td>
+                                <td class="py-3 px-4 text-xs font-extrabold text-slate-900 text-center">
                                     <span class="px-2.5 py-1 text-[11px] font-bold rounded-lg text-white
                                         {{ $item->item_status == 'Active' ? 'bg-emerald-600' : 'bg-slate-500' }}">
                                         {{ $item->item_status }}
                                     </span>
                                 </td>
-                                <td class="p-3 text-xs text-slate-500 font-medium">
+                                <td class="py-3 px-4 text-xs text-slate-900 text-center">
                                     {{ $item->user->full_name ?? $item->user->name ?? 'Admin' }}
+                                </td>
+                                <td class="py-3 px-4 text-xs text-slate-900 text-center">
+                                    @if ($item->item_attachment)
+                                        <div x-data="{ open: false }" class="flex justify-center">
+                                          
+                                            <button @click="open = true" 
+                                                    type="button" 
+                                                    class="p-2 bg-slate-100 hover:bg-orange-500 text-slate-600 hover:text-white rounded-lg transition border border-slate-200 shadow-sm flex items-center justify-center cursor-pointer mx-auto"
+                                                    title="View Image">
+                                                <i class="fa-solid fa-eye text-xs"></i>
+                                            </button>
+
+                                            <div x-show="open" 
+                                                x-cloak
+                                                @keydown.escape.window="open = false" 
+                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                                                
+                                                <div class="fixed inset-0" @click="open = false"></div>
+
+                                                <div class="relative bg-white p-3 rounded-2xl shadow-2xl max-w-lg w-full z-10 space-y-3 border border-slate-100 text-left">
+                                                    <div class="flex justify-between items-center px-1">
+                                                        <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Attachment Preview</span>
+                                                        <button @click="open = false" type="button" class="text-slate-400 hover:text-red-500 transition text-sm">
+                                                            <i class="fa-solid fa-xmark"></i>
+                                                        </button>
+                                                    </div>
+
+                                                    <div class="overflow-hidden rounded-xl bg-slate-50 border border-slate-200/80 max-h-[70vh] flex items-center justify-center">
+                                                        <img src="{{ asset('storage/' . $item->item_attachment) }}" 
+                                                            alt="Attachment" 
+                                                            class="max-w-full max-h-[65vh] object-contain rounded-lg">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    @else
+                                    
+                                        <span class="py-3 px-4 text-xs text-slate-400 italic block text-center">No Attachment</span>
+                                    @endif
                                 </td>
                                 <td class="p-3">
                                     <div class="flex items-center justify-center gap-2">

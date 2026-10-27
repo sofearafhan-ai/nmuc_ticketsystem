@@ -37,7 +37,7 @@
                 <!-- Department Name -->
                 <div>
                     <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Department Name</label>
-                    <input type="text" name="department_name" required placeholder="e.g. Information Technology"
+                    <input type="text" name="department_name"
                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:ring-2 focus:ring-orange-500 outline-none transition">
                     @error('department_name')
                         <span class="text-[10px] text-red-500 font-semibold mt-1 block">{{ $message }}</span>
@@ -47,7 +47,7 @@
                 <!-- Department Code / Abbreviation -->
                 <div>
                     <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Department Code (Optional)</label>
-                    <input type="text" name="code" placeholder="e.g. IT, FAC, HR"
+                    <input type="text" name="code"
                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:ring-2 focus:ring-orange-500 outline-none transition">
                 </div>
 
@@ -60,11 +60,9 @@
             </form>
         </div>
 
-        <!-- RUANG KANAN: Jadual Senarai Department (2/3) -->
         <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
             <div class="p-5 border-b border-slate-100 flex items-center justify-between">
                 <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                    <i class="fa-solid fa-building border-l-2 border-orange-500 pl-2"></i>
                     <span>Registered Departments</span>
                 </h3>
                 <span class="text-xs text-slate-400 font-medium">Total: {{ $departments->count() }}</span>

@@ -6,11 +6,28 @@ use App\Models\Ticket;
 use App\Models\Inventory;
 use App\Models\TicketReply;
 use App\Models\User;
+use App\Exports\TicketsExport;
+use App\Exports\InventoryExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
+
+    public function exportTickets(Request $request)
+    {
+        $fileName = 'tickets_report_' . date('Y_m_d_His') . '.xlsx';
+        return Excel::download(new TicketsExport($request), $fileName);
+    }
+
+    public function exportInventory(Request $request)
+    {
+        $fileName = 'inventory_report_' . date('Y_m_d_His') . '.xlsx';
+        return Excel::download(new InventoryExport($request), $fileName);
+    }
+
     // 1. DASHBOARD ADMIN
     public function dashboard()
     {
@@ -39,7 +56,6 @@ class AdminController extends Controller
             'total'    => (clone $inventoryQuery)->count(),
         ];
 
-        // --- KIRA DATA 12 BULAN (REAL-TIME AGGREGATION) ---
         $currentYear = date('Y');
         $activeMonthly = [];
         $inactiveMonthly = [];
@@ -84,7 +100,7 @@ class AdminController extends Controller
         ));
     }
 
-    // 2. ADMIN TICKET LIST (FILTER DISAMAKAN DENGAN MESSAGE)
+    // 2. ADMIN TICKET LIST 
     public function tickets(Request $request)
     {
         $user = Auth::user();
@@ -93,7 +109,6 @@ class AdminController extends Controller
 
         $query = Ticket::with(['user', 'picAdmin']);
 
-        // Filter PIC: Mengambil tiket yang di-assign kepada Admin yang login (Sama seperti Message)
         if ($user->role !== 'Super Admin') {
             $query->where('pic', $currentAdminId);
         }
@@ -182,7 +197,6 @@ class AdminController extends Controller
         return view('admin.tickets.edit', compact('ticket', 'adminsInDept', 'categories', 'types', 'statuses', 'priorities'));
     }
 
-    // Update Ticket & Record Status Change Log
     public function updateTicket(Request $request, $id)
     {
         $request->validate([
@@ -201,7 +215,6 @@ class AdminController extends Controller
         $oldPic    = $ticket->pic;
         $newPic    = $request->pic;
 
-        // 1. Log jika PIC BERTUKAR / DIASSIGN
         if ($oldPic != $newPic && !empty($newPic)) {
             $assignedUser = User::where('user_id', $newPic)->first();
             $picName = $assignedUser ? ($assignedUser->full_name ?? $assignedUser->name) : 'Admin';
@@ -215,7 +228,6 @@ class AdminController extends Controller
             ]);
         }
 
-        // 2. Log jika STATUS BERTUKAR
         if ($oldStatus !== $newStatus) {
             TicketReply::create([
                 'ticket_id'   => $ticket->ticket_id,
@@ -243,7 +255,7 @@ class AdminController extends Controller
         return $this->messages(request(), $id);
     }
 
-    // Store Ticket Baru
+    // New Ticket Store
     public function storeTicket(Request $request)
     {
         $request->validate([
@@ -418,25 +430,50 @@ class AdminController extends Controller
     public function updateInventory(Request $request, $id)
     {
         $request->validate([
-            'item_name'     => 'required|string|max:255',
-            'item_category' => 'required|string|max:255',
-            'item_model'    => 'required|string|max:255',
-            'item_status'   => 'required|in:Active,Inactive',
-            'item_location' => 'required|string|max:255',
+            'item_name'       => 'required|string|max:255',
+            'item_category'   => 'required|string|max:255',
+            'item_model'      => 'required|string|max:255',
+            'item_status'     => 'required|in:Active,Inactive',
+            'item_location'   => 'required|string|max:255',
+            'item_attachment' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', 
         ]);
 
         $item = Inventory::where('item_id', $id)->firstOrFail();
 
-        $item->update([
+        $dataToUpdate = [
             'item_name'     => $request->item_name,
             'item_category' => $request->item_category,
             'item_model'    => $request->item_model,
             'item_status'   => $request->item_status,
             'item_location' => $request->item_location,
-        ]);
+        ];
+
+        if ($request->hasFile('item_attachment')) {
+
+            if ($item->item_attachment && Storage::disk('public')->exists($item->item_attachment)) {
+                Storage::disk('public')->delete($item->item_attachment);
+            }
+
+            $dataToUpdate['item_attachment'] = $request->file('item_attachment')->store('inventories', 'public');
+        }
+
+        $item->update($dataToUpdate);
 
         return redirect()->route('admin.inventory.index')
             ->with('success', 'Inventory assets have been successfully updated!');
+    }
+
+    public function deleteAttachment($id)
+    {
+        $item = Inventory::where('item_id', $id)->firstOrFail();
+
+        if ($item->item_attachment && Storage::disk('public')->exists($item->item_attachment)) {
+            Storage::disk('public')->delete($item->item_attachment);
+        }
+
+        $item->update(['item_attachment' => null]);
+
+        return redirect()->back()->with('success', 'Attachment deleted successfully!');
     }
 
     public function destroyInventory($id)
@@ -459,19 +496,29 @@ class AdminController extends Controller
             'items.*.item_model'    => 'required|string|max:255',
             'items.*.item_status'   => 'required|in:Active,Inactive',
             'items.*.item_location' => 'required|string|max:255',
+            'items.*.item_attachment'   => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $createdCount = 0;
 
-        foreach ($request->items as $itemData) {
+        foreach ($request->items as $index => $itemData) {
+            
+            $attachmentPath = null;
+
+            if ($request->hasFile("items.{$index}.item_attachment")) {
+                $attachmentPath = $request->file("items.{$index}.item_attachment")->store('inventories', 'public');
+            }
+
             Inventory::create([
-                'item_name'     => $itemData['item_name'],
-                'item_category' => $itemData['item_category'],
-                'item_model'    => $itemData['item_model'],
-                'item_status'   => $itemData['item_status'],
-                'item_location' => $itemData['item_location'],
-                'user_id'       => $user->user_id ?? $user->id,
+                'item_name'       => $itemData['item_name'],
+                'item_category'   => $itemData['item_category'],
+                'item_model'      => $itemData['item_model'],
+                'item_status'     => $itemData['item_status'],
+                'item_location'   => $itemData['item_location'],
+                'item_attachment' => $attachmentPath, 
+                'user_id'         => $user->user_id ?? $user->id,
             ]);
+
             $createdCount++;
         }
 

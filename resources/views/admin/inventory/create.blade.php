@@ -20,7 +20,7 @@
     </div>
 
     <!-- Form Container -->
-    <form action="{{ route('admin.inventory.store') }}" method="POST" class="space-y-6">
+    <form action="{{ route('admin.inventory.store') }}" method="POST" class="space-y-6" enctype="multipart/form-data">
         @csrf
 
         @if ($errors->any())
@@ -29,14 +29,11 @@
             </div>
         @endif
 
-        <!-- SINGLE MAIN CARD FORM CONTAINER -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 space-y-6">
 
-            <!-- Dynamic Rows Loop (Alpine.js Template) -->
             <template x-for="(item, index) in items" :key="index">
                 <div class="space-y-4 pb-6" :class="{ 'border-b border-slate-100': index !== items.length - 1 }">
                     
-                    <!-- Card Header / Item Badge & Delete Button -->
                     <div class="flex justify-between items-center">
                         <span class="text-xs font-extrabold text-orange-600 bg-orange-50 px-3 py-1 rounded-full border border-orange-200/60 flex items-center gap-1.5">
                             <i class="fa-solid fa-box text-orange-500"></i> Item #<span x-text="index + 1"></span>
@@ -48,7 +45,6 @@
                         </button>
                     </div>
 
-                    <!-- Input Row 1 -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">Item Name <span class="text-red-500">*</span></label>
@@ -69,7 +65,6 @@
                         </div>
                     </div>
 
-                    <!-- Input Row 2 -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">Model <span class="text-red-500">*</span></label>
@@ -81,6 +76,12 @@
                             <label class="block text-xs font-bold text-slate-700 mb-1">Location <span class="text-red-500">*</span></label>
                             <input type="text" :name="`items[${index}][item_location]`" x-model="item.item_location" required 
                                    class="w-full px-3.5 py-2.5 bg-slate-50/60 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Attachment (Optional)</label>
+                            <input type="file" :name="`items[${index}][item_attachment]`" 
+                                class="w-full px-3.5 py-2.5 bg-slate-50/60 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
                         </div>
 
                         <div>
@@ -96,7 +97,6 @@
                 </div>
             </template>
 
-            <!-- BUTTONS DIRECTLY INSIDE THE MAIN FORM CARD -->
             <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <!-- Add Item Button (Left) -->
                 <button type="button" @click="addItem()" 

@@ -55,10 +55,10 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200 bg-slate-50 text-slate-700 uppercase text-[11px] font-bold tracking-wider">
-                            <th class="p-3">User</th>
-                            <th class="p-3">Email</th>
-                            <th class="p-3">Department</th>
-                            <th class="p-3">Role</th>
+                            <th class="p-3 text-center">User</th>
+                            <th class="p-3 text-center">Email</th>
+                            <th class="p-3 text-center">Department</th>
+                            <th class="p-3 text-center">Role</th>
                             <th class="p-3 text-center">Action</th>
                         </tr>
                     </thead>
@@ -76,12 +76,12 @@
                                     </div>
                                 </td>
                                 <td class="p-3 text-xs text-slate-600 font-medium">{{ $userItem->email }}</td>
-                                <td class="p-3 text-xs font-bold text-slate-700">
+                                <td class="p-3 text-xs font-bold text-slate-700 text-center">
                                     <span class="px-2.5 py-1 bg-slate-100 border text-slate-700 rounded-md">
                                         {{ $userItem->department ?? 'General' }}
                                     </span>
                                 </td>
-                                <td class="p-3">
+                                <td class="p-3 text-center">
                                     <span class="px-2.5 py-1 text-xs font-bold rounded-full border
                                         @if($userItem->role == 'Super Admin') bg-purple-100 text-purple-700 border-purple-200
                                         @elseif($userItem->role == 'Admin') bg-blue-100 text-blue-700 border-blue-200

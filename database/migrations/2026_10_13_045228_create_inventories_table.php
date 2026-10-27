@@ -21,6 +21,8 @@ return new class extends Migration
             $table->enum('item_status', ['Active', 'Inactive'])->default('Active');
             $table->string('item_location', 255);
 
+            $table->string('item_attachment', 255)->nullable();
+
             $table->foreignId('user_id')->constrained('users', 'user_id')->onDelete('cascade');
 
             $table->timestamp('created_at')->useCurrent();

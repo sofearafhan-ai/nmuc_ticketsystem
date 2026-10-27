@@ -27,6 +27,8 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:Admin,Super Admin'])->group(function () {
         Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
+        Route::get('/admin/tickets/export', [AdminController::class, 'exportTickets'])->name('admin.tickets.export');
+
         Route::get('/admin/tickets', [AdminController::class, 'tickets'])->name('admin.tickets.index');
         Route::get('/admin/tickets/create', [AdminController::class, 'createTicket'])->name('admin.tickets.create');
         Route::get('/admin/tickets/{id}/edit', [AdminController::class, 'editTicket'])->name('admin.tickets.edit');
@@ -39,11 +41,15 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/admin/messages/{ticketId}', [AdminController::class, 'replyMessage'])->name('admin.messages.reply');
         
         Route::get('/admin/inventory', [AdminController::class, 'inventory'])->name('admin.inventory.index');
+
+        Route::get('/admin/inventory/export', [AdminController::class, 'exportInventory'])->name('admin.inventory.export');
+
         Route::get('/admin/inventory/create', [AdminController::class, 'createInventory'])->name('admin.inventory.create');
         Route::post('/admin/inventory', [AdminController::class, 'storeInventory'])->name('admin.inventory.store');
         Route::get('/admin/inventory/{id}/edit', [AdminController::class, 'editInventory'])->name('admin.inventory.edit');
         Route::put('/admin/inventory/{id}', [AdminController::class, 'updateInventory'])->name('admin.inventory.update');
         Route::delete('/admin/inventory/{id}', [AdminController::class, 'destroyInventory'])->name('admin.inventory.destroy');
+        Route::delete('/admin/inventory/{id}/attachment', [AdminController::class, 'deleteAttachment'])->name('admin.inventory.delete-attachment');
     });
 
     // Route Super Admin 
@@ -65,7 +71,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/tickets', [SuperAdminController::class, 'ticketsStore'])->name('tickets.store');
         Route::get('/tickets/{id}/edit', [SuperAdminController::class, 'ticketsEdit'])->name('tickets.edit');
         Route::put('/tickets/{id}', [SuperAdminController::class, 'ticketsUpdate'])->name('tickets.update');
+        Route::get('/messages', [SuperAdminController::class, 'messagesIndex'])->name('messages.index');
+        Route::post('/messages/{ticket_id}/reply', [SuperAdminController::class, 'messagesReply'])->name('messages.reply');
 
+        Route::delete('/tickets/{id}', [SuperAdminController::class, 'ticketsDestroy'])->name('tickets.destroy');
+        
         // INVENTORY FOR SUPER ADMIN 
         Route::get('/inventory', [SuperAdminController::class, 'inventoryIndex'])->name('inventory.index');
         Route::get('/inventory/create', [SuperAdminController::class, 'inventoryCreate'])->name('inventory.create');

@@ -10,7 +10,7 @@
         <div>
             <div class="flex items-center gap-2">
                 <span class="bg-purple-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1">
-                    <i class="fa-solid fa-crown text-[9px]"></i> OVERALL SYSTEM OVERVIEW
+                    OVERALL SYSTEM OVERVIEW
                 </span>
                 <h1 class="text-2xl font-bold">Super Admin Dashboard</h1>
             </div>
@@ -106,7 +106,7 @@
                 <i class="fa-solid fa-clock-rotate-left text-orange-500"></i>
                 <h3 class="font-bold text-slate-800 text-sm">Recent Cross-Department Support Tickets</h3>
             </div>
-            <a href="{{ route('admin.tickets.index') }}" class="text-xs font-bold text-orange-600 hover:underline flex items-center gap-1">
+            <a href="{{ route('superadmin.tickets.index') }}" class="text-xs font-bold text-orange-600 hover:underline flex items-center gap-1">
                 <span>View All Tickets</span>
                 <i class="fa-solid fa-arrow-right text-[10px]"></i>
             </a>
@@ -117,12 +117,12 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200 bg-slate-50 text-slate-700 uppercase text-[11px] font-bold tracking-wider">
-                            <th class="p-3">Ticket ID</th>
-                            <th class="p-3">Title</th>
-                            <th class="p-3">Submitted By</th>
-                            <th class="p-3">Category</th>
-                            <th class="p-3">Status</th>
-                            <th class="p-3">Assigned PIC</th>
+                            <th class="p-3 text-center">Ticket ID</th>
+                            <th class="p-3 text-center">Title</th>
+                            <th class="p-3 text-center">Submitted By</th>
+                            <th class="p-3 text-center">Category</th>
+                            <th class="p-3 text-center">Status</th>
+                            <th class="p-3 text-center">Assigned PIC</th>
                             <th class="p-3 text-center">Action</th>
                         </tr>
                     </thead>
@@ -135,12 +135,12 @@
                                 <td class="p-3 font-bold text-slate-900">{{ $formattedTicketNo }}</td>
                                 <td class="p-3 font-medium text-slate-800 truncate max-w-xs">{{ $ticket->title }}</td>
                                 <td class="p-3 text-xs text-slate-600 font-medium">{{ $ticket->user_name ?? ($ticket->user->name ?? 'User') }}</td>
-                                <td class="p-3 font-medium text-slate-700">
+                                <td class="p-3 font-medium text-slate-700 text-center">
                                     <span class="px-2 py-0.5 rounded bg-slate-100 border text-slate-700 text-xs font-semibold">
                                         {{ $ticket->category }}
                                     </span>
                                 </td>
-                                <td class="p-3">
+                                <td class="p-3 text-center">
                                     <span class="px-2.5 py-1 text-xs font-bold rounded text-white inline-block
                                         @if($ticket->status == 'New') bg-green-600
                                         @elseif($ticket->status == 'Processing') bg-blue-500
@@ -154,7 +154,7 @@
                                     {{ $ticket->picAdmin->full_name ?? $ticket->picAdmin->name ?? $ticket->pic ?? 'Unassigned' }}
                                 </td>
                                 <td class="p-3 text-center">
-                                    <a href="{{ route('admin.tickets.edit', $ticket->ticket_id ?? $ticket->id) }}" 
+                                    <a href="{{ route('superadmin.tickets.edit', $ticket->ticket_id ?? $ticket->id) }}" 
                                        class="px-3 py-1.5 bg-slate-100 hover:bg-orange-500 hover:text-white text-slate-700 rounded-lg text-xs font-semibold transition border inline-flex items-center gap-1">
                                         <i class="fa-solid fa-pen-to-square"></i> Edit
                                     </a>
