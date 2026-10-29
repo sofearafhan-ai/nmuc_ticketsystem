@@ -186,7 +186,7 @@ class AdminController extends Controller
         $ticket = Ticket::with(['replies', 'user', 'picAdmin'])->where('ticket_id', $id)->firstOrFail();
 
         $adminsInDept = User::whereIn('role', ['Admin', 'Super Admin'])
-                            ->where('department', $adminDept)
+                            ->where('department_id', $user->department_id)
                             ->get();
 
         $categories = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];

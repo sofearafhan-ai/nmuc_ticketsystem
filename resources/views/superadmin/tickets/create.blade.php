@@ -1,6 +1,6 @@
 @extends('layouts.superadmin')
 
-@section('title', 'Super Admin - Create New Ticket')
+@section('title', 'Create New Ticket')
 
 @section('content')
 <div class="space-y-6">

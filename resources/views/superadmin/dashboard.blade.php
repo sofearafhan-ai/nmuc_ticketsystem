@@ -1,6 +1,6 @@
 @extends('layouts.superadmin')
 
-@section('title', 'Super Admin Dashboard')
+@section('title', 'Dashboard')
 
 @section('content')
 <div class="space-y-6">
@@ -150,7 +150,7 @@
                                         {{ $ticket->status }}
                                     </span>
                                 </td>
-                                <td class="p-3 text-xs text-slate-500 font-medium">
+                                <td class="p-3 text-xs text-slate-500 font-medium text-center">
                                     {{ $ticket->picAdmin->full_name ?? $ticket->picAdmin->name ?? $ticket->pic ?? 'Unassigned' }}
                                 </td>
                                 <td class="p-3 text-center">

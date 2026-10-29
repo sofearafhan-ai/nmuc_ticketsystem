@@ -82,6 +82,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/inventory', [SuperAdminController::class, 'inventoryStore'])->name('inventory.store');
         Route::get('/inventory/{id}/edit', [SuperAdminController::class, 'inventoryEdit'])->name('inventory.edit');
         Route::put('/inventory/{id}', [SuperAdminController::class, 'inventoryUpdate'])->name('inventory.update');
+        Route::delete('/inventory/{id}', [SuperAdminController::class, 'inventoryDestroy'])->name('inventory.destroy');
     });
 
 });

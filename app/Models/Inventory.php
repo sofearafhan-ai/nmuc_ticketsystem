@@ -20,11 +20,17 @@ class Inventory extends Model
         'item_status',
         'item_location',
         'item_attachment',
+        'department',
         'user_id',
     ];
 
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id', 'department_id');
+    }
+
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 }

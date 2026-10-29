@@ -77,10 +77,7 @@ class SuperAdminController extends Controller
 
     public function usersCreate()
     {
-        $departments = Department::pluck('department_name')->toArray();
-        if (empty($departments)) {
-            $departments = ['IT', 'Facility', 'Management', 'HR', 'Finance'];
-        }
+        $departments = Department::all();
         $roles = ['Staff', 'Admin', 'Super Admin'];
 
         return view('superadmin.users.create', compact('departments', 'roles'));
@@ -93,7 +90,7 @@ class SuperAdminController extends Controller
             'email'      => 'required|email|unique:users,email',
             'password'   => 'required|string|min:6',
             'role'       => 'required|string',
-            'department' => 'required|string',
+            'department_id' => 'required|exists:departments,department_id',
         ]);
 
         User::create([
@@ -102,7 +99,7 @@ class SuperAdminController extends Controller
             'email'      => $request->email,
             'password'   => Hash::make($request->password),
             'role'       => $request->role,
-            'department' => $request->department,
+            'department_id' => $request->department_id,
         ]);
 
         return redirect()->route('superadmin.users.index')
@@ -378,29 +375,45 @@ public function ticketsDeleteAttachment($id)
     // ==========================================
     public function inventoryIndex(Request $request)
     {
-        $query = Inventory::query();
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('item_name', 'like', "%{$search}%")
-                  ->orWhere('item_model', 'like', "%{$search}%")
-                  ->orWhere('item_category', 'like', "%{$search}%")
-                  ->orWhere('item_location', 'like', "%{$search}%");
-            });
-        }
+        $departments = Department::all();
 
-        if ($request->filled('category')) {
-            $query->where('item_category', $request->category);
-        }
+        $selectedDepartment = $request->get('department_id') ?? $request->get('department');
+        $inventories = collect();
 
-        if ($request->filled('status')) {
-            $query->where('item_status', $request->status);
-        }
+        if ($selectedDepartment) {
+            $query = Inventory::query();
+
+            if (is_numeric($selectedDepartment)) {
+                $query->where('department_id', $selectedDepartment);
+            }else {
+                $query->whereHas('department', function ($q) use ($selectedDepartment) {
+                    $q->where('department_name',$selectedDepartment);
+                });
+            }
+                
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('item_name', 'like', "%{$search}%")
+                    ->orWhere('item_model', 'like', "%{$search}%")
+                    ->orWhere('item_category', 'like', "%{$search}%")
+                    ->orWhere('item_location', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->filled('category')) {
+                $query->where('item_category', $request->category);
+            }
+
+            if ($request->filled('status')) {
+                $query->where('item_status', $request->status);
+            }
 
         $inventories = $query->latest('item_id')->paginate(10)->withQueryString();
+        }
 
-        return view('superadmin.inventory.index', compact('inventories'));
+        return view('superadmin.inventory.index', compact('departments', 'inventories', 'selectedDepartment'));
     }
 
     public function inventoryCreate()
@@ -440,6 +453,7 @@ public function ticketsDeleteAttachment($id)
                 'item_location'   => $itemData['item_location'],
                 'item_attachment' => $attachmentPath,
                 'user_id'         => $user->user_id ?? $user->id,
+                'department_id'   => $user->department_id,
             ]);
 
             $createdCount++;
@@ -461,5 +475,13 @@ public function ticketsDeleteAttachment($id)
 
         return redirect()->route('superadmin.inventory.index')
             ->with('success', 'Inventory asset deleted successfully!');
+    }
+
+    public function inventoryEdit($id)
+    {
+        $item = Inventory::where('item_id', $id)->firstOrFail();
+        $departments = Department::all();
+
+        return view('superadmin.inventory.edit', compact('item', 'departments'));
     }
 }

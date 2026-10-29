@@ -362,6 +362,20 @@
                     </div>
                 </div>
 
+                <div>
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Department</label>
+                    <select name="department" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:ring-2 focus-orange-500 outline-none transition">
+                        <option value="">-- Select --</option>
+                        @if(isset($department))
+                            @foreach($department as $dept)
+                                <option value="{{ $dept->department_id ?? $dept->id }}" {{ $ticket->department == ($dept->department_id ?? $dept->id) ? 'selected' : '' }}>
+                                    {{ $dept->department_name ?? $dept->name }} ({{ $dept->code }})
+                                </option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+
                 <!-- ASSIGN TO (PIC) DROPDOWN -->
                 <div>
                     <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Assign To (PIC)</label>

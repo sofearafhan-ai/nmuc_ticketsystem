@@ -60,9 +60,10 @@
                 <!-- Department -->
                 <div>
                     <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Department</label>
-                    <select name="department" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-orange-500 outline-none transition">
+                    <select name="department_id" id="department_id" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-orange-500 outline-none transition">
+                        <option value="">-- Select Department --</option>
                         @foreach($departments as $dept)
-                            <option value="{{ $dept }}">{{ $dept }}</option>
+                            <option value="{{ $dept->department_id }}">{{ $dept->department_name }}</option>
                         @endforeach
                     </select>
                 </div>

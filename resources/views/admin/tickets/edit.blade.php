@@ -81,14 +81,11 @@
             <!-- Chat Messages Scroll Area -->
             <div class="flex-1 p-5 md:p-6 overflow-y-auto custom-scrollbar space-y-4 bg-white" id="editMessageScrollContainer">
                 
-                <!-- 1. First Ticket Message (Submission oleh User) -->
                 <div class="flex items-end gap-2.5 max-w-[85%] md:max-w-[70%]">
-                    <!-- Avatar di Luar Kiri -->
                     <div class="w-8 h-8 rounded-full bg-emerald-500 text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-xs mb-1">
                         {{ strtoupper(substr($activeUserName, 0, 1)) }}
                     </div>
 
-                    <!-- Gelembung Kelabu Lembut -->
                     <div class="bg-slate-100 text-slate-800 p-3.5 px-4 rounded-2xl rounded-bl-xs space-y-1">
                         <div class="text-xs font-bold text-slate-900">
                             {{ $activeUserName }}
@@ -97,7 +94,6 @@
                             {!! $ticket->description !!}
                         </div>
 
-                        <!-- Gambar / Attachment dari Kolom image/image_path -->
                         @if(!empty($ticketMainAttachment) && $ticketMainAttachment !== 'no-image.png')
                             @php
                                 $mainExt = strtolower(pathinfo($ticketMainAttachment, PATHINFO_EXTENSION));
@@ -116,14 +112,12 @@
                             </div>
                         @endif
 
-                        <!-- Masa -->
                         <div class="text-[10px] text-slate-400 font-medium pt-1">
                             {{ $ticket->date ?? ($ticket->created_at ? $ticket->created_at->format('h:i A') : '') }}
                         </div>
                     </div>
                 </div>
 
-                <!-- 2. Replies Loop & System Event Logs -->
                 @if(isset($ticket->replies) && $ticket->replies->count() > 0)
                     @foreach($ticket->replies as $reply)
                         @php
@@ -180,7 +174,6 @@
                             </div>
 
                         @elseif($isAdmin)
-                            <!-- Mesej Admin (Kanan) -->
                             <div class="flex items-end justify-end gap-2.5 max-w-[85%] md:max-w-[70%] ml-auto">
                                 <div class="bg-blue-50/90 text-slate-800 p-3.5 px-4 rounded-2xl rounded-br-xs space-y-1">
                                     <div class="text-xs font-bold text-blue-900">
@@ -215,7 +208,6 @@
                             </div>
 
                         @else
-                            <!-- Mesej Pengguna (Kiri) -->
                             <div class="flex items-end gap-2.5 max-w-[85%] md:max-w-[70%]">
                                 <div class="w-8 h-8 rounded-full bg-emerald-500 text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-xs mb-1">
                                     {{ strtoupper(substr($replyName, 0, 1)) }}
@@ -388,13 +380,12 @@
 <!-- Client-side Script for Auto Scroll & File Preview -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // 1. Auto Scroll ke bahagian mesej bawah sekali
+    
     const scrollContainer = document.getElementById('editMessageScrollContainer');
     if (scrollContainer) {
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
     }
-
-    // 2. File Attachment Preview Indicator
+    
     const fileInput = document.getElementById('attachmentInputEdit');
     const filePreviewContainer = document.getElementById('filePreviewContainerEdit');
     const fileNameDisplay = document.getElementById('fileNameDisplayEdit');

@@ -1,6 +1,6 @@
 @extends('layouts.superadmin')
 
-@section('title', 'Super Admin - All Tickets Overview')
+@section('title', 'Tickets')
 
 @section('content')
 <div class="space-y-6">

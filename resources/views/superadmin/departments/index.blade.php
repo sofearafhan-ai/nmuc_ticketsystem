@@ -92,7 +92,7 @@
                                         </span>
                                     </td>
                                     <td class="p-3 text-center">
-                                        <form action="{{ route('superadmin.departments.destroy', $dept->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this department?');" class="inline">
+                                        <form action="{{ route('superadmin.departments.destroy', $dept->department_id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this department?');" class="inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="px-3 py-1.5 bg-red-50 hover:bg-red-500 hover:text-white text-red-600 rounded-lg text-xs font-bold transition border border-red-200">

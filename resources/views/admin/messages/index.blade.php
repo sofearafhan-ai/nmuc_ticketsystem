@@ -120,7 +120,6 @@
                     class="chat-item relative flex items-start gap-2.5 p-3.5 pl-0 hover:bg-slate-50 transition cursor-pointer {{ $isActive ? 'bg-slate-100/90' : '' }}"
                     data-search="{{ strtolower($userName . ' ' . $ticketTitle . ' ' . $convId) }}">
                         
-                        <!-- GARISAN HITAM TEPI -->
                         <div class="w-1.5 self-stretch shrink-0 {{ $isActive ? 'bg-slate-900 rounded-r-md' : 'bg-transparent' }}"></div>
 
                         <!-- Avatar -->
@@ -132,7 +131,7 @@
 
                         <!-- Chat Details Layout -->
                         <div class="flex-1 min-w-0 space-y-1 pr-2">
-                            <!-- Baris 1: ID Tiket & Masa -->
+                            
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-extrabold text-slate-900 tracking-tight">
                                     {{ $formattedNo }}
@@ -142,20 +141,17 @@
                                 </span>
                             </div>
 
-                            <!-- Baris 2: Nama Pengguna -->
                             <div class="flex items-center justify-between">
                                 <h4 class="text-xs font-bold text-slate-700 truncate">
                                     {{ $userName }}
                                 </h4>
                             </div>
 
-                            <!-- Baris 3: Tajuk Tiket & Lencana Status di Kanan Bawah -->
                             <div class="flex items-center justify-between gap-2 pt-0.5">
                                 <p class="text-xs text-slate-400 truncate font-normal flex-1">
                                     {{ $ticketTitle }}
                                 </p>
 
-                                <!-- Lencana Status Tiket (Kanan Bawah) -->
                                 <span class="px-2 py-0.5 text-[10px] font-bold rounded-md border shrink-0 {{ $badgeStyle }}">
                                     {{ $ticketStatus }}
                                 </span>

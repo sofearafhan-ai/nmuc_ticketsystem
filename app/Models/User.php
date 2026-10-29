@@ -18,7 +18,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'department',
+        'department_id',
     ];
 
     protected $hidden = [
@@ -30,21 +30,11 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    // ==========================================
-    // HUBUNGAN (RELATIONSHIPS)
-    // ==========================================
-
-    /**
-     * Seorang User boleh mempunyai banyak Ticket.
-     */
     public function tickets()
     {
         return $this->hasMany(Ticket::class, 'user_id', 'user_id');
     }
 
-    /**
-     * Seorang User boleh mempunyai banyak Inventory.
-     */
     public function inventories()
     {
         return $this->hasMany(Inventory::class, 'user_id', 'user_id');

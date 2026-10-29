@@ -2,16 +2,26 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Department extends Model
 {
-    use HasFactory;
+    protected $primaryKey = 'department_id';
 
-    protected $table = 'departments';
+    protected $fillable = ['department_name', 'code'];
 
-    protected $fillable = [
-        'department_name',
-    ];
+    public function inventories()
+    {
+        return $this->hasMany(Inventory::class, 'department_id', 'department_id');
+    }
+
+    public function users()
+    {
+        return $this->hasMany(User::class, 'department_id', 'department_id');
+    }
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class, 'department_id', 'department_id');
+    }
 }
