@@ -69,7 +69,6 @@
     <!-- 2. BOTTOM SECTION -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <!-- Graf Bar Bertingkat (Kiri) -->
         <div class="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-between">
             <div>
                 <h3 class="font-bold text-slate-800 text-lg mb-1">Inventory & Ticket Trends</h3>
@@ -114,7 +113,7 @@
             </div>
         </div>
 
-        <!-- Doughnut Graph (Kanan) -->
+        <!-- Doughnut Graph -->
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-between">
             <h3 class="font-bold text-slate-800 text-lg mb-2">Tickets Status Overview</h3>
 
@@ -212,12 +211,11 @@
                                 {{ $ticket->date ? \Carbon\Carbon::parse($ticket->date)->format('d M Y') : '-' }}
                             @endif
                         </td>
-                        <td class="py-3 px-4">
+                        <td class="py-3 px-4 text-center">
                             <div class="flex items-center gap-2">
                                 <a href="{{ route('admin.tickets.edit', $ticket->ticket_id ?? $ticket->id) }}" 
                                 class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition flex items-center gap-1">
                                     <i class="fa-solid fa-pen-to-square"></i>
-                                    <span>Edit</span>
                                 </a>
 
                                 <form action="{{ route('admin.tickets.destroy', $ticket->ticket_id ?? $ticket->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this ticket?');">
@@ -225,7 +223,6 @@
                                     @method('DELETE')
                                     <button type="submit" class="px-2.5 py-1.5 bg-red-50 hover:bg-red-600 text-red-600 hover:text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
                                         <i class="fa-solid fa-trash-can"></i>
-                                        <span>Delete</span>
                                     </button>
                                 </form>
                             </div>

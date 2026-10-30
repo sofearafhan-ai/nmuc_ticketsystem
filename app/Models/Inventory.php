@@ -20,8 +20,8 @@ class Inventory extends Model
         'item_status',
         'item_location',
         'item_attachment',
-        'department',
         'user_id',
+        'department_id',
     ];
 
     public function department()

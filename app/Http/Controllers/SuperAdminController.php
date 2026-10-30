@@ -178,7 +178,7 @@ class SuperAdminController extends Controller
 
     public function ticketsCreate()
     {
-        $departments = Department::pluck('department_name')->toArray();
+        $departments = Department::pluck('department_name', 'department_id');
         $types       = ['Incident', 'Request', 'Hardware', 'Software', 'Network', 'Facility', 'Others'];
         $categories  = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
         $priorities  = ['Low', 'Medium', 'High', 'Urgent'];
@@ -304,6 +304,8 @@ public function ticketsEdit($id)
     $statuses   = ['New', 'Processing', 'Pending', 'Closed'];
     $priorities = ['Low', 'Medium', 'High', 'Urgent'];
 
+    $departments = Department::all();
+
     $adminsInDept = User::whereIn('role', ['Admin', 'Super Admin'])->get();
 
     return view('superadmin.tickets.edit', compact(
@@ -312,36 +314,39 @@ public function ticketsEdit($id)
         'types', 
         'statuses', 
         'priorities', 
+        'departments',
         'adminsInDept'
     ));
 }
 
 public function ticketsUpdate(Request $request, $id)
 {
-    $request->validate([
-        'title'       => 'required|string|max:255',
-        'user_name'   => 'required|string|max:255',
-        'type'        => 'required|string',
-        'category'    => 'required|string',
-        'priority'    => 'required|string',
-        'status'      => 'required|string',
-        'location'    => 'required|string',
-        'description' => 'required|string',
-        'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
 
     $ticket = Ticket::where('ticket_id', $id)->firstOrFail();
 
+    $request->validate([
+        'category'      => 'nullable|string',
+        'type'          => 'nullable|string',
+        'status'        => 'nullable|string',
+        'priority'      => 'nullable|string',
+        'location'      => 'nullable|string',
+        'department_id' => 'nullable|exists:departments,department_id',
+        'pic_id'        => 'nullable|exists:users,user_id',
+        'image'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
     $dataToUpdate = [
-        'title'       => $request->title,
-        'user_name'   => $request->user_name,
-        'user_email'  => $request->user_email,
-        'type'        => $request->type,
-        'category'    => $request->category,
-        'priority'    => $request->priority,
-        'status'      => $request->status,
-        'location'    => $request->location,
-        'description' => $request->description,
+        'title'         => $request->title ?? $ticket->title,
+        'user_name'     => $request->user_name ?? $ticket->user_name,
+        'user_email'    => $request->user_email ?? $ticket->user_email,
+        'description'   => $request->description ?? $ticket->description,
+        'type'          => $request->type ?? $ticket->type,
+        'category'      => $request->category ?? $ticket->category,
+        'priority'      => $request->priority ?? $ticket->priority,
+        'status'        => $request->status ?? $ticket->status,
+        'location'      => $request->location ?? $ticket->location,
+        'department_id' => $request->department_id ?? $ticket->department_id,
+        'pic_id'        => $request->pic_id ?? $ticket->pic_id,
     ];
 
     if ($request->hasFile('image')) {
@@ -353,21 +358,7 @@ public function ticketsUpdate(Request $request, $id)
 
     $ticket->update($dataToUpdate);
 
-    return redirect()->route('superadmin.tickets.index')
-        ->with('success', 'Ticket updated successfully!');
-}
-
-public function ticketsDeleteAttachment($id)
-{
-    $ticket = Ticket::where('ticket_id', $id)->firstOrFail();
-
-    if ($ticket->image && Storage::disk('public')->exists($ticket->image)) {
-        Storage::disk('public')->delete($ticket->image);
-    }
-
-    $ticket->update(['image' => null]);
-
-    return redirect()->back()->with('success', 'Ticket image deleted successfully!');
+    return redirect()->back()->with('success', 'Ticket updated successfully!');
 }
 
     // ==========================================

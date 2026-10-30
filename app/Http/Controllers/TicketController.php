@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Models\TicketReply;
+use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -67,14 +68,15 @@ class TicketController extends Controller
 
     public function create()
     {
-        // Mengambil nilai ENUM daripada pangkalan data secara dinamik
+        $departments = Department::pluck('department_name', 'department_id');
+
         $types = $this->getEnumValues('tickets', 'type');
         $priorities = $this->getEnumValues('tickets', 'priority');
         
         // Senarai kategori
         $categories = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
 
-        return view('tickets.create', compact('types', 'priorities', 'categories'));
+        return view('tickets.create', compact('types', 'priorities', 'categories', 'departments'));
     }
 
     // Fungsi khas untuk mengekstrak pilihan ENUM terus dari jadual MySQL

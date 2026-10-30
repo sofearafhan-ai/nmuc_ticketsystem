@@ -190,8 +190,8 @@ class AdminController extends Controller
                             ->get();
 
         $categories = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
-        $types = ['Incident', 'Request'];
-        $statuses = ['New', 'Processing', 'Pending', 'Close'];
+        $types      = ['Incident', 'Request'];
+        $statuses   = ['New', 'Processing', 'Pending', 'Close'];
         $priorities = ['Low', 'Medium', 'High', 'Urgent'];
 
         return view('admin.tickets.edit', compact('ticket', 'adminsInDept', 'categories', 'types', 'statuses', 'priorities'));

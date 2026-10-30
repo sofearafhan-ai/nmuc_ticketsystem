@@ -156,7 +156,7 @@
                                 <td class="p-3 text-center">
                                     <a href="{{ route('superadmin.tickets.edit', $ticket->ticket_id ?? $ticket->id) }}" 
                                        class="px-3 py-1.5 bg-slate-100 hover:bg-orange-500 hover:text-white text-slate-700 rounded-lg text-xs font-semibold transition border inline-flex items-center gap-1">
-                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                        <i class="fa-solid fa-pen-to-square"></i>
                                     </a>
                                 </td>
                             </tr>

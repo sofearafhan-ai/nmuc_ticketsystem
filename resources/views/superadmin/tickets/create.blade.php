@@ -152,6 +152,17 @@
                         class="w-full border border-slate-300 rounded-xl p-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
                 </div>
 
+                <!-- Department -->
+                 <div>
+                    <label for="department_id" class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Submitted To</label>
+                    <select name="department_id" id="department_select" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none transition">
+                        <option value="">-- Select Department --</option>
+                        @foreach($departments as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
                 <!-- Type -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Type</label>
@@ -232,6 +243,7 @@
 
 <!-- JavaScript Visual Command Sync -->
 <script>
+
     function execCmd(command) {
         document.execCommand(command, false, null);
         syncEditorContent();

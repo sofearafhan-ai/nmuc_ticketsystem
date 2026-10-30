@@ -24,23 +24,16 @@ class AuthController extends Controller
 
             $user = Auth::user();
 
-            // Tukar role ke lowercase supaya tidak sensitif pada huruf besar/kecil (contoh: 'Admin', 'admin', 'Super Admin')
-            $userRole = strtolower(trim($user->role ?? ''));
-
-            if ($userRole === 'super admin' || $userRole === 'super_admin') {
-                return redirect()->route('superadmin.dashboard')->with('success', 'Welcome Super Admin!');
+            if ($user->role === 'Super Admin') {
+                return redirect()->route('superadmin.dashboard');
+            } elseif ($user->role === 'Admin') {
+                return redirect()->route('admin.dashboard');
             }
 
-            if ($userRole === 'admin') {
-                return redirect()->route('admin.dashboard')->with('success', 'Welcome Admin!');
-            }
-
-            return redirect()->route('tickets.index')->with('success', 'Welcome Back!');
+            return redirect()->route('messages.index');
         }
 
-        return back()->withErrors([
-            'email' => 'The email or password entered is incorrect.',
-        ])->onlyInput('email');
+        return back()->withErrors(['email' => 'Maklumat log masuk tidak sah.']);
     }
 
     public function logout(Request $request)

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\SuperAdminController;
 
@@ -13,15 +14,33 @@ Route::middleware(['guest'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
 
-    // Logout Process
+    Route::get('/', function () {
+        $user = Auth::user();
+
+        if ($user->role === 'Super Admin') {
+            return redirect()->route('superadmin.dashboard');
+        } elseif ($user->role === 'Admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return redirect()->route('messages.index');
+    });
+
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Route Authentication User, Admin, Super Admin
-    Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
-    Route::get('/tickets/create', [TicketController::class, 'create'])->name('tickets.create');
-    Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
-    Route::get('/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
-    Route::post('/tickets/{id}/reply', [TicketController::class, 'storeReply'])->name('tickets.reply');
+    // ==========================================
+    // ROUTE USER / AUTHENTICATION USER
+    // ==========================================
+    Route::middleware(['role:Authentication User'])->prefix('user')->group(function () {
+        
+        Route::get('/messages', [UserController::class, 'messagesIndex'])->name('messages.index');
+        Route::post('/messages/{ticketId}/reply', [UserController::class, 'messagesReply'])->name('messages.reply');
+
+        Route::get('/tickets', [UserController::class, 'ticketsIndex'])->name('tickets.index');
+
+        Route::get('/tickets/create', [UserController::class, 'ticketsCreate'])->name('tickets.create');
+        Route::post('/tickets', [UserController::class, 'ticketsStore'])->name('tickets.store');
+    });
 
     // Route Admin 
     Route::middleware(['role:Admin,Super Admin'])->group(function () {

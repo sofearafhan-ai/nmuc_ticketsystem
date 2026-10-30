@@ -226,7 +226,6 @@
                                         <a href="{{ route('admin.tickets.edit', $ticket->ticket_id) }}" 
                                            class="px-2.5 py-1.5 bg-slate-100 hover:bg-orange-500 text-slate-600 hover:text-white rounded-lg text-xs font-semibold transition border border-slate-200 hover:border-orange-500 flex items-center gap-1 cursor-pointer">
                                             <i class="fa-solid fa-pen-to-square"></i>
-                                            <span>Edit</span>
                                         </a>
 
                                         <form action="{{ route('admin.tickets.destroy', $ticket->ticket_id) }}" method="POST" 
@@ -236,7 +235,6 @@
                                             <button type="submit" 
                                                     class="px-2.5 py-1.5 bg-red-50 hover:bg-red-600 text-red-600 hover:text-white rounded-lg text-xs font-semibold transition border border-red-200 hover:border-red-600 flex items-center gap-1 cursor-pointer">
                                                 <i class="fa-solid fa-trash-can"></i>
-                                                <span>Delete</span>
                                             </button>
                                         </form>
                                     </div>

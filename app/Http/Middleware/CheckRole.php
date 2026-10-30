@@ -15,10 +15,17 @@ class CheckRole
         }
 
         $user = Auth::user();
+
         if (in_array($user->role, $roles)) {
             return $next($request);
         }
 
-        return redirect()->route('tickets.index')->with('error', 'You do not have permission to access that page.');
+        if ($user->role === 'Super Admin') {
+            return redirect()->route('superadmin.dashboard');
+        } elseif ($user->role === 'Admin') {
+            return redirect()->route('admin.dashboard');
+        } else {
+            return redirect()->route('messages.index');
+        }
     }
 }

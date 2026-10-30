@@ -63,7 +63,7 @@
                     <!-- Header Title & Status -->
                     <div class="flex items-center gap-2 min-w-0">
                         <h2 class="text-base font-bold text-slate-800 truncate">
-                            Ticket {{ $formattedTicketNo }} - {{ $ticket->title }}
+                            {{ $formattedTicketNo }} - {{ $ticket->title }}
                         </h2>
                         <span class="text-slate-400">•</span>
                         <span class="px-2.5 py-1 rounded-full font-bold text-xs
@@ -83,12 +83,11 @@
                 
                 <!-- 1. First Ticket Message (Submission oleh User) -->
                 <div class="flex items-end gap-2.5 max-w-[85%] md:max-w-[70%]">
-                    <!-- Avatar di Luar Kiri -->
+                    
                     <div class="w-8 h-8 rounded-full bg-emerald-500 text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-xs mb-1">
                         {{ strtoupper(substr($activeUserName, 0, 1)) }}
                     </div>
 
-                    <!-- Gelembung Kelabu Lembut -->
                     <div class="bg-slate-100 text-slate-800 p-3.5 px-4 rounded-2xl rounded-bl-xs space-y-1">
                         <div class="text-xs font-bold text-slate-900">
                             {{ $activeUserName }}
@@ -97,7 +96,6 @@
                             {!! $ticket->description !!}
                         </div>
 
-                        <!-- Gambar / Attachment dari Kolom image/image_path -->
                         @if(!empty($ticketMainAttachment) && $ticketMainAttachment !== 'no-image.png')
                             @php
                                 $mainExt = strtolower(pathinfo($ticketMainAttachment, PATHINFO_EXTENSION));
@@ -116,7 +114,6 @@
                             </div>
                         @endif
 
-                        <!-- Masa -->
                         <div class="text-[10px] text-slate-400 font-medium pt-1">
                             {{ $ticket->date ?? ($ticket->created_at ? $ticket->created_at->format('h:i A') : '') }}
                         </div>
@@ -215,7 +212,7 @@
                             </div>
 
                         @else
-                            <!-- Mesej Pengguna (Kiri) -->
+                            <!-- User Message -->
                             <div class="flex items-end gap-2.5 max-w-[85%] md:max-w-[70%]">
                                 <div class="w-8 h-8 rounded-full bg-emerald-500 text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-xs mb-1">
                                     {{ strtoupper(substr($replyName, 0, 1)) }}
@@ -362,32 +359,32 @@
                     </div>
                 </div>
 
+                <!-- Dropdown Department -->
                 <div>
-                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Department</label>
-                    <select name="department" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:ring-2 focus-orange-500 outline-none transition">
-                        <option value="">-- Select --</option>
-                        @if(isset($department))
-                            @foreach($department as $dept)
-                                <option value="{{ $dept->department_id ?? $dept->id }}" {{ $ticket->department == ($dept->department_id ?? $dept->id) ? 'selected' : '' }}>
-                                    {{ $dept->department_name ?? $dept->name }} ({{ $dept->code }})
-                                </option>
-                            @endforeach
-                        @endif
+                    <label for="department_id" class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Department</label>
+                    <select name="department_id" id="department_select" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none transition">
+                        <option value="">-- Select Department --</option>
+                        @foreach($departments as $dept)
+                            <option value="{{ $dept->department_id }}" 
+                                {{ (old('department_id', $ticket->department_id) == $dept->department_id) ? 'selected' : '' }}>
+                                {{ $dept->department_name }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
 
-                <!-- ASSIGN TO (PIC) DROPDOWN -->
+                <!-- Dropdown PIC -->
                 <div>
-                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Assign To (PIC)</label>
-                    <select name="pic" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none transition">
-                        <option value="">-- Unassigned --</option>
-                        @if(isset($adminsInDept))
-                            @foreach($adminsInDept as $adm)
-                                <option value="{{ $adm->user_id ?? $adm->id }}" {{ $ticket->pic == ($adm->user_id ?? $adm->id) ? 'selected' : '' }}>
-                                    {{ $adm->full_name ?? $adm->name }} ({{ $adm->role }})
-                                </option>
-                            @endforeach
-                        @endif
+                    <label for="pic_id" class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Assign PIC</label>
+                    <select name="pic_id" id="pic_select" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none transition">
+                        <option value="">-- Select PIC --</option>
+                        @foreach($adminsInDept as $admin)
+                            <option value="{{ $admin->user_id }}" 
+                                data-department-id="{{ $admin->department_id }}"
+                                {{ (old('pic_id', $ticket->pic_id) == $admin->user_id) ? 'selected' : '' }}>
+                                {{ $admin->full_name ?? $admin->name }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -408,35 +405,47 @@
 <!-- Client-side Script for Auto Scroll & File Preview -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // 1. Auto Scroll ke bahagian mesej bawah sekali
-    const scrollContainer = document.getElementById('editMessageScrollContainer');
-    if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
-    }
+    const deptSelect = document.getElementById('department_select');
+    const picSelect = document.getElementById('pic_select');
+    const picOptions = picSelect.querySelectorAll('option');
 
-    // 2. File Attachment Preview Indicator
-    const fileInput = document.getElementById('attachmentInputEdit');
-    const filePreviewContainer = document.getElementById('filePreviewContainerEdit');
-    const fileNameDisplay = document.getElementById('fileNameDisplayEdit');
-    const removeFileBtn = document.getElementById('removeFileBtnEdit');
+    function filterPicByDepartment() {
+        const selectedDeptId = deptSelect.value;
+        let hasValidSelection = false;
 
-    if (fileInput) {
-        fileInput.addEventListener('change', function () {
-            if (this.files && this.files[0]) {
-                fileNameDisplay.textContent = this.files[0].name;
-                filePreviewContainer.classList.remove('hidden');
-                filePreviewContainer.classList.add('flex');
+        picOptions.forEach(option => {
+            if (option.value === '') {
+                option.style.display = 'block';
+                return;
+            }
+
+            const picDeptId = option.getAttribute('data-department-id');
+
+            if (!selectedDeptId || picDeptId === selectedDeptId) {
+                option.style.display = 'block';
+                if (option.selected) {
+                    hasValidSelection = true;
+                }
+            } else {
+                option.style.display = 'none';
+                if (option.selected) {
+                    option.selected = false;
+                }
             }
         });
 
-        if (removeFileBtn) {
-            removeFileBtn.addEventListener('click', function () {
-                fileInput.value = '';
-                filePreviewContainer.classList.add('hidden');
-                filePreviewContainer.classList.remove('flex');
-            });
+        if (!hasValidSelection && deptSelect.dataset.initialLoad !== 'true') {
+            picSelect.value = '';
         }
+        
+        deptSelect.dataset.initialLoad = 'false';
     }
+
+    deptSelect.dataset.initialLoad = 'true';
+
+    filterPicByDepartment();
+
+    deptSelect.addEventListener('change', filterPicByDepartment);
 });
 </script>
 @endsection
