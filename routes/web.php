@@ -37,9 +37,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/messages/{ticketId}/reply', [UserController::class, 'messagesReply'])->name('messages.reply');
 
         Route::get('/tickets', [UserController::class, 'ticketsIndex'])->name('tickets.index');
+        Route::get('/tickets/export', [UserController::class, 'export'])->name('tickets.export');
 
         Route::get('/tickets/create', [UserController::class, 'ticketsCreate'])->name('tickets.create');
         Route::post('/tickets', [UserController::class, 'ticketsStore'])->name('tickets.store');
+        Route::delete('/tickets/{id}', [UserController::class, 'destroyTicket'])->name('tickets.destroy');
     });
 
     // Route Admin 

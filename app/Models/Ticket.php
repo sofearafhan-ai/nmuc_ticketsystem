@@ -27,7 +27,7 @@ class Ticket extends Model
         'priority',
         'user_id',
         'pic',
-        'department',
+        'department_id',
         'location',
     ];
 
@@ -44,6 +44,11 @@ class Ticket extends Model
    public function replies()
     {
         return $this->hasMany(TicketReply::class, 'ticket_id', 'ticket_id');
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id', 'department_id');
     }
 
 }
