@@ -33,7 +33,7 @@ class AuthController extends Controller
             return redirect()->route('messages.index');
         }
 
-        return back()->withErrors(['email' => 'Maklumat log masuk tidak sah.']);
+        return back()->withErrors(['email' => 'Invalid login information.']);
     }
 
     public function logout(Request $request)

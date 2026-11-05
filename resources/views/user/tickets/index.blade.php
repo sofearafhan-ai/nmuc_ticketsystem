@@ -198,7 +198,11 @@
                             @endphp
                         <tr class="hover:bg-slate-50/80 transition">
                             <td class="p-4 pl-4 font-bold text-slate-900 text-center">{{ $formattedTicketNo }}</td>
-                            <td class="p-3 font-semibold text-slate-800 text-left">{{ $ticket->title }}</td>
+                            <td class="p-3 font-semibold text-slate-800 text-left">
+                                <a href="{{ route('messages.index', ['ticket_id' => $ticket->ticket_id]) }}"  class="hover:text-orange-600 hover:underline">
+                                    {{ $ticket->title }}
+                                </a>
+                            </td>
                             <td class="p-3 text-center">{{ $ticket->category }}</td>
                             <td class="p-3 text-center">{{ $ticket->type ?? '-' }}</td>
                             <td class="p-3 text-center">

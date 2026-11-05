@@ -274,7 +274,7 @@
                                     <div class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-slate-600 text-white flex items-center justify-center text-[9px] md:text-[10px] shrink-0 shadow-2xs">
                                         <i class="fa-solid fa-user-check"></i>
                                     </div>
-                                    <span>Agent <strong class="text-slate-700 font-bold">{{ $picAssignedName }}</strong> has taken over</span>
+                                    <span><strong class="text-slate-700 font-bold">{{ $picAssignedName }}</strong> has taken over</span>
                                 </div>
 
                             @elseif($isSystemStatus)
@@ -468,7 +468,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf'];
 
                 if (!allowedExtensions.includes(ext)) {
-                    alert('Format fail tidak dibenarkan! Sila pilih fail JPG, JPEG, PNG, atau PDF sahaja.');
+                    alert('File format not allowed! Please select only JPG, JPEG, PNG, or PDF files.');
                     this.value = '';
                     filePreviewContainer.classList.add('hidden');
                     filePreviewContainer.classList.remove('flex');

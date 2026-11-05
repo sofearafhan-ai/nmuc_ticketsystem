@@ -14,14 +14,14 @@ class Inventory extends Model
     protected $primaryKey = 'item_id';
     
     protected $fillable = [
+        'user_id',
+        'department_id',
         'item_name',
         'item_category',
         'item_model',
-        'item_status',
         'item_location',
+        'item_status',
         'item_attachment',
-        'user_id',
-        'department_id',
     ];
 
     public function department()

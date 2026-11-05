@@ -41,6 +41,10 @@ class TicketsExport implements FromQuery, WithHeadings, WithMapping
             $query->where('status', $this->request->status);
         }
 
+        if ($this->request->filled('pic')) {
+            $query->where('pic', $this->request->pic);
+        }
+
         if ($this->request->filled('month')) {
             $query->whereMonth('created_at', $this->request->month);
         }

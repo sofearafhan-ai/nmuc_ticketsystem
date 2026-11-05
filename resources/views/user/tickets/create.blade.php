@@ -152,15 +152,15 @@
                 <!-- Name -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Submitted By Name</label>
-                    <input type="text" name="user_name" required value="{{ old('user_name', Auth::user()->full_name ?? Auth::user()->name ?? '') }}" 
-                        class="w-full border border-slate-300 rounded-xl p-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
+                    <input type="text" name="user_name" readonly value="{{ old('user_name', Auth::user()->full_name ?? Auth::user()->name ?? '') }}" 
+                        class="w-full border border-slate-200 bg-slate-100/80 rounded-xl p-2.5 text-sm text-slate-500 cursor-not-allowed outline-none select-none">
                 </div>
 
                 <!-- Email -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Submitted By Email</label>
-                    <input type="email" name="user_email" value="{{ old('user_email', Auth::user()->email ?? '') }}" required
-                        class="w-full border border-slate-300 rounded-xl p-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
+                    <input type="email" name="user_email" readonly value="{{ old('user_email', Auth::user()->email ?? '') }}" 
+                        class="w-full border border-slate-200 bg-slate-100/80 rounded-xl p-2.5 text-sm text-slate-500 cursor-not-allowed outline-none select-none">
                 </div>
 
                 <!-- Department -->

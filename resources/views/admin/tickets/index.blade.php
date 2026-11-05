@@ -48,7 +48,7 @@
                        <i class="fa-solid fa-file-excel"></i> Export Excel
                     </a>
 
-                    @if(request()->hasAny(['search', 'category', 'type', 'priority', 'status', 'month', 'year']))
+                    @if(request()->hasAny(['search', 'category', 'type', 'priority', 'pic', 'status', 'month', 'year']))
                         <a href="{{ route('admin.tickets.index') }}" 
                            class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl transition flex items-center gap-1.5"
                            title="Reset Filters">
@@ -60,8 +60,8 @@
 
             <hr class="border-slate-100">
 
-            <!-- Bottom 6 Dropdown Filters Grid -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 pt-1">
+            <!-- Bottom 7 Dropdown Filters Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-3 pt-1">
                 
                 <!-- 1. CATEGORY -->
                 <div>
@@ -114,7 +114,23 @@
                     </select>
                 </div>
 
-                <!-- 5. MONTH -->
+                <!-- 5. PiC -->
+                <div>
+                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">PiC</label>
+                    <select name="pic" onchange="this.form.submit()"
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer">
+                        <option value="">All PiC</option>
+                        <option value="unassigned" {{ request('pic') == 'unassigned' ? 'selected' : '' }}>-</option>
+                        @foreach($admins ?? [] as $adminUser)
+                            @php $adminId = $adminUser->user_id ?? $adminUser->id; @endphp
+                            <option value="{{ $adminId }}" {{ request('pic') == $adminId ? 'selected' : '' }}>
+                                {{ $adminUser->full_name ?? $adminUser->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- 6. MONTH -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Month</label>
                     <select name="month" onchange="this.form.submit()" 
@@ -135,13 +151,12 @@
                     </select>
                 </div>
 
-                <!-- 6. YEAR -->
+                <!-- 7. YEAR -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Year</label>
                     <select name="year" onchange="this.form.submit()" 
                             class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer">
                         <option value="">All Years</option>
-                        
                         @foreach (range(date('Y') + 5, date('Y')) as $year)
                             <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>
                                 {{ $year }}
@@ -161,7 +176,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="border-b border-slate-200 bg-slate-50 text-slate-700 uppercase text-[11px] font-bold tracking-wider">
+                        <tr class="border-b border-orange-100 bg-orange-50 text-orange-400 uppercase text-[11px] font-bold tracking-wider">
                             <th class="p-2 text-center">Ticket ID</th>
                             <th class="p-2 text-center">Title</th>
                             <th class="p-2 text-center">Submitted By</th>
@@ -174,26 +189,22 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 text-sm">
-                        @forelse ($tickets as $index => $ticket)
+                        @forelse ($tickets as $ticket)
                             @php
-                                $totalTickets = method_exists($tickets, 'total') ? $tickets->total() : count($tickets);
-                                $currentPage = method_exists($tickets, 'currentPage') ? $tickets->currentPage() : 1;
-                                $perPage = method_exists($tickets, 'perPage') ? $tickets->perPage() : count($tickets);
-                                
-                                $sequenceNo = $totalTickets - (($currentPage - 1) * $perPage + $index);
-                                $formattedTicketNo = '#TC-' . str_pad($sequenceNo, 4, '0', STR_PAD_LEFT);
+                                $tId = $ticket->ticket_id ?? $ticket->id;
+                                $ticketNo = '#TC-' . $tId;
                             @endphp
                             <tr class="hover:bg-orange-50/40 transition">
-                                <td class="p-2 font-bold text-slate-900">{{ $formattedTicketNo }}</td>
-                                <td class="p-2 font-medium text-slate-900">
-                                    <a href="{{ route('admin.messages.index', ['ticket_id' => $ticket->ticket_id]) }}" class="hover:text-orange-600 hover:underline">
+                                <td class="p-2 font-bold text-slate-900 text-center">{{ $ticketNo }}</td>
+                                <td class="p-2 font-medium text-slate-900 text-center">
+                                    <a href="{{ route('admin.messages.index', ['ticket_id' => $tId]) }}" class="hover:text-orange-600 hover:underline">
                                         {{ $ticket->title }}
                                     </a>
                                 </td>
                                 <td class="p-2 text-xs text-slate-600 font-medium text-center">{{ $ticket->user_name ?? ($ticket->user->name ?? 'User') }}</td>
-                                <td class="p-2 font-medium text-slate-700 text-center">{{ $ticket->category }}</td>
+                                <td class="p-2 text-xs font-medium text-slate-600 text-center">{{ $ticket->category }}</td>
                                 <td class="p-2 text-center">
-                                    <span class="px-2.5 py-1 text-xs font-bold rounded 
+                                    <span class="px-2 py-0.5 font-bold rounded-full text-[10px]
                                         @if($ticket->priority == 'Urgent') bg-red-100 text-red-800
                                         @elseif($ticket->priority == 'High') bg-orange-200 text-orange-900
                                         @elseif($ticket->priority == 'Medium') bg-yellow-100 text-yellow-800
@@ -202,19 +213,19 @@
                                     </span>
                                 </td>
                                 <td class="p-2 text-center">
-                                    <span class="px-2.5 py-1 text-xs font-bold rounded text-white inline-block
-                                        @if($ticket->status == 'New') bg-green-600
-                                        @elseif($ticket->status == 'Processing') bg-blue-500
-                                        @elseif($ticket->status == 'Pending') bg-amber-600
-                                        @elseif($ticket->status == 'Close') bg-red-600
-                                        @else bg-emerald-600 @endif">
+                                    <span class="px-2.5 py-1 font-bold rounded-full text-[10px]
+                                        @if($ticket->status == 'New') bg-emerald-100 text-emerald-700
+                                        @elseif($ticket->status == 'Processing') bg-blue-100 text-blue-700
+                                        @elseif($ticket->status == 'Pending') bg-amber-100 text-amber-700
+                                        @elseif(in_array($ticket->status, ['Close', 'Closed'])) bg-red-100 text-red-700
+                                        @else bg-slate-100 text-slate-700 @endif">
                                         {{ $ticket->status }}
                                     </span>
                                 </td>
                                 <td class="p-2 text-xs text-slate-500 font-medium text-center">
-                                    {{ $ticket->picAdmin->full_name ?? $ticket->picAdmin->name ?? $ticket->pic ?? '-' }}
+                                    {{ $ticket->picAdmin->full_name ?? $ticket->picAdmin->name ?? $ticket->pic ?? 'Unassigned' }}
                                 </td>
-                                <td class="p-2 text-xs text-slate-500 font-medium text-center">
+                                <td class="p-2 text-xs text-slate-500 font-medium text-center whitespace-nowrap">
                                     @if(!empty($ticket->created_at))
                                         {{ is_string($ticket->created_at) ? \Carbon\Carbon::parse($ticket->created_at)->format('d M Y') : $ticket->created_at->format('d M Y') }}
                                     @else
@@ -223,12 +234,12 @@
                                 </td>
                                 <td class="p-2 text-center">
                                     <div class="flex items-center justify-center gap-2">
-                                        <a href="{{ route('admin.tickets.edit', $ticket->ticket_id) }}" 
+                                        <a href="{{ route('admin.tickets.edit', $tId) }}" 
                                            class="px-2.5 py-1.5 bg-slate-100 hover:bg-orange-500 text-slate-600 hover:text-white rounded-lg text-xs font-semibold transition border border-slate-200 hover:border-orange-500 flex items-center gap-1 cursor-pointer">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
 
-                                        <form action="{{ route('admin.tickets.destroy', $ticket->ticket_id) }}" method="POST" 
+                                        <form action="{{ route('admin.tickets.destroy', $tId) }}" method="POST" 
                                               onsubmit="return confirm('Are you sure you want to delete this ticket?');">
                                             @csrf
                                             @method('DELETE')

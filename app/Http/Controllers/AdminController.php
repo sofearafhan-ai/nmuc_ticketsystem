@@ -6,6 +6,7 @@ use App\Models\Ticket;
 use App\Models\Inventory;
 use App\Models\TicketReply;
 use App\Models\User;
+use App\Models\Department;
 use App\Exports\TicketsExport;
 use App\Exports\InventoryExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -15,7 +16,6 @@ use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
-
     public function exportTickets(Request $request)
     {
         $fileName = 'tickets_report_' . date('Y_m_d_His') . '.xlsx';
@@ -34,47 +34,65 @@ class AdminController extends Controller
         $user = Auth::user();
         $adminDept = $user->department ?? 'IT';
         $currentAdminId = $user->user_id ?? $user->id;
+        $deptId = $user->department_id;
 
-        $ticketQuery = Ticket::query();
-        
+        // A. QUERY KESELURUHAN DEPT (Untuk Quick Overview & Trends)
+        $deptTicketQuery = Ticket::query();
+        $deptInventoryQuery = Inventory::query();
+
         if ($user->role !== 'Super Admin') {
-            $ticketQuery->where('pic', $currentAdminId);
+            $deptTicketQuery->where('department_id', $deptId);
+            $deptInventoryQuery->where('department_id', $deptId);
         }
 
-        $ticketStats = [
-            'new'        => (clone $ticketQuery)->where('status', 'New')->count(),
-            'processing' => (clone $ticketQuery)->where('status', 'Processing')->count(),
-            'pending'    => (clone $ticketQuery)->where('status', 'Pending')->count(),
-            'close'      => (clone $ticketQuery)->whereIn('status', ['Close', 'Closed'])->count(),
-            'total'      => (clone $ticketQuery)->count(),
+        $deptTicketStats = [
+            'new'        => (clone $deptTicketQuery)->where('status', 'New')->count(),
+            'processing' => (clone $deptTicketQuery)->where('status', 'Processing')->count(),
+            'pending'    => (clone $deptTicketQuery)->where('status', 'Pending')->count(),
+            'close'      => (clone $deptTicketQuery)->whereIn('status', ['Close', 'Closed'])->count(),
+            'total'      => (clone $deptTicketQuery)->count(),
         ];
 
-        $inventoryQuery = Inventory::query();
         $inventoryStats = [
-            'active'   => (clone $inventoryQuery)->where('item_status', 'Active')->count(),
-            'inactive' => (clone $inventoryQuery)->where('item_status', 'Inactive')->count(),
-            'total'    => (clone $inventoryQuery)->count(),
+            'active'   => (clone $deptInventoryQuery)->where('item_status', 'Active')->count(),
+            'inactive' => (clone $deptInventoryQuery)->where('item_status', 'Inactive')->count(),
+            'total'    => (clone $deptInventoryQuery)->count(),
         ];
 
+        // B. QUERY SPESIFIK ADMIN SAHAJA (Untuk Tickets Status Overview - Doughnut Chart)
+        $myTicketQuery = Ticket::query(); // Dibetulkan di sini ($myTicketQuery)
+        if ($user->role !== 'Super Admin') {
+            $myTicketQuery->where('pic', $currentAdminId);
+        }
+
+        $myTicketStats = [
+            'new'        => (clone $myTicketQuery)->where('status', 'New')->count(),
+            'processing' => (clone $myTicketQuery)->where('status', 'Processing')->count(),
+            'pending'    => (clone $myTicketQuery)->where('status', 'Pending')->count(),
+            'close'      => (clone $myTicketQuery)->whereIn('status', ['Close', 'Closed'])->count(),
+            'total'      => (clone $myTicketQuery)->count(),
+        ];
+
+        // C. TRENDS BULANAN KESELURUHAN DEPARTMENT
         $currentYear = date('Y');
         $activeMonthly = [];
         $inactiveMonthly = [];
         $ticketsMonthly = [];
 
         for ($month = 1; $month <= 12; $month++) {
-            $activeCount = (clone $inventoryQuery)
+            $activeCount = (clone $deptInventoryQuery)
                 ->where('item_status', 'Active')
                 ->whereYear('created_at', $currentYear)
                 ->whereMonth('created_at', $month)
                 ->count();
 
-            $inactiveCount = (clone $inventoryQuery)
+            $inactiveCount = (clone $deptInventoryQuery)
                 ->where('item_status', 'Inactive')
                 ->whereYear('created_at', $currentYear)
                 ->whereMonth('created_at', $month)
                 ->count();
 
-            $ticketCount = (clone $ticketQuery)
+            $ticketCount = (clone $deptTicketQuery)
                 ->whereYear('created_at', $currentYear)
                 ->whereMonth('created_at', $month)
                 ->count();
@@ -84,13 +102,20 @@ class AdminController extends Controller
             $ticketsMonthly[] = $ticketCount > 0 ? $ticketCount : null;
         }
 
-        $recentTickets = (clone $ticketQuery)
-            ->latest()
-            ->take(5) 
-            ->get();
+        // D. RECENT TICKETS
+        $unassignedQuery = Ticket::query()->where(function($q) {
+            $q->whereNull('pic')->orWhere('pic', '');
+        });
+
+        if ($user->role !== 'Super Admin') {
+            $unassignedQuery->where('department_id', $deptId);
+        }
+
+        $recentTickets = $unassignedQuery->latest()->take(5)->get();
 
         return view('admin.dashboard', compact(
-            'ticketStats', 
+            'deptTicketStats', 
+            'myTicketStats',
             'inventoryStats', 
             'adminDept', 
             'recentTickets',
@@ -105,34 +130,26 @@ class AdminController extends Controller
     {
         $user = Auth::user();
         $adminDept = $user->department ?? 'IT';
-        $currentAdminId = $user->user_id ?? $user->id;
 
         $query = Ticket::with(['user', 'picAdmin']);
 
         if ($user->role !== 'Super Admin') {
-            $query->where('pic', $currentAdminId);
+            $query->where('department_id', $user->department_id);
         }
 
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('ticket_id', 'like', "%{$search}%")
-                  ->orWhere('user_name', 'like', "%{$search}%");
+                ->orWhere('ticket_id', 'like', "%{$search}%")
+                ->orWhere('user_name', 'like', "%{$search}%");
             });
         }
 
-        if ($request->filled('category')) {
-            $query->where('category', $request->category);
-        }
 
-        if ($request->filled('type')) {
-            $query->where('type', $request->type);
-        }
-
-        if ($request->filled('priority')) {
-            $query->where('priority', $request->priority);
-        }
+        if ($request->filled('category')) { $query->where('category', $request->category); }
+        if ($request->filled('type')) { $query->where('type', $request->type); }
+        if ($request->filled('priority')) { $query->where('priority', $request->priority); }
 
         if ($request->filled('status')) {
             $statusVal = $request->status;
@@ -143,17 +160,27 @@ class AdminController extends Controller
             }
         }
 
-        if ($request->filled('month')) {
-            $query->whereMonth('created_at', $request->month);
+        if ($request->filled('pic')) {
+            if ($request->pic === 'unassigned') {
+                $query->where(function($q) {
+                    $q->whereNull('pic')->orWhere('pic', '');
+                });
+            } else {
+                $query->where('pic', $request->pic);
+            }
         }
 
-        if ($request->filled('year')) {
-            $query->whereYear('created_at', $request->year);
-        }
+        if ($request->filled('month')) { $query->whereMonth('created_at', $request->month); }
+        if ($request->filled('year')) { $query->whereYear('created_at', $request->year); }
 
         $tickets = $query->latest()->paginate(10)->withQueryString();
 
-        return view('admin.tickets.index', compact('tickets', 'adminDept'));
+        $admins = User::whereIn('role', ['Admin', 'Super Admin'])
+            ->when($user->role !== 'Super Admin', function($q) use ($user) {
+                return $q->where('department_id', $user->department_id);
+            })->get();
+
+        return view('admin.tickets.index', compact('tickets', 'adminDept', 'admins'));
     }
 
     public function destroyTicket($id)
@@ -165,16 +192,19 @@ class AdminController extends Controller
             ->with('success', 'Ticket successfully deleted!');
     }
 
+    // CREATE TICKET 
     public function createTicket()
     {
         $user = Auth::user();
         $adminDept = $user->department ?? 'IT';
 
+        $departments = Department::all();
+
         $types = ['Incident', 'Request'];
         $categories = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
         $priorities = ['Low', 'Medium', 'High', 'Urgent'];
 
-        return view('admin.tickets.create', compact('adminDept', 'types', 'categories', 'priorities'));
+        return view('admin.tickets.create', compact('adminDept', 'departments', 'types', 'categories', 'priorities'));
     }
 
     // Edit Ticket
@@ -185,27 +215,36 @@ class AdminController extends Controller
 
         $ticket = Ticket::with(['replies', 'user', 'picAdmin'])->where('ticket_id', $id)->firstOrFail();
 
-        $adminsInDept = User::whereIn('role', ['Admin', 'Super Admin'])
-                            ->where('department_id', $user->department_id)
-                            ->get();
+        $departments = Department::all();
+        $adminsInDept = User::whereIn('role', ['Admin', 'Super Admin'])->get();
 
         $categories = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
         $types      = ['Incident', 'Request'];
         $statuses   = ['New', 'Processing', 'Pending', 'Close'];
         $priorities = ['Low', 'Medium', 'High', 'Urgent'];
 
-        return view('admin.tickets.edit', compact('ticket', 'adminsInDept', 'categories', 'types', 'statuses', 'priorities'));
+        return view('admin.tickets.edit', compact(
+            'ticket', 
+            'adminDept',
+            'departments',
+            'adminsInDept', 
+            'categories', 
+            'types', 
+            'statuses', 
+            'priorities'
+        ));
     }
 
     public function updateTicket(Request $request, $id)
     {
         $request->validate([
-            'category' => 'required|string',
-            'type'     => 'required|string',
-            'status'   => 'required|in:New,Processing,Pending,Close', 
-            'priority' => 'required|string',
-            'location' => 'required|string',
-            'pic'      => 'nullable|exists:users,user_id',
+            'category'      => 'required|string',
+            'type'          => 'required|string',
+            'status'        => 'required|in:New,Processing,Pending,Close', 
+            'priority'      => 'required|string',
+            'location'      => 'required|string',
+            'department_id' => 'nullable|exists:departments,department_id',
+            'pic'           => 'nullable|exists:users,user_id',
         ]);
 
         $ticket = Ticket::with(['replies', 'user'])->where('ticket_id', $id)->firstOrFail();
@@ -239,12 +278,13 @@ class AdminController extends Controller
         }
 
         $ticket->update([
-            'category' => $request->category,
-            'type'     => $request->type,
-            'status'   => $request->status,
-            'priority' => $request->priority,
-            'location' => $request->location,
-            'pic'      => $request->pic, 
+            'category'      => $request->category,
+            'type'          => $request->type,
+            'status'        => $request->status,
+            'priority'      => $request->priority,
+            'location'      => $request->location,
+            'department_id' => $request->department_id,
+            'pic'           => $request->pic, 
         ]);
 
         return redirect()->back()->with('success', 'Ticket Information updated successfully!');
@@ -259,15 +299,16 @@ class AdminController extends Controller
     public function storeTicket(Request $request)
     {
         $request->validate([
-            'title'       => 'required|string|max:255',
-            'description' => 'required|string',
-            'user_name'   => 'required|string|max:255',
-            'user_email'  => 'required|email|max:255',
-            'type'        => 'required|string',
-            'category'    => 'required|string',
-            'priority'    => 'required|string',
-            'location'    => 'required|string|max:255',
-            'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'title'         => 'required|string|max:255',
+            'description'   => 'required|string',
+            'user_name'     => 'required|string|max:255',
+            'user_email'    => 'required|email|max:255',
+            'type'          => 'required|string',
+            'category'      => 'required|string',
+            'priority'      => 'required|string',
+            'location'      => 'required|string|max:255',
+            'department_id' => 'nullable|exists:departments,department_id',
+            'image'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $user = Auth::user();
@@ -278,18 +319,19 @@ class AdminController extends Controller
         }
 
         $ticket = Ticket::create([
-            'user_id'     => $user->user_id ?? $user->id,
-            'user_name'   => $request->user_name,
-            'user_email'  => $request->user_email,
-            'title'       => $request->title,
-            'description' => $request->description,
-            'type'        => $request->type,
-            'category'    => $request->category,
-            'priority'    => $request->priority,
-            'location'    => $request->location,
-            'status'      => 'New',
-            'date'        => now()->format('Y-m-d'),
-            'image_path'  => $imagePath,
+            'user_id'       => $user->user_id ?? $user->id,
+            'user_name'     => $request->user_name,
+            'user_email'    => $request->user_email,
+            'title'         => $request->title,
+            'description'   => $request->description,
+            'type'          => $request->type,
+            'category'      => $request->category,
+            'priority'      => $request->priority,
+            'location'      => $request->location,
+            'department_id' => $request->department_id,
+            'status'        => 'New',
+            'date'          => now()->format('Y-m-d'),
+            'image_path'    => $imagePath,
         ]);
 
         TicketReply::create([
@@ -350,7 +392,7 @@ class AdminController extends Controller
     {
         $request->validate([
             'message'    => 'required|string',
-            'attachment' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'attachment' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048'
         ]);
 
         $user = Auth::user();
@@ -382,16 +424,16 @@ class AdminController extends Controller
         $query = Inventory::with('user');
 
         if ($user->role !== 'Super Admin') {
-            $query->where('user_id', $user->user_id ?? $user->id);
+            $query->where('department_id', $user->department_id);
         }
 
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('item_name', 'like', "%{$search}%")
-                  ->orWhere('item_model', 'like', "%{$search}%")
-                  ->orWhere('item_category', 'like', "%{$search}%")
-                  ->orWhere('item_location', 'like', "%{$search}%");
+                ->orWhere('item_model', 'like', "%{$search}%")
+                ->orWhere('item_category', 'like', "%{$search}%")
+                ->orWhere('item_location', 'like', "%{$search}%");
             });
         }
 
@@ -435,7 +477,7 @@ class AdminController extends Controller
             'item_model'      => 'required|string|max:255',
             'item_status'     => 'required|in:Active,Inactive',
             'item_location'   => 'required|string|max:255',
-            'item_attachment' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', 
+            'item_attachment' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048', 
         ]);
 
         $item = Inventory::where('item_id', $id)->firstOrFail();
@@ -449,7 +491,6 @@ class AdminController extends Controller
         ];
 
         if ($request->hasFile('item_attachment')) {
-
             if ($item->item_attachment && Storage::disk('public')->exists($item->item_attachment)) {
                 Storage::disk('public')->delete($item->item_attachment);
             }
@@ -490,39 +531,34 @@ class AdminController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'items'                 => 'required|array|min:1',
-            'items.*.item_name'     => 'required|string|max:255',
-            'items.*.item_category' => 'required|string|max:255',
-            'items.*.item_model'    => 'required|string|max:255',
-            'items.*.item_status'   => 'required|in:Active,Inactive',
-            'items.*.item_location' => 'required|string|max:255',
-            'items.*.item_attachment'   => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'items'                   => 'required|array|min:1',
+            'items.*.item_name'       => 'required|string|max:255',
+            'items.*.item_category'   => 'required|string|max:255',
+            'items.*.item_model'      => 'required|string|max:255',
+            'items.*.item_status'     => 'required|in:Active,Inactive',
+            'items.*.item_location'   => 'required|string|max:255',
+            'items.*.item_attachment' => 'nullable|file|mimes:pdf,jpeg,jpg,png|max:2048',
         ]);
 
-        $createdCount = 0;
-
-        foreach ($request->items as $index => $itemData) {
-            
+        foreach ($request->items as $itemData) {
             $attachmentPath = null;
 
-            if ($request->hasFile("items.{$index}.item_attachment")) {
-                $attachmentPath = $request->file("items.{$index}.item_attachment")->store('inventories', 'public');
+            if (isset($itemData['item_attachment']) && $itemData['item_attachment'] instanceof \Illuminate\Http\UploadedFile) {
+                $attachmentPath = $itemData['item_attachment']->store('inventories', 'public');
             }
 
             Inventory::create([
+                'user_id'         => $user->user_id ?? $user->id, 
+                'department_id'   => $user->department_id,         
                 'item_name'       => $itemData['item_name'],
                 'item_category'   => $itemData['item_category'],
                 'item_model'      => $itemData['item_model'],
-                'item_status'     => $itemData['item_status'],
                 'item_location'   => $itemData['item_location'],
-                'item_attachment' => $attachmentPath, 
-                'user_id'         => $user->user_id ?? $user->id,
+                'item_status'     => $itemData['item_status'],
+                'item_attachment' => $attachmentPath,
             ]);
-
-            $createdCount++;
         }
 
-        return redirect()->route('admin.inventory.index')
-            ->with('success', "A total of {$createdCount} new inventory assets have been successfully registered!");
+        return redirect()->route('admin.inventory.index')->with('success', 'New inventory asset(s) successfully registered!');
     }
 }

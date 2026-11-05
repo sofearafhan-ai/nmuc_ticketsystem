@@ -117,7 +117,7 @@
                     <tbody class="divide-y divide-slate-200 text-sm">
                         @forelse ($inventories as $index => $item)
                             <tr class="hover:bg-orange-50/40 transition">
-                                <td class="py-3 px-4 text-xs font-extrabold text-slate-900">#{{ $inventories->firstItem() + $index }}</td>
+                                <td class="py-3 px-4 text-xs font-extrabold text-slate-900 text-center">#{{ $inventories->firstItem() + $index }}</td>
                                 <td class="py-3 px-4 text-xs text-slate-900 text-center">{{ $item->item_name }}</td>
                                 <td class="py-3 px-4 text-xs font-extrabold text-slate-900 text-center">
                                     <span class="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200 font-medium">
@@ -171,7 +171,6 @@
 
                                         </div>
                                     @else
-                                    
                                         <span class="py-3 px-4 text-xs text-slate-400 italic block text-center">No Attachment</span>
                                     @endif
                                 </td>
@@ -185,7 +184,7 @@
 
                                         <!-- Delete Button -->
                                         <form action="{{ route('admin.inventory.destroy', $item->item_id) }}" method="POST" 
-                                              onsubmit="return confirm('Adakah anda pasti ingin memadamkan aset ini?');">
+                                              onsubmit="return confirm('Are you sure you want to delete this asset?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" 
@@ -199,7 +198,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="p-8 text-center text-slate-500 font-medium">
+                                <td colspan="9" class="p-8 text-center text-slate-500 font-medium">
                                     <i class="fa-solid fa-boxes-stacked text-2xl mb-2 text-slate-300 block"></i>
                                     No inventory data registered for the {{ $adminDept }} Department.
                                 </td>
