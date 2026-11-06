@@ -196,7 +196,7 @@
                             @endphp
                             <tr class="hover:bg-orange-50/40 transition">
                                 <td class="p-2 font-bold text-slate-900 text-center">{{ $ticketNo }}</td>
-                                <td class="p-2 font-medium text-slate-900 text-center">
+                                <td class="p-2 font-medium text-slate-900">
                                     <a href="{{ route('admin.messages.index', ['ticket_id' => $tId]) }}" class="hover:text-orange-600 hover:underline">
                                         {{ $ticket->title }}
                                     </a>

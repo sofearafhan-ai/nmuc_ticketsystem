@@ -36,9 +36,9 @@ class SuperAdminController extends Controller
             'departments' => Department::count(),
         ];
 
-        $recentTickets = Ticket::with(['user', 'picAdmin'])
+        $recentTickets = Ticket::whereNull('pic')
             ->latest()
-            ->take(5)
+            ->take(10)
             ->get();
 
         return view('superadmin.dashboard', compact(

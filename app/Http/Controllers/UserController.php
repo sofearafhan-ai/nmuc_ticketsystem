@@ -63,7 +63,17 @@ class UserController extends Controller
         $replyName = Auth::user()->name;
         $adminDept = Auth::user()->department ?? null;
 
-        return view('user.messages.index', compact('conversations', 'activeTicket', 'replyName', 'adminDept'));
+        $userTicketQuery = Ticket::where('user_id', Auth::id());
+
+        $userTicketStats = [
+            'new'        => (clone $userTicketQuery)->where('status', 'New')->count(),
+            'processing' => (clone $userTicketQuery)->where('status', 'Processing')->count(),
+            'pending'    => (clone $userTicketQuery)->where('status', 'Pending')->count(),
+            'close'      => (clone $userTicketQuery)->whereIn('status', ['Close', 'Closed'])->count(),
+            'total'      => (clone $userTicketQuery)->count(),
+        ];
+
+        return view('user.messages.index', compact('conversations', 'activeTicket', 'replyName', 'adminDept', 'userTicketStats' ));
     }
 
     public function messagesReply(Request $request, $ticketId)
@@ -98,6 +108,8 @@ class UserController extends Controller
         return redirect()->route('messages.index', ['ticket_id' => $ticketId])
             ->with('success', 'Message sent successfully!');
     }
+
+
 
     // ==========================================
     // 3. TICKET LIST PAGE
@@ -218,4 +230,5 @@ class UserController extends Controller
         return redirect()->route('messages.index', ['ticket_id' => $ticket->ticket_id])
             ->with('success', 'New ticket successfully created!');
     }
+    
 }

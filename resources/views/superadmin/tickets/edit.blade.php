@@ -3,7 +3,7 @@
 @section('title', 'Ticket Details #' . ($ticket->ticket_id ?? $ticket->id))
 
 @section('content')
-<!-- Styling Custom Scrollbar -->
+
 <style>
     .custom-scrollbar::-webkit-scrollbar {
         width: 6px;
@@ -22,7 +22,6 @@
 
 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
 
-    <!-- Flash Message Notification -->
     @if(session('success'))
         <div class="p-4 bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2">
             <i class="fa-solid fa-circle-check text-emerald-600"></i>
@@ -30,26 +29,26 @@
         </div>
     @endif
 
-    <!-- Back to Ticket List Button -->
     <div class="mb-2">
         <a href="{{ route('superadmin.tickets.index') }}" 
-        class="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition duration-150">
+           class="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition duration-150">
             <i class="fa-solid fa-arrow-left"></i>
             <span>Back to Ticket List</span>
         </a>
     </div>
 
-    <!-- GRID LAYOUT 2 RUANG (Kiri 2/3, Kanan 1/3) -->
+    <!-- GRID LAYOUT 2 COLUMN -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
-        <!-- RUANG KIRI: Conversation / Chat Area (Width 2/3) -->
+        <!-- LEFT SIDE: Conversation / Chat Area (Width 2/3) -->
         <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col h-[650px]">
             
             @php
                 $activeId = $ticket->ticket_id ?? $ticket->id;
                 $activeUserName = $ticket->user_name ?? ($ticket->user->name ?? 'User');
                 $ticketMainAttachment = $ticket->image ?? $ticket->image_path ?? null;
-                $formattedTicketNo = '#TC-' . str_pad($activeId, 4, '0', STR_PAD_LEFT);
+                $formattedTicketNo = '#TC-' . $activeId;
+                $isTicketClosed = in_array($ticket->status ?? '', ['Close', 'Closed']);
             @endphp
 
             <!-- Active Chat Header -->
@@ -61,17 +60,22 @@
                     </div>
                     
                     <!-- Header Title & Status -->
-                    <div class="flex items-center gap-2 min-w-0">
-                        <h2 class="text-base font-bold text-slate-800 truncate">
-                            {{ $formattedTicketNo }} - {{ $ticket->title }}
-                        </h2>
-                        <span class="text-slate-400">•</span>
-                        <span class="px-2.5 py-1 rounded-full font-bold text-xs
-                            @if(($ticket->status ?? '') == 'New') bg-emerald-100 text-emerald-700
-                            @elseif(($ticket->status ?? '') == 'Processing') bg-blue-100 text-blue-700
-                            @elseif(($ticket->status ?? '') == 'Pending') bg-amber-100 text-amber-700
-                            @elseif(($ticket->status ?? '') == 'Close' || ($ticket->status ?? '') == 'Closed') bg-red-100 text-red-700
-                            @else bg-slate-100 text-slate-700 @endif">
+                    <div class="flex-1 flex items-center justify-between gap-2 min-w-0">
+                        <div class="min-w-0">
+                            <h6 class="text-xs md:text-base font-bold text-slate-800 truncate">
+                                {{ $formattedTicketNo }}
+                            </h6>
+                            <p class="text-[11px] md:text-xs text-slate-500 font-medium truncate">
+                                {{ $ticket->title }}
+                            </p>
+                        </div>
+
+                        <span class="px-2.5 py-0.5 md:px-3 md:py-1 rounded-full font-bold text-[10px] md:text-xs shrink-0 shadow-2xs
+                            @if(($ticket->status ?? '') == 'New') bg-emerald-100 text-emerald-700 border border-emerald-200
+                            @elseif(($ticket->status ?? '') == 'Processing') bg-blue-100 text-blue-700 border border-blue-200
+                            @elseif(($ticket->status ?? '') == 'Pending') bg-amber-100 text-amber-700 border border-amber-200
+                            @elseif($isTicketClosed) bg-red-100 text-red-700 border border-red-200
+                            @else bg-slate-100 text-slate-700 border border-slate-200 @endif">
                             {{ $ticket->status }}
                         </span>
                     </div>
@@ -81,9 +85,8 @@
             <!-- Chat Messages Scroll Area -->
             <div class="flex-1 p-5 md:p-6 overflow-y-auto custom-scrollbar space-y-4 bg-white" id="editMessageScrollContainer">
                 
-                <!-- 1. First Ticket Message (Submission oleh User) -->
+                <!-- Main Submission Message -->
                 <div class="flex items-end gap-2.5 max-w-[85%] md:max-w-[70%]">
-                    
                     <div class="w-8 h-8 rounded-full bg-emerald-500 text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-xs mb-1">
                         {{ strtoupper(substr($activeUserName, 0, 1)) }}
                     </div>
@@ -99,7 +102,7 @@
                         @if(!empty($ticketMainAttachment) && $ticketMainAttachment !== 'no-image.png')
                             @php
                                 $mainExt = strtolower(pathinfo($ticketMainAttachment, PATHINFO_EXTENSION));
-                                $isMainImg = in_array($mainExt, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                $isMainImg = in_array($mainExt, ['jpg', 'jpeg', 'png', 'pdf']);
                             @endphp
                             <div class="mt-2 pt-2 border-t border-slate-200/60">
                                 @if($isMainImg)
@@ -115,12 +118,12 @@
                         @endif
 
                         <div class="text-[10px] text-slate-400 font-medium pt-1">
-                            {{ $ticket->date ?? ($ticket->created_at ? $ticket->created_at->format('h:i A') : '') }}
+                            {{ $ticket->created_at ? \Carbon\Carbon::parse($ticket->created_at)->format(' d M Y, h:i A') : '' }}
                         </div>
                     </div>
                 </div>
 
-                <!-- 2. Replies Loop & System Event Logs -->
+                <!-- Replies Loop -->
                 @if(isset($ticket->replies) && $ticket->replies->count() > 0)
                     @foreach($ticket->replies as $reply)
                         @php
@@ -136,7 +139,6 @@
                         @endphp
 
                         @if($isSystemPic)
-                            <!-- LOG SYSTEM: PIC ASSIGNED / TAKEOVER -->
                             @php
                                 $picAssignedName = str_replace('PIC_CHANGE:', '', $reply->message);
                             @endphp
@@ -144,14 +146,10 @@
                                 <div class="w-6 h-6 rounded-full bg-slate-600 text-white flex items-center justify-center text-[10px] shrink-0 shadow-2xs">
                                     <i class="fa-solid fa-user-check"></i>
                                 </div>
-                                <span><strong class="text-slate-700 font-bold">{{ $picAssignedName }}</strong> has connected to take over ticket</span>
-                                <span class="text-[10px] text-slate-400">
-                                    {{ $reply->created_at ? \Carbon\Carbon::parse($reply->created_at)->format('h:i A') : '' }}
-                                </span>
+                                <span><strong class="text-slate-700 font-bold">{{ $picAssignedName }}</strong> has taken over</span>
                             </div>
 
                         @elseif($isSystemStatus)
-                            <!-- LOG SYSTEM: STATUS CHANGE -->
                             @php
                                 $statusValue = str_replace('STATUS_CHANGE:', '', $reply->message);
                                 $statusClasses = [
@@ -171,13 +169,9 @@
                                 <span class="px-2.5 py-0.5 rounded-full font-bold text-[11px] {{ $badgeClass }}">
                                     {{ $statusValue }}
                                 </span>
-                                <span class="text-[10px] text-slate-400">
-                                    {{ $reply->created_at ? \Carbon\Carbon::parse($reply->created_at)->format('h:i A') : '' }}
-                                </span>
                             </div>
 
                         @elseif($isAdmin)
-                            <!-- Mesej Admin (Kanan) -->
                             <div class="flex items-end justify-end gap-2.5 max-w-[85%] md:max-w-[70%] ml-auto">
                                 <div class="bg-blue-50/90 text-slate-800 p-3.5 px-4 rounded-2xl rounded-br-xs space-y-1">
                                     <div class="text-xs font-bold text-blue-900">
@@ -202,7 +196,7 @@
                                     @endif
 
                                     <div class="text-[10px] text-slate-400 font-medium pt-1">
-                                        {{ $reply->created_at ? \Carbon\Carbon::parse($reply->created_at)->format('h:i A') : '' }}
+                                        {{ $reply->created_at ? \Carbon\Carbon::parse($reply->created_at)->format('d M Y, h:i A') : '' }}
                                     </div>
                                 </div>
 
@@ -212,7 +206,6 @@
                             </div>
 
                         @else
-                            <!-- User Message -->
                             <div class="flex items-end gap-2.5 max-w-[85%] md:max-w-[70%]">
                                 <div class="w-8 h-8 rounded-full bg-emerald-500 text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-xs mb-1">
                                     {{ strtoupper(substr($replyName, 0, 1)) }}
@@ -252,36 +245,43 @@
 
             <!-- Bottom Chat Input Bar -->
             <div class="p-4 bg-white border-t border-slate-200 shrink-0">
-                <form action="{{ route('superadmin.messages.reply', $activeId) }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-2">
-                    @csrf
-                    
-                    <!-- File Preview Name Indicator -->
-                    <div id="filePreviewContainerEdit" class="hidden items-center justify-between bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-200 text-xs text-orange-700">
-                        <span class="truncate flex items-center gap-1.5">
-                            <i class="fa-solid fa-image"></i>
-                            <span id="fileNameDisplayEdit">Selected file</span>
-                        </span>
-                        <button type="button" id="removeFileBtnEdit" class="text-orange-500 hover:text-red-500 ml-2 font-bold">&times;</button>
+                @if($isTicketClosed)
+                    <div class="p-3 bg-slate-100 rounded-xl text-center text-xs font-semibold text-slate-500 flex items-center justify-center gap-2 border border-slate-200">
+                        <i class="fa-solid fa-lock text-slate-400"></i>
+                        <span>This ticket has been closed. Replies are disabled.</span>
                     </div>
+                @else
+                    <form action="{{ route('superadmin.messages.reply', $activeId) }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-2">
+                        @csrf
+                        
+                        <!-- File Preview Name Indicator -->
+                        <div id="filePreviewContainerEdit" class="hidden items-center justify-between bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-200 text-xs text-orange-700">
+                            <span class="truncate flex items-center gap-1.5">
+                                <i class="fa-solid fa-image"></i>
+                                <span id="fileNameDisplayEdit">Selected file</span>
+                            </span>
+                            <button type="button" id="removeFileBtnEdit" class="text-orange-500 hover:text-red-500 ml-2 font-bold">&times;</button>
+                        </div>
 
-                    <div class="flex items-center gap-2">
-                        <!-- Attachment Button -->
-                        <label class="p-2.5 text-slate-400 hover:text-orange-500 hover:bg-slate-100 rounded-xl transition cursor-pointer" title="Attach file or image">
-                            <i class="fa-solid fa-paperclip text-lg"></i>
-                            <input type="file" id="attachmentInputEdit" name="attachment" accept="image/*,.pdf,.doc,.docx" class="hidden">
-                        </label>
+                        <div class="flex items-center gap-2">
+                            <!-- Attachment Button -->
+                            <label class="p-2.5 text-slate-400 hover:text-orange-500 hover:bg-slate-100 rounded-xl transition cursor-pointer" title="Attach file or image">
+                                <i class="fa-solid fa-paperclip text-lg"></i>
+                                <input type="file" id="attachmentInputEdit" name="attachment" accept="image/*,.pdf,.doc,.docx" class="hidden">
+                            </label>
 
-                        <!-- Input Message Field -->
-                        <input type="text" name="message" required placeholder="Type a message..." 
-                               class="flex-1 bg-slate-100 border border-transparent focus:border-orange-500 focus:bg-white rounded-xl px-4 py-2.5 text-xs md:text-sm text-slate-800 outline-none transition">
+                            <!-- Input Message Field -->
+                            <input type="text" name="message" required placeholder="Type a message..." 
+                                   class="flex-1 bg-slate-100 border border-transparent focus:border-orange-500 focus:bg-white rounded-xl px-4 py-2.5 text-xs md:text-sm text-slate-800 outline-none transition">
 
-                        <!-- Send Button -->
-                        <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-md flex items-center gap-2 cursor-pointer shrink-0">
-                            <span>Send</span>
-                            <i class="fa-solid fa-paper-plane text-[11px]"></i>
-                        </button>
-                    </div>
-                </form>
+                            <!-- Send Button -->
+                            <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-md flex items-center gap-2 cursor-pointer shrink-0">
+                                <span>Send</span>
+                                <i class="fa-solid fa-paper-plane text-[11px]"></i>
+                            </button>
+                        </div>
+                    </form>
+                @endif
             </div>
 
         </div>
@@ -294,9 +294,9 @@
                     <i class="fa-solid fa-sliders text-orange-500"></i>
                     <span>Ticket Information</span>
                 </div>
-                <div class="text-right text-[11px] text-slate-400 font-medium">
-                    <div><i class="fa-regular fa-calendar mr-1"></i>{{ $ticket->date ?? (is_object($ticket->created_at) ? $ticket->created_at->format('Y-m-d') : \Carbon\Carbon::parse($ticket->created_at)->format('Y-m-d')) }}</div>
-                    <div><i class="fa-regular fa-clock mr-1"></i>{{ is_object($ticket->created_at) ? $ticket->created_at->format('h:i A') : \Carbon\Carbon::parse($ticket->created_at)->format('h:i A') }}</div>
+                <div class="text-right text-[11px] text-slate-400 font-medium shrink-0">
+                    <div class="whitespace-nowrap"><i class="fa-regular fa-calendar mr-1"></i>{{ $ticket->created_at ? \Carbon\Carbon::parse($ticket->created_at)->format('d M Y') : '' }}</div>
+                    <div class="whitespace-nowrap"><i class="fa-regular fa-clock mr-1"></i>{{ $ticket->created_at ? \Carbon\Carbon::parse($ticket->created_at)->format('h:i A') : '' }}</div>
                 </div>
             </div>
 
@@ -309,8 +309,7 @@
                 <div>
                     <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Category</label>
                     <select name="category" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none transition">
-                        @php $catList = $categories ?? ['Hardware', 'Software', 'Network', 'Facility', 'Others']; @endphp
-                        @foreach($catList as $cat)
+                        @foreach($categories as $cat)
                             <option value="{{ $cat }}" {{ $ticket->category == $cat ? 'selected' : '' }}>{{ $cat }}</option>
                         @endforeach
                     </select>
@@ -320,8 +319,7 @@
                 <div>
                     <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Type</label>
                     <select name="type" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none transition">
-                        @php $typeList = $types ?? ['Incident', 'Request', 'Hardware', 'Software', 'Network', 'Facility', 'Others']; @endphp
-                        @foreach($typeList as $type)
+                        @foreach($types as $type)
                             <option value="{{ $type }}" {{ $ticket->type == $type ? 'selected' : '' }}>{{ $type }}</option>
                         @endforeach
                     </select>
@@ -331,8 +329,7 @@
                 <div>
                     <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Status</label>
                     <select name="status" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none transition">
-                        @php $stList = $statuses ?? ['New', 'Processing', 'Pending', 'Closed']; @endphp
-                        @foreach($stList as $st)
+                        @foreach($statuses as $st)
                             <option value="{{ $st }}" {{ $ticket->status == $st ? 'selected' : '' }}>{{ $st }}</option>
                         @endforeach
                     </select>
@@ -342,8 +339,7 @@
                 <div>
                     <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Priority</label>
                     <select name="priority" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none transition">
-                        @php $prioList = $priorities ?? ['Low', 'Medium', 'High', 'Urgent']; @endphp
-                        @foreach($prioList as $prio)
+                        @foreach($priorities as $prio)
                             <option value="{{ $prio }}" {{ $ticket->priority == $prio ? 'selected' : '' }}>{{ $prio }}</option>
                         @endforeach
                     </select>
@@ -361,7 +357,7 @@
 
                 <!-- Dropdown Department -->
                 <div>
-                    <label for="department_id" class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Department</label>
+                    <label for="department_select" class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Department</label>
                     <select name="department_id" id="department_select" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none transition">
                         <option value="">-- Select Department --</option>
                         @foreach($departments as $dept)
@@ -373,16 +369,14 @@
                     </select>
                 </div>
 
-                <!-- Dropdown PIC -->
+                <!-- ASSIGN TO (PIC) DROPDOWN -->
                 <div>
-                    <label for="pic_id" class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Assign PIC</label>
-                    <select name="pic_id" id="pic_select" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none transition">
-                        <option value="">-- Select PIC --</option>
-                        @foreach($adminsInDept as $admin)
-                            <option value="{{ $admin->user_id }}" 
-                                data-department-id="{{ $admin->department_id }}"
-                                {{ (old('pic_id', $ticket->pic_id) == $admin->user_id) ? 'selected' : '' }}>
-                                {{ $admin->full_name ?? $admin->name }}
+                    <label for="pic_select" class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Assign To (PIC)</label>
+                    <select name="pic" id="pic_select" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none transition">
+                        <option value="">-- Unassigned --</option>
+                        @foreach($adminsInDept as $adm)
+                            <option value="{{ $adm->user_id }}" data-department-id="{{ $adm->department_id ?? '' }}" {{ $ticket->pic == $adm->user_id ? 'selected' : '' }}>
+                                {{ $adm->full_name ?? $adm->name }} ({{ $adm->role }})
                             </option>
                         @endforeach
                     </select>
@@ -402,50 +396,83 @@
 
 </div>
 
-<!-- Client-side Script for Auto Scroll & File Preview -->
+<!-- Client-side Script -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const deptSelect = document.getElementById('department_select');
-    const picSelect = document.getElementById('pic_select');
-    const picOptions = picSelect.querySelectorAll('option');
+    
+    // Auto Scroll Chat
+    const scrollContainer = document.getElementById('editMessageScrollContainer');
+    if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    }
+    
+    // File Preview Handler
+    const fileInput = document.getElementById('attachmentInputEdit');
+    const filePreviewContainer = document.getElementById('filePreviewContainerEdit');
+    const fileNameDisplay = document.getElementById('fileNameDisplayEdit');
+    const removeFileBtn = document.getElementById('removeFileBtnEdit');
 
-    function filterPicByDepartment() {
-        const selectedDeptId = deptSelect.value;
-        let hasValidSelection = false;
-
-        picOptions.forEach(option => {
-            if (option.value === '') {
-                option.style.display = 'block';
-                return;
-            }
-
-            const picDeptId = option.getAttribute('data-department-id');
-
-            if (!selectedDeptId || picDeptId === selectedDeptId) {
-                option.style.display = 'block';
-                if (option.selected) {
-                    hasValidSelection = true;
-                }
-            } else {
-                option.style.display = 'none';
-                if (option.selected) {
-                    option.selected = false;
-                }
+    if (fileInput) {
+        fileInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                fileNameDisplay.textContent = this.files[0].name;
+                filePreviewContainer.classList.remove('hidden');
+                filePreviewContainer.classList.add('flex');
             }
         });
 
-        if (!hasValidSelection && deptSelect.dataset.initialLoad !== 'true') {
-            picSelect.value = '';
+        if (removeFileBtn) {
+            removeFileBtn.addEventListener('click', function () {
+                fileInput.value = '';
+                filePreviewContainer.classList.add('hidden');
+                filePreviewContainer.classList.remove('flex');
+            });
         }
-        
-        deptSelect.dataset.initialLoad = 'false';
     }
 
-    deptSelect.dataset.initialLoad = 'true';
+    // Filter PIC options by Department selection
+    const deptSelect = document.getElementById('department_select');
+    const picSelect = document.getElementById('pic_select');
 
-    filterPicByDepartment();
+    if (deptSelect && picSelect) {
+        const picOptions = picSelect.querySelectorAll('option');
 
-    deptSelect.addEventListener('change', filterPicByDepartment);
+        function filterPicByDepartment() {
+            const selectedDeptId = deptSelect.value;
+            let hasValidSelection = false;
+
+            picOptions.forEach(option => {
+                if (option.value === '') {
+                    option.style.display = 'block';
+                    return;
+                }
+
+                const picDeptId = option.getAttribute('data-department-id');
+
+                if (!selectedDeptId || picDeptId === selectedDeptId) {
+                    option.style.display = 'block';
+                    if (option.selected) {
+                        hasValidSelection = true;
+                    }
+                } else {
+                    option.style.display = 'none';
+                    if (option.selected) {
+                        option.selected = false;
+                    }
+                }
+            });
+
+            if (!hasValidSelection && deptSelect.dataset.initialLoad !== 'true') {
+                picSelect.value = '';
+            }
+            
+            deptSelect.dataset.initialLoad = 'false';
+        }
+
+        deptSelect.dataset.initialLoad = 'true';
+        filterPicByDepartment();
+        deptSelect.addEventListener('change', filterPicByDepartment);
+    }
 });
 </script>
 @endsection

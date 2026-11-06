@@ -8,7 +8,7 @@
 
 <div class="space-y-6">
 
-    <!-- 1. HEADER / QUICK OVERVIEW CARDS (KESELURUHAN DEPARTMENT) -->
+    <!-- 1. HEADER / QUICK OVERVIEW CARDS -->
     <div class="bg-gradient-to-r from-orange-100 via-indigo-50 to-blue-100 p-6 rounded-3xl shadow-sm">
         <div class="mb-4">
             <h2 class="text-xl font-bold text-slate-800">Quick Overview</h2>
@@ -69,7 +69,7 @@
     <!-- 2. BOTTOM SECTION -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <!-- Inventory & Ticket Trends (KESELURUHAN DEPARTMENT) -->
+        <!-- Inventory & Ticket Trends -->
         <div class="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-between">
             <div>
                 <h3 class="font-bold text-slate-800 text-lg mb-1">Inventory & Ticket Trends</h3>
@@ -114,7 +114,7 @@
             </div>
         </div>
 
-        <!-- Doughnut Graph (HANYA TIKET ADMIN INI SAHAJA) -->
+        <!-- Doughnut Graph -->
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-between">
             <div>
                 <h3 class="font-bold text-slate-800 text-lg mb-1">My Tickets Overview</h3>
@@ -182,8 +182,10 @@
                 <thead class="text-xs text-slate-500 uppercase bg-slate-50 rounded-lg">
                     <tr>
                         <th scope="col" class="px-4 py-3 text-center">Ticket ID</th>
-                        <th scope="col" class="px-4 py-3 text-center">Subject</th>
-                        <th scope="col" class="px-4 py-3 text-center">User</th>
+                        <th scope="col" class="px-4 py-3 text-center">Title</th>
+                        <th scope="col" class="px-4 py-3 text-center">Submitted by</th>
+                        <th scope="col" class="px-4 py-3 text-center">Category</th>
+                        <th scope="col" class="px-4 py-3 text-center">Priority</th>
                         <th scope="col" class="px-4 py-3 text-center">Status</th>
                         <th scope="col" class="px-4 py-3 text-center">Date</th>
                         <th scope="col" class="px-4 py-3 text-center">Action</th>
@@ -203,6 +205,19 @@
                         </td>
                         <td class="py-3 px-4 text-xs text-slate-700 font-medium text-center">
                             {{ $ticket->user_name ?? ($ticket->user->name ?? 'User') }}
+                        </td>
+                        <td class="py-3 px-4 text-xs text-slate-700 font-medium text-center">
+                                {{ $ticket->category }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                            <span class="px-2 py-0.5 font-bold rounded-full text-[10px]
+                                @if($ticket->priority == 'Urgent') bg-red-100 text-red-800
+                                @elseif($ticket->priority == 'High') bg-orange-200 text-orange-900
+                                @elseif($ticket->priority == 'Medium') bg-yellow-100 text-yellow-800
+                                @else bg-slate-100 text-slate-800 @endif">
+                                {{ $ticket->priority }}
+                            </span>
                         </td>
                         <td class="py-3 px-4 text-center">
                             <span class="px-2.5 py-1 rounded-full font-bold text-xs bg-emerald-100 text-emerald-700">

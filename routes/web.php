@@ -6,6 +6,11 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\GuestTicketController;
+
+
+Route::get('/guest/tickets/create', [GuestTicketController::class, 'create'])->name('guest.tickets.create');
+Route::post('/guest/tickets', [GuestTicketController::class, 'store'])->name('guest.tickets.store');
 
 Route::middleware(['guest'])->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');

@@ -21,7 +21,7 @@
     }
 </style>
 
-<div class="h-[82vh] flex flex-col">
+<div class="h-[130vh] flex flex-col">
 
     <!-- MAIN CHAT CONTAINER -->
     <div class="flex-1 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col md:flex-row h-full">
