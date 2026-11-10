@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Admin Dashboard - ' . $adminDept)
+@section('title', 'Admin - Dashboard')
 
 @section('content')
 <!-- Chart.js Script -->
@@ -12,7 +12,7 @@
     <div class="bg-gradient-to-r from-orange-100 via-indigo-50 to-blue-100 p-6 rounded-3xl shadow-sm">
         <div class="mb-4">
             <h2 class="text-xl font-bold text-slate-800">Quick Overview</h2>
-            <p class="text-xs text-slate-500">Department-wide overview statistics for {{ $adminDept }} department</p>
+            <p class="text-xs text-slate-500">Department-wide overview statistics for {{ Auth::user()->department->department_code ?? Auth::user()->department->code ?? 'all' }} department</p>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
@@ -173,7 +173,7 @@
                 <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
                     <i class="fa-solid fa-ticket text-orange-500"></i> New Unassigned Tickets
                 </h3>
-                <p class="text-xs text-slate-400">Tickets awaiting PIC assignment for {{ $adminDept }} department</p>
+                <p class="text-xs text-slate-400">Tickets awaiting PIC assignment for {{ Auth::user()->department->department_code ?? Auth::user()->department->code ?? 'all' }} department</p>
             </div>
         </div>
 

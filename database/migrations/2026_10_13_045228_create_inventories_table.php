@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id('item_id'); //Primary Key, AUTO_INCREMENT
 
             $table->string('item_name', 255);
+            $table->string('serial_number', 255);
+            $table->string('item_manufacturer', 255);
+            $table->string('item_type', 255);
             $table->string('item_category', 255);
             $table->string('item_model', 255);
 

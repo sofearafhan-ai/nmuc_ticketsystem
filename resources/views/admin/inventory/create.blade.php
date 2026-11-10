@@ -9,7 +9,7 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#0d1527] p-6 rounded-2xl text-white shadow-md gap-4">
         <div class="flex items-center gap-3">
             <span class="bg-orange-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
-                {{ $adminDept }} DEPARTMENT
+                {{ Auth::user()->department->department_code ?? Auth::user()->department->code ?? 'all' }} DEPARTMENT
             </span>
             <h1 class="text-xl font-bold">New Inventories Register</h1>
         </div>

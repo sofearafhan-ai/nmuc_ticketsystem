@@ -83,9 +83,15 @@ Route::middleware(['auth'])->group(function () {
         // Dashboard, Users & Departments
         Route::get('/dashboard', [SuperAdminController::class, 'dashboard'])->name('dashboard');
         Route::get('/users', [SuperAdminController::class, 'usersIndex'])->name('users.index');
+
+        Route::get('/users/export', [SuperAdminController::class, 'usersExport'])->name('users.export');
+        
         Route::get('/users/create', [SuperAdminController::class, 'usersCreate'])->name('users.create');
         Route::post('/users', [SuperAdminController::class, 'usersStore'])->name('users.store');
+        Route::get('/users/{id}/edit', [SuperAdminController::class, 'usersEdit'])->name('users.edit');
+        Route::put('/users/{id}', [SuperAdminController::class, 'usersUpdate'])->name('users.update');
         Route::delete('/users/{id}', [SuperAdminController::class, 'usersDestroy'])->name('users.destroy');
+
         
         Route::get('/departments', [SuperAdminController::class, 'departmentsIndex'])->name('departments.index');
         Route::post('/departments', [SuperAdminController::class, 'departmentsStore'])->name('departments.store');

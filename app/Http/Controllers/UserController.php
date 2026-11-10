@@ -78,10 +78,7 @@ class UserController extends Controller
 
     public function messagesReply(Request $request, $ticketId)
     {
-        $ticket = Ticket::where('ticket_id', $ticketId)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
-
+        $ticket = Ticket::where('ticket_id', $ticketId)->firstOrFail();
 
         if (in_array($ticket->status, ['Close', 'Closed'])) {
             return redirect()->back()->with('error', 'This ticket is closed and cannot receive replies.');
@@ -173,7 +170,7 @@ class UserController extends Controller
 
     public function destroyTicket($ticketId)
     {
-        $ticket = Ticket::where('ticket_id', $ticketId)->firstOrFail();
+        $ticket = Ticket::where('ticket_id', $id)->firstOrFail();
         $ticket->delete();
 
         return redirect()->back()->with('success', 'Ticket successfully deleted!');

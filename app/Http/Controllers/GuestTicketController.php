@@ -22,7 +22,7 @@ class GuestTicketController extends Controller
             'user_name'    => 'required|string|max:255',
             'user_email'   => 'required|email|max:255',
             'nmuc_email'   => 'required|email|exists:users,email',
-            'student_id'   => 'required|string|max:50',
+            'id'           => 'required|string|max:255',
             'type'         => 'required|in:Incident,Request',
             'category'     => 'required|string',
             'priority'     => 'required|in:Low,Medium,High,Urgent',
@@ -39,7 +39,7 @@ class GuestTicketController extends Controller
         }
 
         $fullDescription = "<p><strong>Title:</strong> " . e($request->title) . "</p>" .
-                           "<p><strong>Student ID:</strong> " . e($request->student_id) . "</p>" .
+                           "<p><strong>Student ID:</strong> " . e($request->id) . "</p>" .
                            "<p><strong>NMUC Email:</strong> " . e($request->nmuc_email) . "</p>" .
                            "<hr><br>" . $request->description;
 

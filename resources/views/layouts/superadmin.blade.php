@@ -97,7 +97,7 @@
                }" 
                class="fixed md:static inset-y-0 left-0 top-16 md:top-auto h-full bg-[#0d1527] flex flex-col justify-between shrink-0 text-slate-100 transition-all duration-300 z-50 md:z-30 shadow-2xl md:shadow-none overflow-hidden"
                x-data="{ 
-                    openTickets: {{ request()->routeIs('superadmin.tickets.*') || request()->routeIs('admin.messages.*') ? 'true' : 'false' }},
+                    openTickets: {{ request()->routeIs('superadmin.tickets.*') || request()->routeIs('superadmin.messages.*') ? 'true' : 'false' }},
                     openInventory: {{ request()->routeIs('superadmin.inventory.*') ? 'true' : 'false' }},
                     openUsers: {{ request()->routeIs('superadmin.users.*') ? 'true' : 'false' }}
                 }">

@@ -36,7 +36,6 @@ class AdminController extends Controller
         $currentAdminId = $user->user_id ?? $user->id;
         $deptId = $user->department_id;
 
-        // A. QUERY KESELURUHAN DEPT (Untuk Quick Overview & Trends)
         $deptTicketQuery = Ticket::query();
         $deptInventoryQuery = Inventory::query();
 
@@ -59,8 +58,7 @@ class AdminController extends Controller
             'total'    => (clone $deptInventoryQuery)->count(),
         ];
 
-        // B. QUERY SPESIFIK ADMIN SAHAJA (Untuk Tickets Status Overview - Doughnut Chart)
-        $myTicketQuery = Ticket::query(); // Dibetulkan di sini ($myTicketQuery)
+        $myTicketQuery = Ticket::query();
         if ($user->role !== 'Super Admin') {
             $myTicketQuery->where('pic', $currentAdminId);
         }
@@ -73,7 +71,6 @@ class AdminController extends Controller
             'total'      => (clone $myTicketQuery)->count(),
         ];
 
-        // C. TRENDS BULANAN KESELURUHAN DEPARTMENT
         $currentYear = date('Y');
         $activeMonthly = [];
         $inactiveMonthly = [];

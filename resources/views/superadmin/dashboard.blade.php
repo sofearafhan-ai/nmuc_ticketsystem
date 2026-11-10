@@ -118,15 +118,15 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-50/80 text-slate-400 uppercase text-[11px] font-bold tracking-wider border-b border-slate-100">
-                        <th class="py-3 px-4 text-center">TICKET ID</th>
-                        <th class="py-3 px-4 text-center">TITLE</th>
-                        <th class="py-3 px-4 text-center">SUBMITTED BY</th>
-                        <th class="py-3 px-4 text-center">CATEGORY</th>
-                        <th class="py-3 px-4 text-center">PRIORITY</th>
-                        <th class="py-3 px-4 text-center">DEPARTMENT</th>
-                        <th class="py-3 px-4 text-center">STATUS</th>
-                        <th class="py-3 px-4 text-center">DATE</th>
-                        <th class="py-3 px-4 text-center">ACTION</th>
+                        <th class="py-2 px-3 text-center">TICKET ID</th>
+                        <th class="py-2 px-3 text-center">TITLE</th>
+                        <th class="py-2 px-3 text-center">SUBMITTED BY</th>
+                        <th class="py-2 px-3 text-center">CATEGORY</th>
+                        <th class="py-2 px-3 text-center">PRIORITY</th>
+                        <th class="py-2 px-3 text-center">DEPARTMENT</th>
+                        <th class="py-2 px-3 text-center">STATUS</th>
+                        <th class="py-2 px-3 text-center">DATE</th>
+                        <th class="py-2 px-3 text-center">ACTION</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
@@ -144,12 +144,11 @@
                             }
                         @endphp
                         <tr class="hover:bg-slate-50/50 transition">
-                            <td class="py-3 px-4 font-bold text-slate-900">{{ $formattedTicketNo }}</td>
-                            <td class="py-3 px-4 font-semibold text-slate-800 truncate max-w-xs">{{ $ticket->title }}</td>
-                            <td class="py-3 px-4 text-slate-600 font-semibold">{{ $ticket->user_name ?? ($ticket->user->name ?? 'User') }}</td>
+                            <td class="py-3 px-4 font-bold text-slate-900 text-center">{{ $formattedTicketNo }}</td>
+                            <td class="py-3 px-4 font-semibold text-slate-800 truncate max-w-xs text-center">{{ $ticket->title }}</td>
+                            <td class="py-3 px-4 text-slate-600 font-semibold text-center">{{ $ticket->user_name ?? ($ticket->user->name ?? 'User') }}</td>
                             <td class="py-3 px-4 text-xs text-slate-700 font-medium text-center">
-                                    {{ $ticket->category }}
-                                </span>
+                                {{ $ticket->category }}
                             </td>
                             <td class="py-3 px-4 text-center">
                                 <span class="px-2 py-0.5 font-bold rounded-full text-[10px]
@@ -160,7 +159,28 @@
                                     {{ $ticket->priority }}
                                 </span>
                             </td>
-                            <td class="py-3 px-4 text-center text-slate-500 font-medium">{{ $ticket->department_name }}</td>
+                            <td class="py-3 px-4 text-center text-slate-500 font-medium">
+                                @php
+                                    $rawDept = $ticket->department_name ?? $ticket->department ?? null;
+
+                                    if (is_string($rawDept)) {
+                                        $decoded = json_decode($rawDept, true);
+                                        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                            $rawDept = $decoded;
+                                        }
+                                    }
+
+                                    if (is_array($rawDept)) {
+                                        $deptName = $rawDept['department_name'] ?? $rawDept['name'] ?? null;
+                                    } elseif (is_object($rawDept)) {
+                                        $deptName = $rawDept->department_name ?? $rawDept->name ?? null;
+                                    } else {
+                                        $deptName = $rawDept;
+                                    }
+                                @endphp
+
+                                {{ $deptName ?? '-' }}
+                            </td>
                             <td class="py-3 px-4 text-center">
                                 <span class="px-3 py-1 text-xs font-semibold rounded-full inline-block
                                     @if($ticket->status == 'New') bg-emerald-100 text-emerald-700
@@ -182,7 +202,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="p-8 text-center text-slate-400 text-xs">
+                            <td colspan="9" class="p-8 text-center text-slate-400 text-xs">
                                 <i class="fa-regular fa-folder-open text-3xl mb-2 text-slate-300 block"></i>
                                 No unassigned tickets available right now.
                             </td>

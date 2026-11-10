@@ -155,7 +155,7 @@
                 <!-- Student ID -->
                 <div> 
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Student ID <span class="text-red-500">*</span></label>
-                    <input type="text" name="student_id" required value="{{ old('student_id') }}"
+                    <input type="text" name="id" required value="{{ old('id') }}"
                         class="w-full border border-slate-300 rounded-xl p-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
                 </div>
 

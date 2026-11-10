@@ -10,7 +10,7 @@
         <div>
             <div class="flex items-center gap-2 mb-1">
                 <span class="bg-orange-600/90 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
-                    {{ $adminDept }} DEPARTMENT
+                    {{ Auth::user()->department->department_code ?? Auth::user()->department->code ?? 'all' }} DEPARTMENT
                 </span>
             </div>
             <h1 class="text-xl font-bold">Edit Asset #{{ $rowNum ?? $item->item_id }}</h1>

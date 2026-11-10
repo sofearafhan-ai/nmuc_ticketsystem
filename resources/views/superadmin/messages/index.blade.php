@@ -265,8 +265,15 @@
                                 $replyName = $reply->sender_name ?? $reply->user_name ?? ($reply->user->name ?? 'User');
                                 $isAdmin = ($reply->sender_role ?? '') == 'Admin' || ($reply->sender_role ?? '') == 'Super Admin' || str_contains(strtolower($replyName), 'admin') || ($reply->user_id ?? null) == Auth::id();
                                 
-                                $isSystemStatus = str_starts_with($reply->message, 'STATUS_CHANGE:');
-                                $isSystemPic    = str_starts_with($reply->message, 'PIC_CHANGE:');
+                                $msgLower = strtolower(trim($reply->message ?? ''));
+
+                                // Semakan fleksibel untuk Status & PIC Log
+                                $isSystemStatus = str_contains($msgLower, 'status_change:') 
+                                               || str_contains($msgLower, 'status updated to')
+                                               || str_contains($msgLower, 'status changed to');
+
+                                $isSystemPic = str_contains($msgLower, 'pic_change:') 
+                                            || str_contains($msgLower, 'has taken over');
 
                                 $attachment = $reply->attachment ?? null;
                                 $ext = $attachment ? strtolower(pathinfo($attachment, PATHINFO_EXTENSION)) : '';
@@ -275,7 +282,9 @@
 
                             @if($isSystemPic)
                                 @php
-                                    $picAssignedName = str_replace('PIC_CHANGE:', '', $reply->message);
+                                    $picAssignedName = str_ireplace(['PIC_CHANGE:', 'has taken over'], '', $reply->message);
+                                    $picAssignedName = trim(str_replace(['.', ':'], '', $picAssignedName));
+                                    if(empty($picAssignedName)) $picAssignedName = $replyName;
                                 @endphp
                                 <div class="flex items-center justify-center gap-2 py-2 my-2 text-xs text-slate-400 font-medium">
                                     <div class="w-6 h-6 rounded-full bg-slate-600 text-white flex items-center justify-center text-[9px] shrink-0 shadow-2xs">
@@ -300,7 +309,7 @@
                                     <div class="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px] shrink-0 shadow-2xs">
                                         <i class="fa-solid fa-sliders"></i>
                                     </div>
-                                    <span>Status updated to</span>
+                                    <span>Ticket changed status to</span>
                                     <span class="px-2.5 py-0.5 rounded-full font-bold text-[11px] {{ $badgeClass }}">
                                         {{ $statusValue }}
                                     </span>

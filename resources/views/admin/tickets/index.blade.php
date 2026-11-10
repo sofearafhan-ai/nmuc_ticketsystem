@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Admin - ' . $adminDept . ' Tickets')
+@section('title', 'Admin - Ticket List')
 
 @section('content')
 <div class="space-y-6">
@@ -9,7 +9,7 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-[#0d1527] p-6 rounded-2xl text-white shadow-md gap-4">
         <div>
             <div class="flex items-center gap-2">
-                <span class="bg-orange-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">{{ $adminDept }} DEPARTMENT</span>
+                <span class="bg-orange-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">{{ Auth::user()->department->department_code ?? Auth::user()->department->code ?? 'all' }} DEPARTMENT</span>
                 <h1 class="text-2xl font-bold">Manage Support Tickets</h1>
             </div>
             <p class="text-xs text-slate-400 mt-1">Review, filter, and manage support tickets.</p>

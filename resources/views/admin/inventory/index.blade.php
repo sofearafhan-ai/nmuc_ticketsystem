@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Admin - ' . $adminDept . ' Inventory')
+@section('title', 'Admin - Inventory List')
 
 @section('content')
 <div class="space-y-6">
@@ -9,10 +9,10 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-[#0d1527] p-6 rounded-2xl text-white shadow-md gap-4">
         <div>
             <div class="flex items-center gap-2">
-                <span class="bg-orange-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">{{ $adminDept }} DEPARTMENT</span>
+                <span class="bg-orange-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">{{ Auth::user()->department->department_code ?? Auth::user()->department->code ?? 'all' }} DEPARTMENT</span>
                 <h1 class="text-2xl font-bold">Asset Inventory</h1>
             </div>
-            <p class="text-xs text-slate-400 mt-1">Managing the list of devices and assets under the {{ $adminDept }} Department.</p>
+            <p class="text-xs text-slate-400 mt-1">Managing the list of devices and assets under the {{ Auth::user()->department->department_code ?? Auth::user()->department->code ?? 'all' }} Department.</p>
         </div>
 
         <!-- Link to New Inventory Form Page -->
@@ -103,75 +103,116 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200 bg-slate-50 text-slate-700 uppercase text-[11px] font-bold tracking-wider">
-                            <th class="p-3 text-center">Item ID</th>
-                            <th class="p-3 text-center">Item Name</th>
-                            <th class="p-3 text-center">Category</th>
-                            <th class="p-3 text-center">Model / Specs</th>
-                            <th class="p-3 text-center">Location</th>
-                            <th class="p-3 text-center">Status</th>
-                            <th class="p-3 text-center">Registered By</th>
-                            <th class="p-3 text-center">Attachment</th>
-                            <th class="p-3 text-center">Actions</th>
+                            <th class="py-2 px-2 text-center">NO</th>
+                            <th class="py-2 px-2 text-center">NAME</th>
+                            <th class="py-2 px-2 text-center">TYPE</th>
+                            <th class="py-2 px-2 text-center">MANUFACTURER</th>
+                            <th class="py-2 px-2 text-center">MODEL</th>
+                            <th class="py-2 px-2 text-center">SERIAL NO.</th>
+                            <th class="py-2 px-2 text-center">LOCATION</th>
+                            <th class="py-2 px-2 text-center">STATUS</th>
+                            <th class="py-2 px-2 text-center">REGISTERED BY</th>
+                            <th class="py-2 px-2 text-center">ATTACHMENT</th>
+                            <th class="py-2 px-2 text-center">ACTIONS</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200 text-sm">
+                    <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
                         @forelse ($inventories as $index => $item)
-                            <tr class="hover:bg-orange-50/40 transition">
-                                <td class="py-3 px-4 text-xs font-extrabold text-slate-900 text-center">#{{ $inventories->firstItem() + $index }}</td>
-                                <td class="py-3 px-4 text-xs text-slate-900 text-center">{{ $item->item_name }}</td>
-                                <td class="py-3 px-4 text-xs font-extrabold text-slate-900 text-center">
-                                    <span class="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200 font-medium">
-                                        {{ $item->item_category }}
-                                    </span>
+                            @php
+                                $registeredUser = $item->user->full_name ?? $item->user->name ?? 'System Admin';
+                            @endphp
+                            <tr class="hover:bg-slate-50/60 transition duration-150">
+                                
+                                <!-- No -->
+                                <td class="py-3.5 px-4 font-bold text-slate-900 text-center">
+                                    #{{ method_exists($inventories, 'firstItem') ? ($inventories->firstItem() + $index) : ($index + 1) }}
                                 </td>
-                                <td class="py-3 px-4 text-xs text-slate-900 text-center">{{ $item->item_model }}</td>
-                                <td class="py-3 px-4 text-xs text-slate-900 text-center">{{ $item->item_location }}</td>
-                                <td class="py-3 px-4 text-xs font-extrabold text-slate-900 text-center">
-                                    <span class="px-2.5 py-1 text-[11px] font-bold rounded-lg text-white
-                                        {{ $item->item_status == 'Active' ? 'bg-emerald-600' : 'bg-slate-500' }}">
+
+                                <!-- Item Name -->
+                                <td class="py-3.5 px-4 text-center">
+                                    <div class="flex items-center gap-3">
+                                        <div>
+                                            <span class="font-bold text-slate-800 block text-xs">{{ $item->item_name }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Type -->
+                                <td class="py-3.5 px-4 text-center">
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        <span class="text-xs text-slate-700 font-semibold">{{ $item->item_type }}</span>
+                                    </div>
+                                </td>
+
+                                <!-- Manufacturer -->
+                                <td class="py-3.5 px-4 text-center">
+                                    <span class="text-[10px] text-slate-400 block font-medium">{{ $item->item_manufacturer ?? '-' }}</span>
+                                </td>
+
+                                <!-- Model -->
+                                <td class="py-3.5 px-4 text-center">
+                                    <span class="font-bold text-slate-800 block">{{ $item->item_model ?? '-' }}</span>
+                                </td>
+
+                                 <!-- Serial Number -->
+                                <td class="py-2 text-xs text-center font-medium text-slate-500">
+                                    {{ $item->serial_number ?? 'N/A' }}
+                                </td>
+
+                                <!-- Location -->
+                                <td class="p-2 text-xs text-slate-500 font-medium text-center">
+                                        {{ $item->item_location ?? 'N/A' }}
+                                </td>
+
+                                <!-- Status Badge -->
+                                <td class="p-2 text-xs text-slate-500 font-medium text-center">
+                                    <span class="px-2.5 py-1 text-[10px] font-bold rounded-full inline-block uppercase tracking-wider border
+                                        {{ $item->item_status == 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200' }}">
                                         {{ $item->item_status }}
                                     </span>
                                 </td>
-                                <td class="py-3 px-4 text-xs text-slate-900 text-center">
-                                    {{ $item->user->full_name ?? $item->user->name ?? 'Admin' }}
+
+                                <!-- Registered By -->
+                                <td class="p-2 text-xs text-slate-500 font-medium text-center">
+                                    {{ $registeredUser }}
                                 </td>
-                                <td class="py-3 px-4 text-xs text-slate-900 text-center">
+
+                                <!-- Attachment Preview Button -->
+                                <td class="py-3.5 px-4 text-center">
                                     @if ($item->item_attachment)
                                         <div x-data="{ open: false }" class="flex justify-center">
-                                          
                                             <button @click="open = true" 
                                                     type="button" 
-                                                    class="p-2 bg-slate-100 hover:bg-orange-500 text-slate-600 hover:text-white rounded-lg transition border border-slate-200 shadow-sm flex items-center justify-center cursor-pointer mx-auto"
-                                                    title="View Image">
-                                                <i class="fa-solid fa-eye text-xs"></i>
+                                                    class="px-2.5 py-1.5 bg-slate-100 hover:bg-orange-500 text-slate-600 hover:text-white rounded-xl transition-all border border-slate-200 shadow-xs flex items-center justify-center gap-1.5 cursor-pointer text-xs font-semibold"
+                                                    title="View Attachment">
+                                                <i class="fa-solid fa-eye text-[11px]"></i>
                                             </button>
 
+                                            <!-- Modal Backdrop & Window -->
                                             <div x-show="open" 
-                                                x-cloak
-                                                @keydown.escape.window="open = false" 
-                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                                                
+                                                 x-cloak
+                                                 @keydown.escape.window="open = false" 
+                                                 class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
                                                 <div class="fixed inset-0" @click="open = false"></div>
-
-                                                <div class="relative bg-white p-3 rounded-2xl shadow-2xl max-w-lg w-full z-10 space-y-3 border border-slate-100 text-left">
+                                                <div class="relative bg-white p-4 rounded-3xl shadow-2xl max-w-lg w-full z-10 space-y-3 border border-slate-100 text-left">
                                                     <div class="flex justify-between items-center px-1">
-                                                        <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Attachment Preview</span>
-                                                        <button @click="open = false" type="button" class="text-slate-400 hover:text-red-500 transition text-sm">
+                                                        <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                                                            <i class="fa-solid fa-paperclip text-orange-500"></i> Attachment Preview
+                                                        </span>
+                                                        <button @click="open = false" type="button" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-red-100 text-slate-400 hover:text-red-500 transition flex items-center justify-center text-xs">
                                                             <i class="fa-solid fa-xmark"></i>
                                                         </button>
                                                     </div>
-
-                                                    <div class="overflow-hidden rounded-xl bg-slate-50 border border-slate-200/80 max-h-[70vh] flex items-center justify-center">
+                                                    <div class="overflow-hidden rounded-2xl bg-slate-900 border border-slate-200/80 max-h-[70vh] flex items-center justify-center p-2">
                                                         <img src="{{ asset('storage/' . $item->item_attachment) }}" 
-                                                            alt="Attachment" 
-                                                            class="max-w-full max-h-[65vh] object-contain rounded-lg">
+                                                             alt="Attachment" 
+                                                             class="max-w-full max-h-[65vh] object-contain rounded-xl">
                                                     </div>
                                                 </div>
                                             </div>
-
                                         </div>
                                     @else
-                                        <span class="py-3 px-4 text-xs text-slate-400 italic block text-center">No Attachment</span>
+                                        <span class="text-[11px] text-slate-400 italic block text-center">-</span>
                                     @endif
                                 </td>
                                 <td class="p-3">

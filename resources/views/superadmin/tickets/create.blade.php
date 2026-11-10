@@ -6,121 +6,132 @@
 <div class="space-y-6">
 
     <!-- Validation Error Alert -->
-    @if ($errors->any())
-        <div class="bg-red-950/80 border-l-4 border-red-500 p-4 rounded-xl shadow-sm text-red-200">
-            <div class="flex items-center gap-2 text-red-400 font-bold mb-1 text-sm">
+    @if($errors->any())
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl shadow-sm text-red-700">
+            <div class="flex items-center gap-2 text-red-600 font-bold mb-1 text-sm">
                 <i class="fa-solid fa-triangle-exclamation"></i> Please check the following errors:
             </div>
-            <ul class="list-disc pl-5 text-xs text-red-300 space-y-1">
+            <ul class="list-disc pl-5 text-xs text-red-600 space-y-1">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
         </div>
     @endif
-
+    
     <!-- Form Container -->
-    <form action="{{ route('superadmin.tickets.store') }}" method="POST" enctype="multipart/form-data" 
+    <form action="{{ route('superadmin.tickets.store') }}" method="POST" enctype="multipart/form-data"
           class="w-full bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[650px] text-slate-700">
         @csrf
 
-        <!-- LEFT SECTION: Main Form (8 Columns) -->
+        <!-- LEFT SECTION: Main Form -->
         <div class="lg:col-span-8 p-4 md:p-6 border-b lg:border-b-0 lg:border-r border-slate-200 bg-slate-50/50 flex flex-col justify-between">
-            
+
             <div class="space-y-5">
-                <div class="flex items-start gap-4">
+                <!-- Header User Info -->
+                <div class="flex items-center gap-4 mb-4">
                     <div class="w-12 h-12 rounded-xl bg-orange-500 text-white font-bold flex items-center justify-center text-lg shadow-sm shrink-0">
-                        {{ strtoupper(substr(Auth::user()->full_name ?? Auth::user()->name ?? 'SA', 0, 2)) }}
+                        <span>{{ strtoupper(substr(Auth::user()->full_name ?? Auth::user()->name ?? 'SA', 0, 2)) }}</span>
                     </div>
-
-                    <div class="flex-1 bg-orange-50/60 border border-orange-200 rounded-2xl p-4 md:p-5 relative">
-                        <div class="hidden md:block absolute -left-2 top-4 w-0 h-0 border-t-8 border-t-transparent border-r-8 border-r-orange-100 border-b-8 border-b-transparent"></div>
-
-                        <div class="text-sm font-bold text-slate-800 mb-3 flex items-center justify-between">
-                            <span>{{ Auth::user()->full_name ?? Auth::user()->name ?? 'Super Admin' }}</span>
-                            <span class="text-xs text-slate-400 font-normal">Create New Ticket</span>
-                        </div>
-
-                        <div class="bg-white border-l-4 border-sky-500 border-slate-200 rounded-lg p-2.5 mb-5 text-xs text-slate-600 flex items-center gap-2 shadow-sm">
-                            <span>This ticket will be created under Super Admin privileges.</span>
-                        </div>
-
-                        <!-- Title Input -->
-                        <div class="mb-5">
-                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Title <span class="text-red-500">*</span></label>
-                            <input type="text" name="title" required value="{{ old('title') }}" placeholder="Briefly describe the ticket subject..."
-                                class="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition">
-                        </div>
-
-                        <!-- Description Input (Visual WYSIWYG Editor) -->
-                        <div class="mb-2">
-                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Description <span class="text-red-500">*</span></label>
-                            
-                            <!-- Editor Toolbar -->
-                            <div class="bg-white border border-slate-300 rounded-t-xl p-2 flex flex-wrap items-center gap-2 text-xs text-slate-600 border-b-0">
-                                <!-- Paragraph / Heading Dropdown -->
-                                <select onchange="execCmdArg('formatBlock', this.value)" class="px-2 py-1 bg-slate-100 rounded text-slate-700 border border-slate-200 outline-none text-xs cursor-pointer font-medium">
-                                    <option value="p">Paragraph</option>
-                                    <option value="h1">Heading 1</option>
-                                    <option value="h2">Heading 2</option>
-                                    <option value="h3">Heading 3</option>
-                                </select>
-
-                                <div class="h-4 w-px bg-slate-200 mx-1"></div>
-
-                                <!-- Bold -->
-                                <button type="button" onclick="execCmd('bold')" class="p-1 hover:bg-slate-100 rounded font-bold px-2 text-slate-700" title="Bold">B</button>
-                                
-                                <!-- Italic -->
-                                <button type="button" onclick="execCmd('italic')" class="p-1 hover:bg-slate-100 rounded italic px-2 text-slate-700" title="Italic">I</button>
-                                
-                                <div class="h-4 w-px bg-slate-200 mx-1"></div>
-
-                                <!-- Underline -->
-                                <button type="button" onclick="execCmd('underline')" class="p-1 hover:bg-slate-100 rounded text-slate-700" title="Underline">
-                                    <i class="fa-solid fa-underline"></i>
-                                </button>
-
-                                <!-- Highlight -->
-                                <button type="button" onclick="execCmdArg('hiliteColor', '#fef08a')" class="p-1 hover:bg-slate-100 rounded text-slate-700" title="Highlight">
-                                    <i class="fa-solid fa-highlighter"></i>
-                                </button>
-
-                                <div class="h-4 w-px bg-slate-200 mx-1"></div>
-
-                                <!-- Bullet List -->
-                                <button type="button" onclick="execCmd('insertUnorderedList')" class="p-1 hover:bg-slate-100 rounded text-slate-700" title="Bullet List">
-                                    <i class="fa-solid fa-list-ul"></i>
-                                </button>
-
-                                <!-- Clear Formatting -->
-                                <button type="button" onclick="execCmd('removeFormat')" class="p-1 hover:bg-slate-100 rounded text-slate-700" title="Clear Formatting">
-                                    <i class="fa-solid fa-eraser"></i>
-                                </button>
-                            </div>
-
-                            <!-- Visual Rich Text Box -->
-                            <div id="visual-editor" contenteditable="true" 
-                                 class="w-full min-h-[180px] max-h-[300px] overflow-y-auto bg-white border border-slate-300 rounded-b-xl p-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500 transition border-t-0">
-                                {!! old('description') !!}
-                            </div>
-
-                            <input type="hidden" name="description" id="hidden-description" value="{{ old('description') }}" required>
-                        </div>
-
-                        <!-- Image Upload -->
-                        <div class="mt-4 bg-white p-3 rounded-xl border border-slate-200">
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Attachments / Images (Optional)</label>
-                            <input type="file" name="image" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer">
-                        </div>
-
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800">{{ Auth::user()->full_name ?? Auth::user()->name ?? 'Super Admin' }}</h3>
+                        <p class="text-xs text-slate-400 font-normal">Create New Ticket</p>
                     </div>
                 </div>
+
+                <div class="bg-sky-50 border-l-4 border-sky-500 rounded-lg p-3 text-xs text-sky-800 flex items-center gap-2 shadow-xs">
+                    <i class="fa-solid fa-circle-info text-sky-500 text-sm"></i>
+                    <span>This ticket will be created under Super Admin privileges and submitted to your selected department.</span>
+                </div>
+
+                <!-- Title Input -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Title <span class="text-red-500">*</span></label>
+                    <input type="text" name="title" required value="{{ old('title') }}" placeholder="Briefly describe the ticket subject..."
+                        class="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition">
+                </div>
+
+                <!-- Description Editor -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Description <span class="text-red-500">*</span></label>
+
+                    <!-- Editor Toolbar -->
+                    <div class="bg-white border border-slate-300 rounded-t-xl p-2 flex flex-wrap items-center gap-2 text-xs text-slate-600 border-b-0">
+
+                        <!-- Paragraph / Heading Dropdown -->
+                        <select onchange="execCmdArg('formatBlock', this.value)" class="px-2 py-1 bg-slate-100 rounded text-slate-700 border border-slate-200 outline-none text-xs cursor-pointer font-medium">
+                            <option value="p">Paragraph</option>
+                            <option value="h1">Heading 1</option>
+                            <option value="h2">Heading 2</option>
+                            <option value="h3">Heading 3</option>
+                        </select>
+
+                        <div class="h-4 w-px bg-slate-200 mx-1"></div>
+
+                        <!-- Bold -->
+                        <button type="button" onclick="execCmd('bold')" class="p-1 hover:bg-slate-100 rounded font-bold px-2 text-slate-700" title="Bold">B</button>
+                            
+                        <!-- Italic -->
+                        <button type="button" onclick="execCmd('italic')" class="p-1 hover:bg-slate-100 rounded italic px-2 text-slate-700" title="Italic">I</button>
+                            
+                        <div class="h-4 w-px bg-slate-200 mx-1"></div>
+
+                        <!-- Underline -->
+                        <button type="button" onclick="execCmd('underline')" class="p-1 hover:bg-slate-100 rounded text-slate-700" title="Underline">
+                            <i class="fa-solid fa-underline"></i>
+                        </button>
+
+                        <!-- Highlight -->
+                        <button type="button" onclick="execCmdArg('hiliteColor', '#fef08a')" class="p-1 hover:bg-slate-100 rounded text-slate-700" title="Highlight">
+                            <i class="fa-solid fa-highlighter"></i>
+                        </button>
+
+                        <div class="h-4 w-px bg-slate-200 mx-1"></div>
+
+                        <!-- Bullet List -->
+                        <button type="button" onclick="execCmd('insertUnorderedList')" class="p-1 hover:bg-slate-100 rounded text-slate-700" title="Bullet List">
+                            <i class="fa-solid fa-list-ul"></i>
+                        </button>
+
+                        <!-- Clear Formatting -->
+                        <button type="button" onclick="execCmd('removeFormat')" class="p-1 hover:bg-slate-100 rounded text-slate-700" title="Clear Formatting">
+                            <i class="fa-solid fa-eraser"></i>
+                        </button>
+                    </div>
+
+                    <!-- Visual Text Box -->
+                    <div id="visual-editor" contenteditable="true" 
+                        class="w-full min-h-[180px] max-h-[300px] overflow-y-auto bg-white border border-slate-300 rounded-b-xl p-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500 transition border-t-0">
+                        {!! old('description') !!}
+                    </div>
+
+                    <input type="hidden" name="description" id="hidden-description" value="{{ old('description') }}" required>
+                </div>
+
+                <!-- Image Upload -->
+                <div class="bg-white p-3.5 rounded-xl border border-slate-200 space-y-2">
+                    <label class="block text-xs font-semibold text-slate-600">Attachments / Images (Optional)</label>
+                    
+                    <input type="file" id="ticketImageInput" name="image" accept=".jpg,.jpeg,.png,.pdf" 
+                        class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer">
+
+                    <!-- Container Preview & Cancel File -->
+                    <div id="imagePreviewContainer" class="hidden flex items-center justify-between bg-orange-50/80 px-3 py-2 rounded-xl border border-orange-200 text-xs text-orange-800">
+                        <div class="flex items-center gap-2 truncate pr-2">
+                            <i id="fileTypeIcon" class="fa-solid fa-file text-orange-500 text-sm"></i>
+                            <span id="fileNameDisplay" class="font-semibold truncate">Selected file name</span>
+                        </div>
+                        <button type="button" id="cancelImageBtn" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg text-xs font-bold transition shrink-0 cursor-pointer" title="Cancel/Remove File">
+                            <i class="fa-solid fa-xmark mr-1"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+
             </div>
 
         </div>
 
-        <!-- RIGHT SECTION: Metadata Sidebar (4 Columns) -->
+        <!-- RIGHT SECTION: Metadata Sidebar -->
         <div class="lg:col-span-4 p-4 md:p-6 bg-white flex flex-col justify-between">
             <div class="space-y-4">
                 
@@ -134,14 +145,14 @@
                     <div class="relative">
                         <input type="text" name="opening_date" value="{{ date('Y-m-d H:i') }}" readonly 
                             class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-sm text-slate-700 font-medium pr-8 outline-none">
-                        <i class="fa-regular fa-calendar absolute right-3 top-3 text-slate-400 text-xs"></i>
+                        <i class="fa-regular fa-calendar absolute right-3 top-3.5 text-slate-400 text-xs"></i>
                     </div>
                 </div>
 
                 <!-- Name -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Submitted By Name</label>
-                    <input type="text" name="user_name" required value="{{ old('user_name', Auth::user()->name ?? Auth::user()->full_name ?? '') }}" 
+                    <input type="text" name="user_name" required value="{{ old('user_name', Auth::user()->full_name ?? Auth::user()->name ?? '') }}" 
                         class="w-full border border-slate-300 rounded-xl p-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
                 </div>
 
@@ -153,19 +164,25 @@
                 </div>
 
                 <!-- Department -->
-                 <div>
-                    <label for="department_id" class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Submitted To</label>
-                    <select name="department_id" id="department_select" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none transition">
+                <div>
+                    <label for="department_select" class="block text-xs font-semibold text-slate-500 mb-1">Submitted To (Department) <span class="text-red-500">*</span></label>
+                    <select name="department_id" id="department_select" required class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm font-medium text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer">
                         <option value="">-- Select Department --</option>
-                        @foreach($departments as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
+                        @foreach($departments as $key => $dept)
+                            @php
+                                $id = is_object($dept) ? ($dept->department_id ?? $dept->id) : (is_numeric($key) ? $key : $dept);
+                                $name = is_object($dept) ? ($dept->name ?? $dept->department_name) : $dept;
+                            @endphp
+                            <option value="{{ $id }}" {{ old('department_id') == $id ? 'selected' : '' }}>
+                                {{ $name }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
 
                 <!-- Type -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">Type</label>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Type <span class="text-red-500">*</span></label>
                     <select name="type" required class="w-full border border-slate-300 rounded-xl p-2.5 text-sm bg-white text-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none cursor-pointer">
                         @php
                             $typeList = $types ?? ['Incident', 'Request', 'Hardware', 'Software', 'Network', 'Facility', 'Others'];
@@ -180,7 +197,7 @@
 
                 <!-- Category -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">Category</label>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Category <span class="text-red-500">*</span></label>
                     <select name="category" required class="w-full border border-slate-300 rounded-xl p-2.5 text-sm bg-white text-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none cursor-pointer">
                         <option value="">Choose Category...</option>
                         @php
@@ -196,7 +213,7 @@
 
                 <!-- Priority -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">Priority</label>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Priority <span class="text-red-500">*</span></label>
                     <select name="priority" required class="w-full border border-slate-300 rounded-xl p-2.5 text-sm bg-white text-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none cursor-pointer">
                         @php
                             $priorityList = $priorities ?? ['Low', 'Medium', 'High', 'Urgent'];
@@ -211,7 +228,7 @@
 
                 <!-- Location -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">Location</label>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Location <span class="text-red-500">*</span></label>
                     <input type="text" name="location" required value="{{ old('location') }}" placeholder="e.g. Level 9 Lab"
                         class="w-full border border-slate-300 rounded-xl p-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
                 </div>
@@ -241,9 +258,8 @@
     </form>
 </div>
 
-<!-- JavaScript Visual Command Sync -->
+<!-- JavaScript Editor & File Upload Handler -->
 <script>
-
     function execCmd(command) {
         document.execCommand(command, false, null);
         syncEditorContent();
@@ -267,6 +283,42 @@
 
     document.querySelector('form').addEventListener('submit', function() {
         syncEditorContent();
+    });
+
+    // File Preview & Cancel Handler
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('ticketImageInput');
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const fileTypeIcon = document.getElementById('fileTypeIcon');
+        const cancelBtn = document.getElementById('cancelImageBtn');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    fileNameDisplay.textContent = file.name;
+
+                    if (file.type.includes('pdf')) {
+                        fileTypeIcon.className = 'fa-solid fa-file-pdf text-red-500 text-sm';
+                    } else if (file.type.includes('image')) {
+                        fileTypeIcon.className = 'fa-solid fa-file-image text-blue-500 text-sm';
+                    } else {
+                        fileTypeIcon.className = 'fa-solid fa-file text-orange-500 text-sm';
+                    }
+
+                    previewContainer.classList.remove('hidden');
+                }
+            });
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function() {
+                fileInput.value = '';
+                previewContainer.classList.add('hidden');
+                fileNameDisplay.textContent = '';
+            });
+        }
     });
 </script>
 @endsection

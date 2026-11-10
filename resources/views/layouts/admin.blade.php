@@ -56,7 +56,7 @@
 
             <!-- Admin Badge -->
             <span class="bg-orange-600 text-white font-extrabold text-[11px] px-3 py-1 rounded-full uppercase tracking-wider ml-2 shadow-sm">
-                ADMIN PANEL ({{ Auth::user()->department ?? 'IT' }})
+                ADMIN PANEL ({{ Auth::user()->department->department_code ?? Auth::user()->department->code ?? 'ALL DEPARTMENTS' }})
             </span>
         </div>
 

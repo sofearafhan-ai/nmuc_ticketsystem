@@ -15,10 +15,12 @@ class User extends Authenticatable
 
     protected $fillable = [
         'full_name',
+        'nmuc_id',
         'email',
         'password',
         'role',
         'department_id',
+        'user_status',
     ];
 
     protected $hidden = [
@@ -38,5 +40,10 @@ class User extends Authenticatable
     public function inventories()
     {
         return $this->hasMany(Inventory::class, 'user_id', 'user_id');
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id', 'department_id');
     }
 }

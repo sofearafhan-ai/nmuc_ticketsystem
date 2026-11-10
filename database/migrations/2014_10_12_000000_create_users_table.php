@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('password', 255);
 
             $table->enum('role', ['Super Admin', 'Admin', 'Authentication User']);
+            $table->enum('status', ['Active', 'Inactive']);
 
             $table->string('department', 255);
             $table->timestamp('created_at')->useCurrent();
