@@ -42,28 +42,28 @@
             <!-- SECTION 1: Account Information -->
             <div class="space-y-4">
                 <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-id-card text-orange-500"></i> Basic Information
+                    Basic Information
                 </h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <!-- Full Name -->
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1.5">Full Name <span class="text-red-500">*</span></label>
-                        <input type="text" name="full_name" value="{{ old('full_name') }}" required placeholder="e.g. Ahmad Faliq"
+                        <input type="text" name="full_name" value="{{ old('full_name') }}"
                                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
                     </div>
 
                     <!-- Email Address -->
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1.5">Email Address <span class="text-red-500">*</span></label>
-                        <input type="email" name="email" value="{{ old('email') }}" required placeholder="ahmad@nmuc.edu.my"
+                        <input type="email" name="email" value="{{ old('email') }}"
                                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
                     </div>
 
                     <!-- User ID -->
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">User ID / NMUC ID <span class="text-red-500">*</span></label>
-                        <input type="text" name="nmuc_id" value="{{ old('nmuc_id') }}" required placeholder="e.g. 10023"
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">ID <span class="text-red-500">*</span></label>
+                        <input type="text" name="nmuc_id" value="{{ old('nmuc_id') }}"
                                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
                     </div>
                     
@@ -76,7 +76,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- User Role -->
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">User Role <span class="text-red-500">*</span></label>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Role <span class="text-red-500">*</span></label>
                         <select name="role" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer">
                             <option value="">-- Select Role --</option>
                             @foreach($roles as $r)
@@ -105,7 +105,7 @@
             <!-- SECTION 3: Security -->
             <div class="space-y-4 pt-2">
                 <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-key text-orange-500"></i> Security Credentials
+                    Security Credentials
                 </h3>
 
                 <div>

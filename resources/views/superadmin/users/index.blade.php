@@ -24,7 +24,7 @@
     <!-- Header Section & Add User Button -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-[#0d1527] p-6 rounded-3xl text-white shadow-lg gap-4">
         <div>
-            <h1 class="text-xl font-bold text-slate-800 text-white">User Management</h1>
+            <h1 class="text-xl font-bold text-white">User Management</h1>
             <p class="text-xs text-slate-400 mt-1">Manage system access, roles, and departmental assignments for all users.</p>
         </div>
         <a href="{{ route('superadmin.users.create') }}" 
@@ -39,71 +39,72 @@
         
         <!-- 1. Top Section: Filter & Search Bar -->
         <div class="p-5 bg-white">
-            <form action="{{ route('superadmin.users.index') }}" method="GET" class="flex flex-col md:flex-row gap-3">
+            <form action="{{ route('superadmin.users.index') }}" method="GET" class="space-y-4">
                 
-                <!-- Search Input -->
-                <div class="flex-1 relative">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by name, email, or department..." 
-                           class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-orange-500 transition">
+                <!-- Search & Action Buttons Row -->
+                <div class="flex flex-col sm:flex-row items-center gap-3">
+                    <div class="relative flex-1 w-full">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search..." 
+                               class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 outline-none focus:ring-2 focus:ring-orange-500 transition focus:bg-white">
+                    </div>
+
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <button type="submit"
+                                class="flex-1 sm:flex-initial px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-filter"></i> Filter
+                        </button>
+
+                        <a href="{{ route('superadmin.users.export', request()->all()) }}"
+                           class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span>Export Excel</span>
+                        </a>
+
+                        @if(request()->hasAny(['search', 'department_id', 'role', 'status']))
+                            <a href="{{ route('superadmin.users.index') }}" 
+                               class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
+                               title="Reset Filters">
+                                <i class="fa-solid fa-rotate-right text-[11px]"></i>
+                                <span>Reset</span>
+                            </a>
+                        @endif
+                    </div>
                 </div>
 
-                <!-- Filter Department -->
-                <select name="department_id" class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-orange-500 transition cursor-pointer">
-                    <option value="">All Departments</option>
-                    @foreach($departments ?? [] as $dept)
-                        @php
-                            $deptId = $dept->department_id ?? $dept->id;
-                            $deptName = $dept->department_name ?? $dept->name;
-                        @endphp
-                        <option value="{{ $deptId }}" {{ request('department_id') == $deptId ? 'selected' : '' }}>
-                            {{ $deptName }}
-                        </option>
-                    @endforeach
-                </select>
+                <!-- Dropdown Filters Row -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                    <select name="department_id" class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-orange-500 transition cursor-pointer">
+                        <option value="">All Departments</option>
+                        @foreach($departments ?? [] as $dept)
+                            @php
+                                $deptId = $dept->department_id ?? $dept->id;
+                                $deptName = $dept->department_name ?? $dept->name;
+                            @endphp
+                            <option value="{{ $deptId }}" {{ request('department_id') == $deptId ? 'selected' : '' }}>
+                                {{ $deptName }}
+                            </option>
+                        @endforeach
+                    </select>
 
-                <!-- Filter Role -->
-                <select name="role" class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-orange-500 transition cursor-pointer">
-                    <option value="">All Roles</option>
-                    <option value="Authentication User" {{ request('role') == 'Authentication User' ? 'selected' : '' }}>User</option>
-                    <option value="Admin" {{ request('role') == 'Admin' ? 'selected' : '' }}>Admin</option>
-                    <option value="Super Admin" {{ request('role') == 'Super Admin' ? 'selected' : '' }}>Super Admin</option>
-                </select>
+                    <select name="role" class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-orange-500 transition cursor-pointer">
+                        <option value="">All Roles</option>
+                        <option value="Authentication User" {{ request('role') == 'Authentication User' ? 'selected' : '' }}>User</option>
+                        <option value="Admin" {{ request('role') == 'Admin' ? 'selected' : '' }}>Admin</option>
+                        <option value="Super Admin" {{ request('role') == 'Super Admin' ? 'selected' : '' }}>Super Admin</option>
+                    </select>
 
-                <!-- Filter Status -->
-                <select name="status" class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-orange-500 transition cursor-pointer">
-                    <option value="">All Statuses</option>
-                    <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Active</option>
-                    <option value="Inactive" {{ request('status') == 'Inactive' ? 'selected' : '' }}>Inactive</option>
-                </select>
-
-                <!-- Submit Filter Button -->
-                <button type="submit" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 shadow-xs">
-                    <i class="fa-solid fa-filter text-[11px]"></i>
-                    <span>Filter</span>
-                </button>
-
-                <!-- Export Excel Button -->
-                <a href="{{ route('superadmin.users.export', request()->all()) }}"
-                class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-file-excel text-[11px]"></i>
-                    <span>Export Excel</span>
-                </a>
-
-                <!-- Reset Button -->
-                @if(request()->hasAny(['search', 'department_id', 'role', 'status']))
-                    <a href="{{ route('superadmin.users.index') }}" 
-                       class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
-                       title="Reset Filters">
-                        <i class="fa-solid fa-rotate-right text-[11px]"></i>
-                        <span>Reset</span>
-                    </a>
-                @endif
+                    <select name="status" class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-orange-500 transition cursor-pointer">
+                        <option value="">All Statuses</option>
+                        <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Active</option>
+                        <option value="Inactive" {{ request('status') == 'Inactive' ? 'selected' : '' }}>Inactive</option>
+                    </select>
+                </div>
 
             </form>
         </div>
 
-    <!-- User List Table -->
+        <!-- 2. User List Table -->
         <div class="p-6">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
@@ -138,7 +139,7 @@
                                 </td>
 
                                 <!-- 3. User ID -->
-                                <td class="p-3 text-center text-xs font-mono font-bold text-slate-500">
+                                <td class="p-3 text-center text-xs font-bold text-slate-500">
                                     {{ $user->nmuc_id }}
                                 </td>
 
@@ -174,15 +175,15 @@
                                 <td class="p-3 text-center">
                                     <div class="flex items-center justify-center gap-2">
                                         <a href="{{ route('superadmin.users.edit', $userId) }}" 
-                                        title="Edit User"
-                                        class="px-2.5 py-1.5 bg-slate-100 hover:bg-orange-500 text-slate-600 hover:text-white rounded-lg text-xs font-semibold transition border border-slate-200 hover:border-orange-500 flex items-center gap-1 cursor-pointer">
+                                           title="Edit User"
+                                           class="px-2.5 py-1.5 bg-slate-100 hover:bg-orange-500 text-slate-600 hover:text-white rounded-lg text-xs font-semibold transition border border-slate-200 hover:border-orange-500 flex items-center gap-1 cursor-pointer">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
 
                                         <form action="{{ route('superadmin.users.destroy', $userId) }}" 
-                                            method="POST" 
-                                            onsubmit="return confirm('Are you sure you want to delete this user?');" 
-                                            class="inline">
+                                              method="POST" 
+                                              onsubmit="return confirm('Are you sure you want to delete this user?');" 
+                                              class="inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" 
@@ -196,7 +197,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="p-8 text-center text-slate-400 text-xs">
+                                <td colspan="8" class="p-8 text-center text-slate-400 text-xs">
                                     <i class="fa-regular fa-id-badge text-3xl mb-2 text-slate-300 block"></i>
                                     No user accounts found.
                                 </td>

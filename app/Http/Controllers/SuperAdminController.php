@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Models\Ticket;
 use App\Models\Inventory;
 use App\Models\Department;
-use App\Exports\UsersExport;
+use App\Exports\SuperAdmin\UserExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -17,7 +17,8 @@ class SuperAdminController extends Controller
 {
     public function usersExport(Request $request)
     {
-        return Excel::download(new UsersExport($request), 'users_list_' . now()->format('Ymd_His') . '.xlsx');
+        $fileName = 'user_list_' . date('Y_m_d_His') . '.xlsx';
+        return Excel::download(new UserExport($request), $fileName);
     }
 
     public function dashboard()
@@ -263,7 +264,7 @@ class SuperAdminController extends Controller
         public function ticketsCreate()
         {
             $departments = Department::pluck('department_name', 'department_id');
-            $types       = ['Incident', 'Request', 'Hardware', 'Software', 'Network', 'Facility', 'Others'];
+            $types       = ['Incident', 'Request'];
             $categories  = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
             $priorities  = ['Low', 'Medium', 'High', 'Urgent'];
 
@@ -282,7 +283,7 @@ class SuperAdminController extends Controller
             'category'      => 'required|string',
             'priority'      => 'required|string',
             'location'      => 'required|string',
-            'image'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image'         => 'nullable|image|mimes:jpeg,png,jpg,pdf|max:2048',
         ]);
 
         $imagePath = null;
@@ -386,7 +387,7 @@ class SuperAdminController extends Controller
         $ticket = Ticket::with(['user', 'replies', 'department'])->where('ticket_id', $id)->firstOrFail();
 
         $categories = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
-        $types      = ['Incident', 'Request', 'Hardware', 'Software', 'Network', 'Facility', 'Others'];
+        $types      = ['Incident', 'Request'];
         $statuses   = ['New', 'Processing', 'Pending', 'Closed'];
         $priorities = ['Low', 'Medium', 'High', 'Urgent'];
 
@@ -416,7 +417,7 @@ class SuperAdminController extends Controller
             'location'      => 'nullable|string',
             'department_id' => 'nullable',
             'pic_id'        => 'nullable',
-            'image'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image'         => 'nullable|image|mimes:jpeg,png,jpg,pdf|max:2048',
         ]);
 
         $oldStatus = $ticket->status;

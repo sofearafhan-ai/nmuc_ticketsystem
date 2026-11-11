@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exports\UserExport;
+namespace App\Exports\SuperAdmin;
 
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -11,7 +11,7 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class UsersExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
+class UserExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
 {
     protected $request;
 

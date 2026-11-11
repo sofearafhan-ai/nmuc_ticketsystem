@@ -41,11 +41,17 @@
                         <i class="fa-solid fa-filter"></i> Filter
                     </button>
 
+                    <a href="{{ route('superadmin.users.export', request()->all()) }}"
+                           class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span>Export Excel</span>
+                    </a>
+
                      @if(request()->hasAny(['search', 'category', 'type', 'priority', 'status', 'department_id', 'month', 'year']))
                         <a href="{{ route('superadmin.tickets.index') }}" 
                            class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl transition flex items-center gap-1.5"
                            title="Reset Filters">
-                            <i class="fa-solid fa-rotate-right"></i> Reset
+                            <i class="fa-solid fa-rotate-right"></i>
                         </a>
                     @endif
                 </div>

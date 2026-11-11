@@ -14,8 +14,8 @@
     @endif
 
     <!-- Header Section -->
-    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
-        <h1 class="text-xl font-bold text-slate-800">Department Management</h1>
+    <div class="bg-[#0d1527] p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+        <h1 class="text-xl textfont-bold text-slate-800">Department Management</h1>
         <p class="text-xs text-slate-400 mt-1">Add, update, or remove departments used across the ticketing & inventory systems.</p>
     </div>
 

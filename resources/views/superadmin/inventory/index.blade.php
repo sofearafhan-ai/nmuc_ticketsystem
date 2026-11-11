@@ -44,48 +44,61 @@
                     <p class="text-xs text-slate-400 mt-0.5">Choose a departmental vault to access its itemized inventory catalogue.</p>
                 </div>
 
-                <!-- Global Search Box -->
-                <form action="{{ route('superadmin.inventory.index') }}" method="GET" class="w-full md:w-80">
-                    <div class="relative">
+                <form action="{{ route('superadmin.inventory.index') }}" method="GET" class="w-full md:w-80 flex items-center gap-2">
+                    <div class="relative flex-1">
                         <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                        <input type="text" name="search" value="{{ request('search') }}" 
-                               placeholder="Search department..." 
-                               class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
+                        <input type="text" 
+                            name="search" 
+                            value="{{ request('search') }}" 
+                            placeholder="Search department..." 
+                            onchange="this.form.submit()"
+                            class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
+                        
+                        @if(request()->filled('search'))
+                            <a href="{{ route('superadmin.inventory.index') }}" 
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                            title="Clear Search">
+                                <i class="fa-solid fa-xmark"></i>
+                            </a>
+                        @endif
                     </div>
                 </form>
             </div>
             
             <!-- Departments Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            <div class="grid grid-cols-1 gap-4">
                 @forelse($departments as $dept)
                     @php
                         $deptName = is_object($dept) ? ($dept->department_name ?? $dept->name) : $dept;
                         $deptCode = is_object($dept) ? ($dept->code ?? 'DEPT') : 'N/A';
-                    @endphp
-                    <div class="group bg-white hover:bg-orange-50/20 p-5 rounded-2xl border border-slate-200/90 hover:border-orange-300 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between relative overflow-hidden">
                         
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                                <div class="w-12 h-12 rounded-2xl bg-orange-100/70 text-orange-600 flex items-center justify-center text-xl group-hover:scale-110 transition-transform duration-300">
-                                    <i class="fa-solid fa-building"></i>
-                                </div>
-                                <span class="bg-slate-100 group-hover:bg-orange-100 text-slate-500 group-hover:text-orange-700 text-[10px] font-extrabold px-2.5 py-1 rounded-lg uppercase tracking-wider transition">
-                                    {{ $deptCode }}
-                                </span>
-                            </div>
+                        $totalItems = is_object($dept) ? ($dept->inventories_count ?? $dept->items_count ?? count($dept->inventories ?? [])) : 0;
+                    @endphp
 
-                            <div>
-                                <h3 class="font-bold text-slate-800 text-sm group-hover:text-orange-600 transition truncate" title="{{ $deptName }}">
-                                    {{ $deptName }}
-                                </h3>
+                    <div class="group bg-white hover:bg-orange-50/20 p-5 rounded-2xl border border-slate-200/90 hover:border-orange-300 shadow-xs hover:shadow-md transition-all duration-300 flex items-center justify-between gap-4 relative overflow-hidden">
+                        
+                        <div class="space-y-3 flex-1 min-w-0">
+                            <h3 class="font-bold text-slate-800 text-base group-hover:text-orange-600 transition truncate" title="{{ $deptName }}">
+                                {{ $deptName }}
+                            </h3>
+
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 group-hover:bg-orange-100/60 text-slate-600 group-hover:text-orange-700 text-xs font-semibold transition border border-slate-200/60 group-hover:border-orange-200">
+                                <span>Total: {{ $totalItems }} Items</span>
                             </div>
                         </div>
-                        
-                        <a href="{{ route('superadmin.inventory.index', ['department' => $deptName]) }}" 
-                           class="mt-5 w-full py-2.5 bg-slate-900 group-hover:bg-orange-500 text-white text-xs font-bold rounded-xl shadow-xs transition-all duration-300 text-center flex items-center justify-center gap-2 group-hover:shadow-md">
-                            <span>View Inventory</span>
-                            <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
-                        </a>
+
+                        <div class="flex flex-col items-end justify-between self-stretch gap-3 shrink-0">
+                            <span class="bg-slate-100 group-hover:bg-orange-100 text-slate-600 group-hover:text-orange-700 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider transition border border-slate-200/60 group-hover:border-orange-200">
+                                {{ $deptCode }}
+                            </span>
+
+                            <a href="{{ route('superadmin.inventory.index', ['department' => $deptName]) }}" 
+                            title="View Inventory"
+                            class="w-10 h-10 bg-slate-900 group-hover:bg-orange-500 text-white rounded-full shadow-xs transition-all duration-300 flex items-center justify-center group-hover:shadow-md">
+                                <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-0.5 transition-transform"></i>
+                            </a>
+                        </div>
+
                     </div>
                 @empty
                     <div class="col-span-full text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
@@ -101,8 +114,7 @@
 
         <!-- FILTER & TOOLBAR CARD -->
         <div class="bg-white rounded-3xl p-5 md:p-6 shadow-sm border border-slate-200/80 space-y-4">
-            
-            <!-- Breadcrumb Navigation -->
+
             <div class="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div class="flex items-center gap-2 flex-wrap text-xs">
                     <a href="{{ route('superadmin.inventory.index') }}" 
@@ -111,57 +123,51 @@
                     </a>
                     <span class="text-slate-300">/</span>
                     <span class="px-3 py-1.5 bg-orange-50 text-orange-600 font-extrabold rounded-xl border border-orange-200 uppercase tracking-wider">
-                        <i class="fa-solid fa-building mr-1.5 text-[10px]"></i> {{ request('department') }}
+                        {{ request('department') }}
                     </span>
                 </div>
-
-                @if(request()->hasAny(['search', 'type', 'status']))
-                    <a href="{{ route('superadmin.inventory.index', ['department' => request('department')]) }}" 
-                       class="text-xs text-slate-400 hover:text-red-500 font-semibold flex items-center gap-1 transition"
-                       title="Reset Filters">
-                        <i class="fa-solid fa-rotate-right"></i> Reset All Filters
-                    </a>
-                @endif
             </div>
 
-            <!-- Filter Form -->
+            <div class="p-5 bg-white">
             <form action="{{ route('superadmin.inventory.index') }}" method="GET" class="space-y-4">
-                <input type="hidden" name="department" value="{{ request('department') }}">
                 
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
-                    
-                    <!-- Search Bar (Span 6) -->
-                    <div class="md:col-span-6 relative">
+                <!-- Search & Action Buttons Row -->
+                <div class="flex flex-col sm:flex-row items-center gap-3">
+                    <div class="relative flex-1 w-full">
                         <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                        <input type="text" name="search" value="{{ request('search') }}" 
-                               placeholder="Search item name, model, serial no, or location..." 
-                               class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search..." 
+                               class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 outline-none focus:ring-2 focus:ring-orange-500 transition focus:bg-white">
                     </div>
 
-                    <!-- Status Dropdown (Span 3) -->
-                    <div class="md:col-span-3">
-                        <select name="status" onchange="this.form.submit()" 
-                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer">
-                            <option value="">All Statuses</option>
-                            <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Active</option>
-                            <option value="Inactive" {{ request('status') == 'Inactive' ? 'selected' : '' }}>Inactive</option>
-                        </select>
-                    </div>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <button type="submit"
+                                class="flex-1 sm:flex-initial px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-filter"></i> Filter
+                        </button>
 
+                        <a href="{{ route('admin.inventory.export', request()->all()) }}"
+                           class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span>Export Excel</span>
+                        </a>
+
+                        @if(request()->hasAny(['search', 'status']))
+                            <a href="{{ route('superadmin.inventory.index') }}" 
+                               class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
+                               title="Reset Filters">
+                                <i class="fa-solid fa-rotate-right text-[11px]"></i>
+                            </a>
+                        @endif
+                    </div>
                 </div>
 
-                <!-- Action Toolbar Buttons -->
-                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                    <button type="submit" 
-                            class="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-2 cursor-pointer">
-                        <i class="fa-solid fa-filter text-[11px]"></i> Apply Filter
-                    </button>
+                <div class="grid grid-cols-1 sm:grid-cols-1 gap-3 pt-1">
 
-                    <a href="{{ route('admin.inventory.export', request()->all()) }}"
-                       class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-2 cursor-pointer"
-                       title="Export to Excel">
-                       <i class="fa-solid fa-file-excel text-[11px]"></i> Export Excel
-                    </a>
+                    <select name="status" class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-orange-500 transition cursor-pointer">
+                        <option value="">All Statuses</option>
+                        <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Active</option>
+                        <option value="Inactive" {{ request('status') == 'Inactive' ? 'selected' : '' }}>Inactive</option>
+                    </select>
                 </div>
 
             </form>
