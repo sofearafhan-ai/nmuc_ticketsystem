@@ -179,7 +179,7 @@
 
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left text-slate-600">
-                <thead class="text-xs text-slate-500 uppercase bg-slate-50 rounded-lg">
+                <thead class="border-b border-orange-100 bg-orange-50 text-orange-400 uppercase text-[11px] font-bold tracking-wider">
                     <tr>
                         <th scope="col" class="px-4 py-3 text-center">Ticket ID</th>
                         <th scope="col" class="px-4 py-3 text-center">Title</th>

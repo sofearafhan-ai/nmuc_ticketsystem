@@ -5,7 +5,6 @@
 @section('content')
 
 <style>
-    /* Styling Scrollbar */
     .custom-scrollbar::-webkit-scrollbar {
         width: 6px;
     }
@@ -31,13 +30,11 @@
             
             <!-- Top Header & Filter Bar (Fixed Header) -->
             <div class="p-4 border-b border-slate-100 space-y-3 shrink-0">
-                <!-- Total Tickets & Sort Dropdown -->
                 <div class="flex items-center justify-between">
                     <h3 class="font-bold text-slate-800 text-sm">
                         Total ticket <span class="text-slate-500 font-semibold ml-1">{{ count($conversations ?? []) }}</span>
                     </h3>
 
-                    <!-- Dropdown Sort -->
                     <div class="relative">
                         <select onchange="location = this.value;" class="text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 outline-none cursor-pointer hover:bg-slate-100 transition">
                             <option value="{{ route('superadmin.messages.index', array_merge(request()->query(), ['sort' => 'newest'])) }}" {{ request('sort') != 'oldest' ? 'selected' : '' }}>Newest</option>
@@ -46,7 +43,6 @@
                     </div>
                 </div>
 
-                <!-- Search Bar -->
                 <form action="{{ route('superadmin.messages.index') }}" method="GET" class="relative">
                     @if(request('status'))
                         <input type="hidden" name="status" value="{{ request('status') }}">
@@ -55,8 +51,7 @@
                     <input type="text" id="chatSearchInput" name="search" value="{{ request('search') }}" placeholder="Search..." 
                         class="w-full pl-9 pr-4 py-2 bg-slate-100/80 rounded-xl text-xs text-slate-800 placeholder-slate-400 border border-transparent focus:border-orange-500 focus:bg-white outline-none transition">
                 </form>
-                
-                <!-- Filter Status Buttons -->
+ 
                 <div class="flex items-center gap-1.5 text-xs pt-1">
                     <a href="{{ route('superadmin.messages.index', request()->only('search')) }}" 
                        class="px-3 py-1.5 rounded-xl font-bold cursor-pointer transition {{ !request('status') ? 'bg-orange-500 text-white shadow-2xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
@@ -73,7 +68,6 @@
                 </div>
             </div>
 
-            <!-- Conversation Items Container -->
             <div class="flex-1 overflow-y-auto custom-scrollbar divide-y divide-slate-100" id="chatListContainer">
                 @php
                     $chatList = $conversations ?? $tickets ?? [];
@@ -120,14 +114,12 @@
                         
                         <div class="w-1.5 self-stretch shrink-0 {{ $isActive ? 'bg-slate-900 rounded-r-md' : 'bg-transparent' }}"></div>
 
-                        <!-- Avatar -->
                         <div class="relative shrink-0 mt-0.5">
                             <div class="w-9 h-9 rounded-full bg-slate-400 text-white font-bold flex items-center justify-center text-xs shadow-2xs">
                                 <i class="fa-solid fa-diamond text-[10px]"></i>
                             </div>
                         </div>
 
-                        <!-- Chat Details Layout -->
                         <div class="flex-1 min-w-0 space-y-1 pr-2">
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-extrabold text-slate-900 tracking-tight">
@@ -178,7 +170,6 @@
                     $isTicketClosed = in_array($activeTicket->status ?? '', ['Close', 'Closed']);
                 @endphp
 
-                <!-- Active Chat Header (Fixed Header) -->
                 <div class="px-6 py-4 bg-white border-b border-slate-200 flex items-center justify-between shadow-2xs shrink-0">
                     <div class="flex items-center gap-3 min-w-0">
                         <div class="w-10 h-10 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-sm shrink-0 shadow-xs">
@@ -213,7 +204,6 @@
                     </div>
                 </div>
 
-                <!-- Messages Container -->
                 <div class="flex-1 p-5 md:p-6 overflow-y-auto custom-scrollbar space-y-4 bg-white" id="messageScrollContainer">
                     
                     <!-- 1. First Ticket Message (Submission oleh User) -->
@@ -233,12 +223,17 @@
                             @if(!empty($ticketMainAttachment) && $ticketMainAttachment !== 'no-image.png')
                                 @php
                                     $mainExt = strtolower(pathinfo($ticketMainAttachment, PATHINFO_EXTENSION));
-                                    $isMainImg = in_array($mainExt, ['jpg', 'jpeg', 'png', 'pdf']);
+                                    $isMainImg = in_array($mainExt, ['jpg', 'jpeg', 'png']);
                                 @endphp
                                 <div class="mt-2 pt-2 border-t border-slate-200/60">
                                     @if($isMainImg)
                                         <a href="{{ asset('storage/' . $ticketMainAttachment) }}" target="_blank" class="block group">
                                             <img src="{{ asset('storage/' . $ticketMainAttachment) }}" alt="Ticket Attachment" class="max-w-xs max-h-56 rounded-xl border border-slate-200 object-cover shadow-2xs group-hover:opacity-95 transition">
+                                        </a>
+                                    @elseif($mainExt === 'pdf')
+                                        <a href="{{ asset('storage/' . $ticketMainAttachment) }}" target="_blank" class="inline-flex items-center gap-2.5 px-3 py-2 bg-white hover:bg-red-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition shadow-2xs">
+                                            <i class="fa-solid fa-file-pdf text-red-500 text-lg"></i>
+                                            <span class="truncate max-w-[180px]">{{ basename($ticketMainAttachment) }}</span>
                                         </a>
                                     @else
                                         <a href="{{ asset('storage/' . $ticketMainAttachment) }}" target="_blank" class="text-xs text-sky-600 hover:underline flex items-center gap-1.5 font-medium">
@@ -267,7 +262,6 @@
                                 
                                 $msgLower = strtolower(trim($reply->message ?? ''));
 
-                                // Semakan fleksibel untuk Status & PIC Log
                                 $isSystemStatus = str_contains($msgLower, 'status_change:') 
                                                || str_contains($msgLower, 'status updated to')
                                                || str_contains($msgLower, 'status changed to');
@@ -277,7 +271,7 @@
 
                                 $attachment = $reply->attachment ?? null;
                                 $ext = $attachment ? strtolower(pathinfo($attachment, PATHINFO_EXTENSION)) : '';
-                                $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'pdf']);
+                                $isImage = in_array($ext, ['jpg', 'jpeg', 'png']);
                             @endphp
 
                             @if($isSystemPic)
@@ -369,8 +363,13 @@
                                                     <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="block group">
                                                         <img src="{{ asset('storage/' . $attachment) }}" alt="Attachment" class="max-w-xs max-h-56 rounded-xl border border-slate-200 object-cover shadow-2xs group-hover:opacity-90 transition">
                                                     </a>
+                                                @elseif($ext === 'pdf')
+                                                    <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="inline-flex items-center gap-2.5 px-3 py-2 bg-white hover:bg-red-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition shadow-2xs">
+                                                        <i class="fa-solid fa-file-pdf text-red-500 text-lg"></i>
+                                                        <span class="truncate max-w-[180px]">{{ basename($attachment) }}</span>
+                                                    </a>
                                                 @else
-                                                    <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="text-xs text-sky-600 hover:underline flex items-center gap-1.5">
+                                                    <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="text-xs text-blue-600 hover:underline flex items-center gap-1.5">
                                                         <i class="fa-solid fa-paperclip"></i> Download File
                                                     </a>
                                                 @endif

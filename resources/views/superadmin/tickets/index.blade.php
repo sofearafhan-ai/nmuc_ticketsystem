@@ -15,9 +15,9 @@
         </div>
     </div>
 
-    @if (session('success'))
-        <div class="bg-emerald-900/90 border-l-4 border-emerald-400 text-emerald-100 px-4 py-3 rounded-xl shadow-sm text-sm flex items-center gap-2">
-            <i class="fa-solid fa-circle-check text-emerald-300"></i>
+    @if(session('success'))
+        <div class="p-4 bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
             <span>{{ session('success') }}</span>
         </div>
     @endif
@@ -41,13 +41,13 @@
                         <i class="fa-solid fa-filter"></i> Filter
                     </button>
 
-                    <a href="{{ route('superadmin.users.export', request()->all()) }}"
+                    <a href="{{ route('superadmin.tickets.export', request()->all()) }}"
                            class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
                             <i class="fa-solid fa-file-excel"></i>
                             <span>Export Excel</span>
                     </a>
 
-                     @if(request()->hasAny(['search', 'category', 'type', 'priority', 'status', 'department_id', 'month', 'year']))
+                     @if(request()->hasAny(['search', 'category', 'priority', 'status', 'department_id', 'month', 'year']))
                         <a href="{{ route('superadmin.tickets.index') }}" 
                            class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl transition flex items-center gap-1.5"
                            title="Reset Filters">
@@ -60,9 +60,9 @@
             <hr class="border-slate-100">
 
             <!-- Bottom 6 Dropdown Filters Grid -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-2">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-3 pt-2">
                 
-                <!-- 1. CATEGORY -->
+                <!-- CATEGORY -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Category</label>
                     <select name="category" onchange="this.form.submit()" 
@@ -74,19 +74,7 @@
                     </select>
                 </div>
 
-                <!-- 2. TYPE -->
-                <div>
-                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Type</label>
-                    <select name="type" onchange="this.form.submit()" 
-                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer">
-                        <option value="">All Types</option>
-                        @foreach(($types ?? ['Incident', 'Request']) as $tp)
-                            <option value="{{ $tp }}" {{ request('type') == $tp ? 'selected' : '' }}>{{ $tp }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- 3. PRIORITY -->
+                <!-- PRIORITY -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Priority</label>
                     <select name="priority" onchange="this.form.submit()" 
@@ -98,7 +86,7 @@
                     </select>
                 </div>
 
-                <!-- 4. STATUS -->
+                <!-- STATUS -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Status</label>
                     <select name="status" onchange="this.form.submit()" 
@@ -111,7 +99,7 @@
                     </select>
                 </div>
 
-                <!-- 5. DEPARTMENT -->
+                <!-- DEPARTMENT -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Department</label>
                     <select name="department_id" onchange="this.form.submit()" 
@@ -128,7 +116,7 @@
                     </select>
                 </div>
 
-                <!-- 6. MONTH -->
+                <!-- MONTH -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Month</label>
                     <select name="month" onchange="this.form.submit()" 
@@ -140,7 +128,7 @@
                     </select>
                 </div>
 
-                <!-- 7. YEAR -->
+                <!-- YEAR -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Year</label>
                     <select name="year" onchange="this.form.submit()" 

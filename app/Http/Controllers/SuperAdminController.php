@@ -6,7 +6,10 @@ use App\Models\User;
 use App\Models\Ticket;
 use App\Models\Inventory;
 use App\Models\Department;
+use App\Models\TicketReply;
 use App\Exports\SuperAdmin\UserExport;
+use App\Exports\SuperAdmin\TicketsExport;
+use App\Exports\SuperAdmin\InventoryExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -67,27 +70,23 @@ class SuperAdminController extends Controller
     {
         $query = User::with('department');
 
-        // Search Keyword
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
+                $q->where('nmuc_id', 'like', "%{$search}%")
                 ->orWhere('full_name', 'like', "%{$search}%")
                 ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
-        // Filter Department
         if ($request->filled('department_id')) {
             $query->where('department_id', $request->department_id);
         }
 
-        // Filter Role
         if ($request->filled('role')) {
             $query->where('role', $request->role);
         }
 
-        // Filter Status
         if ($request->filled('status')) {
             $query->where('user_status', $request->status);
         }
@@ -109,15 +108,16 @@ class SuperAdminController extends Controller
     public function usersStore(Request $request)
     {
         $request->validate([
+            'nmuc_id'       => 'required|string|max:50|unique:users,nmuc_id',
             'full_name'     => 'required|string|max:255',
             'email'         => 'required|email|unique:users,email',
             'password'      => 'required|string|min:6',
             'role'          => 'required|string',
-            'department_id' => 'required',
+            'department_id' => 'nullable',
         ]);
 
         User::create([
-            'name'          => $request->full_name,
+            'nmuc_id'       => $request->nmuc_id,
             'full_name'     => $request->full_name,
             'email'         => $request->email,
             'password'      => Hash::make($request->password),
@@ -125,13 +125,11 @@ class SuperAdminController extends Controller
             'department_id' => $request->department_id,
         ]);
 
-        return redirect()->route('superadmin.users.index')
-            ->with('success', 'User account registered successfully!');
+        return redirect()->route('superadmin.users.index')->with('success', 'User created successfully!');
     }
 
     public function usersDestroy($id)
     {
-        // Cari mengikut user_id atau nmuc_id sahaja (buang 'id' yang tak wujud)
         $user = User::where('user_id', $id)
                     ->orWhere('nmuc_id', $id)
                     ->firstOrFail();
@@ -144,7 +142,6 @@ class SuperAdminController extends Controller
 
     public function usersEdit($id)
     {
-        // Cari mengikut user_id atau nmuc_id sahaja
         $user = User::where('user_id', $id)
                     ->orWhere('nmuc_id', $id)
                     ->firstOrFail();
@@ -172,9 +169,7 @@ class SuperAdminController extends Controller
             'password'      => 'nullable|string|min:6|confirmed',
         ]);
 
-        // 4. Sediakan data untuk dikemaskini
         $dataToUpdate = [
-            'name'          => $request->full_name,
             'full_name'     => $request->full_name,
             'email'         => $request->email,
             'role'          => $request->role,
@@ -182,93 +177,130 @@ class SuperAdminController extends Controller
             'user_status'   => $request->user_status,
         ];
 
-        // Kemaskini nmuc_id jika borang menghantar nilai baharu
         if ($request->filled('nmuc_id')) {
             $dataToUpdate['nmuc_id'] = $request->nmuc_id;
         }
 
-        // Kemaskini kata laluan jika diisi
         if ($request->filled('password')) {
             $dataToUpdate['password'] = \Illuminate\Support\Facades\Hash::make($request->password);
         }
 
-        // 5. Simpan kemaskini ke pangkalan data
         $user->update($dataToUpdate);
 
         return redirect()->route('superadmin.users.index')
             ->with('success', 'User account updated successfully!');
     }
 
-        // ==========================================
-        // DEPARTMENT MANAGEMENT
-        // ==========================================
-        public function departmentsIndex()
-        {
-            $departments = Department::latest()->get();
-            return view('superadmin.departments.index', compact('departments'));
-        }
+    // ==========================================
+    // DEPARTMENT MANAGEMENT
+    // ==========================================
+    public function departmentsIndex()
+    {
+        $departments = Department::latest()->get();
+        return view('superadmin.departments.index', compact('departments'));
+    }
 
-        public function departmentsStore(Request $request)
-        {
-            $request->validate([
-                'department_name' => 'required|string|max:255|unique:departments,department_name',
-                'code'            => 'nullable|string|max:50',
-            ]);
+    public function departmentsStore(Request $request)
+    {
+        $request->validate([
+            'department_name' => 'required|string|max:255|unique:departments,department_name',
+            'code'            => 'nullable|string|max:50',
+        ]);
 
-            Department::create([
-                'department_name' => $request->department_name,
-                'code'            => strtoupper($request->code),
-            ]);
+        Department::create([
+            'department_name' => $request->department_name,
+            'code'            => strtoupper($request->code),
+        ]);
 
-            return redirect()->route('superadmin.departments.index')
-                ->with('success', 'Department added successfully!');
-        }
+        return redirect()->route('superadmin.departments.index')
+            ->with('success', 'Department added successfully!');
+    }
 
-        public function departmentsDestroy($id)
-        {
-            $dept = Department::findOrFail($id);
-            $dept->delete();
+    public function departmentsDestroy($id)
+    {
+        $dept = Department::findOrFail($id);
+        $dept->delete();
 
-            return redirect()->route('superadmin.departments.index')
-                ->with('success', 'Department deleted successfully!');
-        }
+        return redirect()->route('superadmin.departments.index')
+            ->with('success', 'Department deleted successfully!');
+    }
 
-        // ==========================================
-        // TICKETS MODULE (SUPER ADMIN)
-        // ==========================================
-        public function ticketsIndex(Request $request)
-        {
-            $adminDept = Auth::user()->department ?? 'ALL DEPARTMENTS';
-            
-            $query = Ticket::with(['department', 'user', 'picAdmin']);
+    // ==========================================
+    // TICKETS MODULE (SUPER ADMIN)
+    // ==========================================
 
-            if ($request->filled('search')) {
-                $search = $request->search;
-                $query->where(function($q) use ($search) {
-                    $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%")
-                    ->orWhere('user_name', 'like', "%{$search}%")
-                    ->orWhere('ticket_id', 'like', "%{$search}%");
+    public function ticketsExport(Request $request)
+    {
+        return Excel::download(new TicketsExport($request), 'tickets_list_' . date('Y_m_d_His') . '.xlsx');
+    }
+        
+    public function ticketsIndex(Request $request)
+    {
+        $query = Ticket::with(['user', 'department', 'picAdmin']);
+
+        if ($request->filled('search')) {
+            $search = str_replace('#TC-', '', $request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('ticket_id', 'like', "%{$search}%")
+                ->orWhere('title', 'like', "%{$search}%")
+                ->orWhere('user_name', 'like', "%{$search}%")
+                ->orWhereHas('user', function ($userQ) use ($search) {
+                    $userQ->where('full_name', 'like', "%{$search}%");
+                })
+                ->orWhereHas('picAdmin', function ($picQ) use ($search) {
+                    $picQ->where('full_name', 'like', "%{$search}%");
                 });
-            }
+            });
+        }
 
-            if ($request->filled('status')) {
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        if ($request->filled('priority')) {
+            $query->where('priority', $request->priority);
+        }
+
+        if ($request->filled('status')) {
+            if (in_array($request->status, ['Close', 'Closed'])) {
+                $query->whereIn('status', ['Close', 'Closed']);
+            } else {
                 $query->where('status', $request->status);
             }
-
-            $tickets = $query->latest()->paginate(10)->withQueryString();
-
-            return view('superadmin.tickets.index', compact('tickets', 'adminDept'));
         }
 
-        public function ticketsCreate()
-        {
-            $departments = Department::pluck('department_name', 'department_id');
-            $types       = ['Incident', 'Request'];
-            $categories  = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
-            $priorities  = ['Low', 'Medium', 'High', 'Urgent'];
+        if ($request->filled('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
 
-            return view('superadmin.tickets.create', compact('departments', 'types', 'categories', 'priorities'));
+        if ($request->filled('month')) {
+            $query->where(function ($q) use ($request) {
+                $q->whereMonth('date', $request->month)
+                ->orWhereMonth('created_at', $request->month);
+            });
+        }
+
+        if ($request->filled('year')) {
+            $query->where(function ($q) use ($request) {
+                $q->whereYear('date', $request->year)
+                ->orWhereYear('created_at', $request->year);
+            });
+        }
+
+        $tickets = $query->latest('date')->paginate(10)->withQueryString();
+        $departments = Department::all();
+
+        return view('superadmin.tickets.index', compact('tickets', 'departments'));
+    }
+
+    public function ticketsCreate()
+    {
+        $departments = Department::pluck('department_name', 'department_id');
+        $types       = ['Incident', 'Request'];
+        $categories  = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
+        $priorities  = ['Low', 'Medium', 'High', 'Urgent'];
+
+        return view('superadmin.tickets.create', compact('departments', 'types', 'categories', 'priorities'));
     }
 
     public function ticketsStore(Request $request)
@@ -291,12 +323,12 @@ class SuperAdminController extends Controller
             $imagePath = $request->file('image')->store('tickets', 'public');
         }
 
-        Ticket::create([
+       Ticket::create([
             'ticket_id'     => 'TK-' . strtoupper(uniqid()),
             'user_id'       => Auth::id(),
             'user_name'     => $request->user_name,
             'user_email'    => $request->user_email,
-            'department_id' => $request->department_id, // Dibetulkan: Simpan department_id
+            'department_id' => $request->department_id,
             'title'         => $request->title,
             'description'   => $request->description,
             'type'          => $request->type,
@@ -304,6 +336,7 @@ class SuperAdminController extends Controller
             'priority'      => $request->priority,
             'location'      => $request->location,
             'status'        => 'New',
+            'date'          => now(),
             'image'         => $imagePath,
         ]);
 
@@ -333,8 +366,8 @@ class SuperAdminController extends Controller
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('ticket_id', 'like', "%{$search}%")
-                  ->orWhere('user_name', 'like', "%{$search}%");
+                ->orWhere('ticket_id', 'like', "%{$search}%")
+                ->orWhere('user_name', 'like', "%{$search}%");
             });
         }
 
@@ -346,7 +379,13 @@ class SuperAdminController extends Controller
             }
         }
 
-        $conversations = $query->latest()->get();
+        if ($request->get('sort') === 'oldest') {
+            $query->oldest();
+        } else {
+            $query->latest(); 
+        }
+
+        $conversations = $query->get();
 
         $selectedId = $request->ticket_id ?? ($conversations->first()->ticket_id ?? null);
         $activeTicket = $selectedId 
@@ -409,109 +448,89 @@ class SuperAdminController extends Controller
     {
         $ticket = Ticket::where('ticket_id', $id)->firstOrFail();
 
-        $request->validate([
-            'category'      => 'nullable|string',
-            'type'          => 'nullable|string',
-            'status'        => 'nullable|string',
-            'priority'      => 'nullable|string',
-            'location'      => 'nullable|string',
-            'department_id' => 'nullable',
-            'pic_id'        => 'nullable',
-            'image'         => 'nullable|image|mimes:jpeg,png,jpg,pdf|max:2048',
+        $oldStatus = $ticket->status;
+        $oldPic    = $ticket->pic;
+
+        $ticket->update([
+            'category'      => $request->category,
+            'type'          => $request->type,
+            'status'        => $request->status,
+            'priority'      => $request->priority,
+            'location'      => $request->location,
+            'department_id' => $request->department_id,
+            'pic'           => $request->pic,
         ]);
 
-        $oldStatus = $ticket->status;
-        $oldPic    = $ticket->pic_id;
+        if ($request->filled('pic') && $oldPic != $request->pic) {
+            $picUser = User::where('user_id', $request->pic)->first();
+            $picName = $picUser ? ($picUser->full_name ?? $picUser->name) : 'Admin';
 
-        $dataToUpdate = [
-            'title'         => $request->title ?? $ticket->title,
-            'user_name'     => $request->user_name ?? $ticket->user_name,
-            'user_email'    => $request->user_email ?? $ticket->user_email,
-            'description'   => $request->description ?? $ticket->description,
-            'type'          => $request->type ?? $ticket->type,
-            'category'      => $request->category ?? $ticket->category,
-            'priority'      => $request->priority ?? $ticket->priority,
-            'status'        => $request->status ?? $ticket->status,
-            'location'      => $request->location ?? $ticket->location,
-            'department_id' => $request->department_id ?? $ticket->department_id,
-            'pic_id'        => $request->pic_id ?? $ticket->pic_id,
-        ];
-
-        if ($request->hasFile('image')) {
-            if ($ticket->image && Storage::disk('public')->exists($ticket->image)) {
-                Storage::disk('public')->delete($ticket->image);
-            }
-            $dataToUpdate['image'] = $request->file('image')->store('tickets', 'public');
-        }
-
-        $ticket->update($dataToUpdate);
-
-        if ($request->filled('status') && $request->status !== $oldStatus) {
-            $ticket->replies()->create([
+            TicketReply::create([
+                'ticket_id'   => $ticket->ticket_id,
                 'user_id'     => Auth::id(),
-                'sender_name' => Auth::user()->full_name ?? Auth::user()->name ?? 'Super Admin',
-                'sender_role' => 'Super Admin',
-                'message'     => 'STATUS_CHANGE:' . $request->status,
-            ]);
-        }
-
-        if ($request->filled('pic_id') && $request->pic_id !== $oldPic) {
-            $picUser = User::where('user_id', $request->pic_id)->orWhere('id', $request->pic_id)->first();
-            $picName = $picUser->full_name ?? $picUser->name ?? 'Admin';
-
-            $ticket->replies()->create([
-                'user_id'     => Auth::id(),
-                'sender_name' => Auth::user()->full_name ?? Auth::user()->name ?? 'Super Admin',
-                'sender_role' => 'Super Admin',
+                'sender_name' => Auth::user()->full_name ?? 'Super Admin',
+                'sender_role' => Auth::user()->role ?? 'Super Admin',
                 'message'     => 'PIC_CHANGE:' . $picName,
             ]);
         }
 
-        return redirect()->back()->with('success', 'Ticket updated successfully!');
+        if ($request->filled('status') && $oldStatus != $request->status) {
+            TicketReply::create([
+                'ticket_id'   => $ticket->ticket_id,
+                'user_id'     => Auth::id(),
+                'sender_name' => Auth::user()->full_name ?? 'Super Admin',
+                'sender_role' => Auth::user()->role ?? 'Super Admin',
+                'message'     => 'STATUS_CHANGE:' . $request->status,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Ticket information updated successfully!');
     }
 
     // ==========================================
     // INVENTORY MODULE (SUPER ADMIN)
     // ==========================================
+
+    public function inventoryExport(Request $request)
+    {
+        return Excel::download(new InventoryExport($request), 'inventory_list_' . date('Y_m_d_His') . '.xlsx');
+    }
+
     public function inventoryIndex(Request $request)
     {
-        $departments = Department::all();
-        $selectedDepartment = $request->get('department_id') ?? $request->get('department');
-        $inventories = collect();
+        $deptQuery = Department::query();
 
-        if ($selectedDepartment) {
-            $query = Inventory::query();
-
-            if (is_numeric($selectedDepartment)) {
-                $query->where('department_id', $selectedDepartment);
-            } else {
-                $query->whereHas('department', function ($q) use ($selectedDepartment) {
-                    $q->where('department_name', $selectedDepartment);
-                });
-            }
-
-            if ($request->filled('search')) {
-                $search = $request->search;
-                $query->where(function($q) use ($search) {
-                    $q->where('item_name', 'like', "%{$search}%")
-                      ->orWhere('item_model', 'like', "%{$search}%")
-                      ->orWhere('item_category', 'like', "%{$search}%")
-                      ->orWhere('item_location', 'like', "%{$search}%");
-                });
-            }
-
-            if ($request->filled('category')) {
-                $query->where('item_category', $request->category);
-            }
-
-            if ($request->filled('status')) {
-                $query->where('item_status', $request->status);
-            }
-
-            $inventories = $query->latest('item_id')->paginate(10)->withQueryString();
+        if ($request->filled('search') && !$request->filled('department')) {
+            $deptQuery->where('department_name', 'like', '%' . $request->search . '%')
+                    ->orWhere('code', 'like', '%' . $request->search . '%');
         }
 
-        return view('superadmin.inventory.index', compact('departments', 'inventories', 'selectedDepartment'));
+        $departments = $deptQuery->get();
+
+        $query = Inventory::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('item_name', 'like', "%{$search}%")
+                ->orWhere('item_type', 'like', "%{$search}%")
+                ->orWhere('item_manufacturer', 'like', "%{$search}%")
+                ->orWhere('item_model', 'like', "%{$search}%")
+                ->orWhere('serial_number', 'like', "%{$search}%")
+                ->orWhere('item_location', 'like', "%{$search}%")
+                ->orWhereHas('user', function ($userQuery) use ($search) {
+                    $userQuery->where('full_name', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('item_status', $request->status);
+        }
+
+        $inventories = $query->latest('item_id')->paginate(10)->withQueryString();
+
+        return view('superadmin.inventory.index', compact('inventories', 'departments'));
     }
 
     public function inventoryCreate()

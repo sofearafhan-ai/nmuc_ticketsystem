@@ -12,19 +12,19 @@ class Inventory extends Model
     public $timestamps = false;
 
     protected $primaryKey = 'item_id';
-    
+    const UPDATED_AT = null; 
+
     protected $fillable = [
-        'user_id',
-        'department_id',
         'item_name',
         'serial_number',
         'item_manufacturer',
         'item_type',
-        'item_category',
         'item_model',
-        'item_location',
         'item_status',
+        'item_location',
         'item_attachment',
+        'department_id',
+        'user_id',
     ];
 
     public function department()

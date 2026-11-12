@@ -103,6 +103,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/tickets', [SuperAdminController::class, 'ticketsStore'])->name('tickets.store');
         Route::get('/tickets/{id}/edit', [SuperAdminController::class, 'ticketsEdit'])->name('tickets.edit');
         Route::put('/tickets/{id}', [SuperAdminController::class, 'ticketsUpdate'])->name('tickets.update');
+        Route::get('/tickets/export', [SuperAdminController::class, 'ticketsExport'])->name('tickets.export');
+
         Route::get('/messages', [SuperAdminController::class, 'messagesIndex'])->name('messages.index');
         Route::post('/messages/{ticket_id}/reply', [SuperAdminController::class, 'messagesReply'])->name('messages.reply');
 
@@ -114,6 +116,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/inventory', [SuperAdminController::class, 'inventoryStore'])->name('inventory.store');
         Route::get('/inventory/{id}/edit', [SuperAdminController::class, 'inventoryEdit'])->name('inventory.edit');
         Route::put('/inventory/{id}', [SuperAdminController::class, 'inventoryUpdate'])->name('inventory.update');
+        Route::get('/inventory/export', [SuperAdminController::class, 'inventoryExport'])->name('inventory.export');
         Route::delete('/inventory/{id}', [SuperAdminController::class, 'inventoryDestroy'])->name('inventory.destroy');
     });
 

@@ -14,13 +14,13 @@ class User extends Authenticatable
     const UPDATED_AT = null;
 
     protected $fillable = [
-        'full_name',
         'nmuc_id',
+        'name',
+        'full_name',
         'email',
         'password',
         'role',
         'department_id',
-        'user_status',
     ];
 
     protected $hidden = [

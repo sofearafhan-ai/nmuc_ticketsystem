@@ -424,13 +424,18 @@ class AdminController extends Controller
             $query->where('department_id', $user->department_id);
         }
 
-        if ($request->filled('search')) {
+         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('item_name', 'like', "%{$search}%")
+                ->orWhere('item_type', 'like', "%{$search}%")
+                ->orWhere('item_manufacturer', 'like', "%{$search}%")
                 ->orWhere('item_model', 'like', "%{$search}%")
-                ->orWhere('item_category', 'like', "%{$search}%")
-                ->orWhere('item_location', 'like', "%{$search}%");
+                ->orWhere('serial_number', 'like', "%{$search}%")
+                ->orWhere('item_location', 'like', "%{$search}%")
+                ->orWhereHas('user', function ($userQuery) use ($search) {
+                    $userQuery->where('full_name', 'like', "%{$search}%");
+                });
             });
         }
 
@@ -469,22 +474,26 @@ class AdminController extends Controller
     public function updateInventory(Request $request, $id)
     {
         $request->validate([
-            'item_name'       => 'required|string|max:255',
-            'item_category'   => 'required|string|max:255',
-            'item_model'      => 'required|string|max:255',
-            'item_status'     => 'required|in:Active,Inactive',
-            'item_location'   => 'required|string|max:255',
-            'item_attachment' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048', 
+            'item_name'         => 'required|string|max:255',
+            'item_type'         => 'required|string|max:255',
+            'item_manufacturer' => 'required|string|max:255',
+            'item_model'        => 'required|string|max:255',
+            'serial_number'     => 'required|string|max:255',
+            'item_status'       => 'required|in:Active,Inactive',
+            'item_location'     => 'required|string|max:255',
+            'item_attachment'   => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048', 
         ]);
 
         $item = Inventory::where('item_id', $id)->firstOrFail();
 
         $dataToUpdate = [
-            'item_name'     => $request->item_name,
-            'item_category' => $request->item_category,
-            'item_model'    => $request->item_model,
-            'item_status'   => $request->item_status,
-            'item_location' => $request->item_location,
+            'item_name'         => $request->item_name,
+            'item_type'         => $request->item_type,
+            'item_manufacturer' => $request->item_manufacturer,
+            'item_model'        => $request->item_model,
+            'serial_number'     => $request->serial_number,
+            'item_status'       => $request->item_status,
+            'item_location'     => $request->item_location,
         ];
 
         if ($request->hasFile('item_attachment')) {
@@ -528,31 +537,35 @@ class AdminController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'items'                   => 'required|array|min:1',
-            'items.*.item_name'       => 'required|string|max:255',
-            'items.*.item_category'   => 'required|string|max:255',
-            'items.*.item_model'      => 'required|string|max:255',
-            'items.*.item_status'     => 'required|in:Active,Inactive',
-            'items.*.item_location'   => 'required|string|max:255',
-            'items.*.item_attachment' => 'nullable|file|mimes:pdf,jpeg,jpg,png|max:2048',
-        ]);
+        'items'                     => 'required|array|min:1',
+        'items.*.item_name'         => 'required|string|max:255',
+        'items.*.item_type'         => 'required|string|max:255',
+        'items.*.item_manufacturer' => 'required|string|max:255',
+        'items.*.item_model'        => 'required|string|max:255',
+        'items.*.serial_number'     => 'required|string|max:255',
+        'items.*.item_location'     => 'required|string|max:255',
+        'items.*.item_attachment'   => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+    ]);
 
-        foreach ($request->items as $itemData) {
-            $attachmentPath = null;
+        foreach ($request->items as $index => $itemData) {
+        $attachmentPath = null;
 
-            if (isset($itemData['item_attachment']) && $itemData['item_attachment'] instanceof \Illuminate\Http\UploadedFile) {
-                $attachmentPath = $itemData['item_attachment']->store('inventories', 'public');
-            }
+        if ($request->hasFile("items.{$index}.item_attachment")) {
+            $attachmentPath = $request->file("items.{$index}.item_attachment")
+                                      ->store('inventories', 'public');
+        }
 
             Inventory::create([
-                'user_id'         => $user->user_id ?? $user->id, 
-                'department_id'   => $user->department_id,         
-                'item_name'       => $itemData['item_name'],
-                'item_category'   => $itemData['item_category'],
-                'item_model'      => $itemData['item_model'],
-                'item_location'   => $itemData['item_location'],
-                'item_status'     => $itemData['item_status'],
-                'item_attachment' => $attachmentPath,
+                'user_id'           => $user->user_id ?? $user->id, 
+                'department_id'     => $user->department_id,         
+                'item_name'         => $itemData['item_name'],
+                'item_type'         => $itemData['item_type'],
+                'item_manufacturer' => $itemData['item_manufacturer'],
+                'item_model'        => $itemData['item_model'],
+                'serial_number'     => $itemData['serial_number'],
+                'item_location'     => $itemData['item_location'],
+                'item_status'       => $itemData['item_status'],
+                'item_attachment'   => $attachmentPath,
             ]);
         }
 

@@ -23,9 +23,17 @@
 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
 
     @if(session('success'))
-        <div class="p-4 bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2">
-            <i class="fa-solid fa-circle-check text-emerald-600"></i>
-            <span>{{ session('success') }}</span>
+        <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-xl shadow-sm text-emerald-800 flex items-start justify-between">
+            <div class="flex items-center gap-3 text-sm font-medium">
+                <i class="fa-solid fa-circle-check text-emerald-500 text-lg shrink-0"></i>
+                <div>
+                    <h4 class="font-bold text-emerald-900">Success!</h4>
+                    <p class="text-xs text-emerald-700 mt-0.5">{{ session('success') }}</p>
+                </div>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700 text-xs p-1">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
     @endif
 
@@ -37,7 +45,6 @@
         </a>
     </div>
 
-    <!-- GRID LAYOUT 2 COLUMN -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
         <!-- LEFT SIDE: Conversation / Chat Area (Width 2/3) -->
@@ -128,14 +135,14 @@
                     @foreach($ticket->replies as $reply)
                         @php
                             $replyName = $reply->sender_name ?? $reply->user_name ?? ($reply->user->name ?? 'User');
-                            $isAdmin = ($reply->sender_role ?? '') == 'Admin' || ($reply->sender_role ?? '') == 'Super Admin' || str_contains(strtolower($replyName), 'admin') || ($reply->user_id ?? null) == Auth::id();
+                            $isAdmin = ($reply->sender_role ?? '') == 'Admin' || str_contains(strtolower($replyName), 'admin') || ($reply->user_id ?? null) == Auth::id();
                             
                             $isSystemStatus = str_starts_with($reply->message, 'STATUS_CHANGE:');
                             $isSystemPic    = str_starts_with($reply->message, 'PIC_CHANGE:');
 
                             $attachment = $reply->attachment ?? null;
                             $ext = $attachment ? strtolower(pathinfo($attachment, PATHINFO_EXTENSION)) : '';
-                            $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                            $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'pdf']);
                         @endphp
 
                         @if($isSystemPic)
@@ -438,36 +445,37 @@ document.addEventListener('DOMContentLoaded', function () {
         const picOptions = picSelect.querySelectorAll('option');
 
         function filterPicByDepartment() {
-            const selectedDeptId = deptSelect.value;
-            let hasValidSelection = false;
+        const selectedDeptId = deptSelect.value;
+        let hasValidSelection = false;
 
-            picOptions.forEach(option => {
-                if (option.value === '') {
-                    option.style.display = 'block';
-                    return;
-                }
-
-                const picDeptId = option.getAttribute('data-department-id');
-
-                if (!selectedDeptId || picDeptId === selectedDeptId) {
-                    option.style.display = 'block';
-                    if (option.selected) {
-                        hasValidSelection = true;
-                    }
-                } else {
-                    option.style.display = 'none';
-                    if (option.selected) {
-                        option.selected = false;
-                    }
-                }
-            });
-
-            if (!hasValidSelection && deptSelect.dataset.initialLoad !== 'true') {
-                picSelect.value = '';
+        picOptions.forEach(option => {
+            if (option.value === '') {
+                option.hidden = false;
+                option.disabled = false;
+                return;
             }
-            
-            deptSelect.dataset.initialLoad = 'false';
+
+            const picDeptId = option.getAttribute('data-department-id');
+
+            if (!selectedDeptId || picDeptId === selectedDeptId) {
+                option.hidden = false;
+                option.disabled = false;
+                if (option.selected) {
+                    hasValidSelection = true;
+                }
+            } else {
+                option.hidden = true;
+                option.disabled = true;
+                option.selected = false;
+            }
+        });
+
+        if (!hasValidSelection && deptSelect.dataset.initialLoad !== 'true') {
+            picSelect.value = '';
         }
+
+        deptSelect.dataset.initialLoad = 'false';
+    }
 
         deptSelect.dataset.initialLoad = 'true';
         filterPicByDepartment();

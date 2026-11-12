@@ -10,25 +10,26 @@ class Ticket extends Model
     use HasFactory;
 
     protected $primaryKey = 'ticket_id';
+    public $incrementing = false;
+    protected $keyType = 'string';
     public $timestamps = false;
 
-    const UPDATED_AT = null;
-
     protected $fillable = [
+        'ticket_id',
+        'user_id',
         'user_name',
         'user_email',
+        'department_id',
         'title',
         'description',
-        'image',
         'type',
         'category',
-        'date',
-        'status',
         'priority',
-        'user_id',
-        'pic',
-        'department_id',
         'location',
+        'status',
+        'pic',
+        'date',
+        'image',
     ];
 
     public function user()

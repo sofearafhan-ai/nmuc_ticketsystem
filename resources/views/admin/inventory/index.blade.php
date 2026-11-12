@@ -21,10 +21,18 @@
         </a>
     </div>
 
-    @if (session('success'))
-        <div class="bg-emerald-900/90 border-l-4 border-emerald-400 text-emerald-100 px-4 py-3 rounded-xl shadow-sm text-sm flex items-center gap-2">
-            <i class="fa-solid fa-circle-check text-emerald-300"></i>
-            <span>{{ session('success') }}</span>
+    @if(session('success'))
+        <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-xl shadow-sm text-emerald-800 flex items-start justify-between">
+            <div class="flex items-center gap-3 text-sm font-medium">
+                <i class="fa-solid fa-circle-check text-emerald-500 text-lg shrink-0"></i>
+                <div>
+                    <h4 class="font-bold text-emerald-900">Success!</h4>
+                    <p class="text-xs text-emerald-700 mt-0.5">{{ session('success') }}</p>
+                </div>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700 text-xs p-1">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
     @endif
 
@@ -37,7 +45,7 @@
                 <div class="relative flex-1 w-full">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                     <input type="text" name="search" value="{{ request('search') }}" 
-                           placeholder="Search by name, model, or location..." 
+                           placeholder="Search..." 
                            class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
                 </div>
 
@@ -66,21 +74,8 @@
             <hr class="border-slate-100">
 
             <!-- Bottom Dropdown Filters -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-1">
-                <!-- Category Filter -->
-                <div>
-                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Category</label>
-                    <select name="category" onchange="this.form.submit()" 
-                            class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer">
-                        <option value="">All Categories</option>
-                        <option value="Hardware" {{ request('category') == 'Hardware' ? 'selected' : '' }}>Hardware</option>
-                        <option value="Software" {{ request('category') == 'Software' ? 'selected' : '' }}>Software</option>
-                        <option value="Network" {{ request('category') == 'Network' ? 'selected' : '' }}>Network</option>
-                        <option value="Facility" {{ request('category') == 'Facility' ? 'selected' : '' }}>Facility</option>
-                        <option value="Others" {{ request('category') == 'Others' ? 'selected' : '' }}>Others</option>
-                    </select>
-                </div>
-
+            <div class="grid grid-cols-1 sm:grid-cols-1 gap-3 pt-1">
+             
                 <!-- Status Filter -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Status</label>
@@ -102,18 +97,18 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="border-b border-slate-200 bg-slate-50 text-slate-700 uppercase text-[11px] font-bold tracking-wider">
-                            <th class="py-2 px-2 text-center">NO</th>
-                            <th class="py-2 px-2 text-center">NAME</th>
-                            <th class="py-2 px-2 text-center">TYPE</th>
-                            <th class="py-2 px-2 text-center">MANUFACTURER</th>
-                            <th class="py-2 px-2 text-center">MODEL</th>
-                            <th class="py-2 px-2 text-center">SERIAL NO.</th>
-                            <th class="py-2 px-2 text-center">LOCATION</th>
-                            <th class="py-2 px-2 text-center">STATUS</th>
-                            <th class="py-2 px-2 text-center">REGISTERED BY</th>
-                            <th class="py-2 px-2 text-center">ATTACHMENT</th>
-                            <th class="py-2 px-2 text-center">ACTIONS</th>
+                        <tr class="border-b border-orange-100 bg-orange-50 text-orange-400 uppercase text-[11px] font-bold tracking-wider">
+                            <th class="py-1 px-1 text-center">NO</th>
+                            <th class="py-1 px-1 text-center">NAME</th>
+                            <th class="py-1 px-1 text-center">TYPE</th>
+                            <th class="py-1 px-1 text-center">MANUFACTURER</th>
+                            <th class="py-1 px-1 text-center">MODEL</th>
+                            <th class="py-1 px-1 text-center">SERIAL NO.</th>
+                            <th class="py-1 px-1 text-center">LOCATION</th>
+                            <th class="py-1 px-1 text-center">STATUS</th>
+                            <th class="py-1 px-1 text-center">REGISTERED BY</th>
+                            <th class="py-1 px-1 text-center">ATTACHMENT</th>
+                            <th class="py-1 px-1 text-center">ACTIONS</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
@@ -180,6 +175,11 @@
                                 <!-- Attachment Preview Button -->
                                 <td class="py-3.5 px-4 text-center">
                                     @if ($item->item_attachment)
+                                        @php
+                                            $fileUrl = asset('storage/' . $item->item_attachment);
+                                            $isPdf   = strtolower(pathinfo($item->item_attachment, PATHINFO_EXTENSION)) === 'pdf';
+                                        @endphp
+
                                         <div x-data="{ open: false }" class="flex justify-center">
                                             <button @click="open = true" 
                                                     type="button" 
@@ -190,23 +190,36 @@
 
                                             <!-- Modal Backdrop & Window -->
                                             <div x-show="open" 
-                                                 x-cloak
-                                                 @keydown.escape.window="open = false" 
-                                                 class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
+                                                x-cloak
+                                                @keydown.escape.window="open = false" 
+                                                class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
                                                 <div class="fixed inset-0" @click="open = false"></div>
-                                                <div class="relative bg-white p-4 rounded-3xl shadow-2xl max-w-lg w-full z-10 space-y-3 border border-slate-100 text-left">
+                                                <div class="relative bg-white p-4 rounded-3xl shadow-2xl {{ $isPdf ? 'max-w-3xl' : 'max-w-lg' }} w-full z-10 space-y-3 border border-slate-100 text-left">
                                                     <div class="flex justify-between items-center px-1">
                                                         <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
                                                             <i class="fa-solid fa-paperclip text-orange-500"></i> Attachment Preview
                                                         </span>
-                                                        <button @click="open = false" type="button" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-red-100 text-slate-400 hover:text-red-500 transition flex items-center justify-center text-xs">
-                                                            <i class="fa-solid fa-xmark"></i>
-                                                        </button>
+                                                        <div class="flex items-center gap-2">
+                                                            @if ($isPdf)
+                                                                <a href="{{ $fileUrl }}" target="_blank"
+                                                                class="px-3 py-1 rounded-full bg-orange-50 hover:bg-orange-500 text-orange-600 hover:text-white transition text-[11px] font-bold flex items-center gap-1">
+                                                                    <i class="fa-solid fa-up-right-from-square text-[10px]"></i> Open Tab
+                                                                </a>
+                                                            @endif
+                                                            <button @click="open = false" type="button" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-red-100 text-slate-400 hover:text-red-500 transition flex items-center justify-center text-xs cursor-pointer">
+                                                                <i class="fa-solid fa-xmark"></i>
+                                                            </button>
+                                                        </div>
                                                     </div>
-                                                    <div class="overflow-hidden rounded-2xl bg-slate-900 border border-slate-200/80 max-h-[70vh] flex items-center justify-center p-2">
-                                                        <img src="{{ asset('storage/' . $item->item_attachment) }}" 
-                                                             alt="Attachment" 
-                                                             class="max-w-full max-h-[65vh] object-contain rounded-xl">
+
+                                                    <div class="overflow-hidden rounded-2xl bg-slate-900 border border-slate-200/80 max-h-[75vh] flex items-center justify-center p-2">
+                                                        @if ($isPdf)
+                                                            <iframe src="{{ $fileUrl }}" class="w-full h-[68vh] rounded-xl bg-white"></iframe>
+                                                        @else
+                                                            <img src="{{ $fileUrl }}" 
+                                                                alt="Attachment" 
+                                                                class="max-w-full max-h-[65vh] object-contain rounded-xl">
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>
@@ -241,7 +254,7 @@
                             <tr>
                                 <td colspan="9" class="p-8 text-center text-slate-500 font-medium">
                                     <i class="fa-solid fa-boxes-stacked text-2xl mb-2 text-slate-300 block"></i>
-                                    No inventory data registered for the {{ $adminDept }} Department.
+                                    No inventory data registered for the {{ Auth::user()->department->department_code ?? Auth::user()->department->code ?? 'all' }} Department.
                                 </td>
                             </tr>
                         @endforelse

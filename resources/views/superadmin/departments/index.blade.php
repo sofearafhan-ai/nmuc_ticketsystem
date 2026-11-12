@@ -5,17 +5,24 @@
 @section('content')
 <div class="space-y-6">
 
-    <!-- Flash Message Notification -->
     @if(session('success'))
-        <div class="p-4 bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2">
-            <i class="fa-solid fa-circle-check text-emerald-600"></i>
-            <span>{{ session('success') }}</span>
+        <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-xl shadow-sm text-emerald-800 flex items-start justify-between">
+            <div class="flex items-center gap-3 text-sm font-medium">
+                <i class="fa-solid fa-circle-check text-emerald-500 text-lg shrink-0"></i>
+                <div>
+                    <h4 class="font-bold text-emerald-900">Success!</h4>
+                    <p class="text-xs text-emerald-700 mt-0.5">{{ session('success') }}</p>
+                </div>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700 text-xs p-1">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
     @endif
 
     <!-- Header Section -->
     <div class="bg-[#0d1527] p-6 rounded-2xl border border-slate-200/80 shadow-sm">
-        <h1 class="text-xl textfont-bold text-slate-800">Department Management</h1>
+        <h1 class="text-xl font-bold text-white">Department Management</h1>
         <p class="text-xs text-slate-400 mt-1">Add, update, or remove departments used across the ticketing & inventory systems.</p>
     </div>
 

@@ -66,7 +66,6 @@
                                class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
                                title="Reset Filters">
                                 <i class="fa-solid fa-rotate-right text-[11px]"></i>
-                                <span>Reset</span>
                             </a>
                         @endif
                     </div>

@@ -16,10 +16,18 @@
         </div>
     </div>
 
-    @if (session('success'))
-        <div class="bg-emerald-900/90 border-l-4 border-emerald-400 text-emerald-100 px-4 py-3 rounded-xl shadow-sm text-sm flex items-center gap-2">
-            <i class="fa-solid fa-circle-check text-emerald-300"></i>
-            <span>{{ session('success') }}</span>
+    @if(session('success'))
+        <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-xl shadow-sm text-emerald-800 flex items-start justify-between">
+            <div class="flex items-center gap-3 text-sm font-medium">
+                <i class="fa-solid fa-circle-check text-emerald-500 text-lg shrink-0"></i>
+                <div>
+                    <h4 class="font-bold text-emerald-900">Success!</h4>
+                    <p class="text-xs text-emerald-700 mt-0.5">{{ session('success') }}</p>
+                </div>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700 text-xs p-1">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
     @endif
 
@@ -213,12 +221,11 @@
                                     </span>
                                 </td>
                                 <td class="p-2 text-center">
-                                    <span class="px-2.5 py-1 font-bold rounded-full text-[10px]
+                                    <span class="px-2.5 py-1 rounded-full font-bold text-[10px]
                                         @if($ticket->status == 'New') bg-emerald-100 text-emerald-700
                                         @elseif($ticket->status == 'Processing') bg-blue-100 text-blue-700
                                         @elseif($ticket->status == 'Pending') bg-amber-100 text-amber-700
-                                        @elseif(in_array($ticket->status, ['Close', 'Closed'])) bg-red-100 text-red-700
-                                        @else bg-slate-100 text-slate-700 @endif">
+                                        @else bg-red-100 text-red-700 @endif">
                                         {{ $ticket->status }}
                                     </span>
                                 </td>

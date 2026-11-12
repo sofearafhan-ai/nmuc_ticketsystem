@@ -141,8 +141,8 @@
                     <i class="fa-solid fa-key text-orange-500"></i> Password Settings
                 </h3>
 
-                <div class="p-4 bg-amber-50/60 rounded-2xl border border-amber-200/60 text-xs text-amber-800 flex items-start gap-2.5">
-                    <i class="fa-solid fa-circle-info text-amber-500 mt-0.5 text-sm shrink-0"></i>
+                <div class="p-1 bg-amber-50/60 rounded-2xl border border-amber-200/60 text-xs text-amber-800 flex items-start gap-2.5">
+                    <i class="text-danger-500 mt-0.5 text-sm shrink-0"></i>
                     <span>Leave the password fields empty if you do not want to change the user's current password.</span>
                 </div>
 

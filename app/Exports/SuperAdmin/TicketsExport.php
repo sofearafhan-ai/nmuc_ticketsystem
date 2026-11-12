@@ -2,7 +2,7 @@
 
 namespace App\Exports\SuperAdmin;
 
-use App\Models\Tickets;
+use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -22,27 +22,34 @@ class TicketsExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoS
 
     public function query()
     {
-        $query = User::with('department');
+        $query = Ticket::query();
 
         if ($this->request->filled('search')) {
-            $search = $this->request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('full_name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
+            $query->where('title', 'like', '%' . $this->request->search . '%');
         }
 
-        if ($this->request->filled('department_id')) {
-            $query->where('department_id', $this->request->department_id);
+        if ($this->request->filled('category')) {
+            $query->where('category', $this->request->category);
         }
 
-        if ($this->request->filled('role')) {
-            $query->where('role', $this->request->role);
+        if ($this->request->filled('priority')) {
+            $query->where('priority', $this->request->priority);
         }
 
         if ($this->request->filled('status')) {
-            $query->where('user_status', $this->request->status);
+            $query->where('status', $this->request->status);
+        }
+
+        if ($this->request->filled('pic')) {
+            $query->where('pic', $this->request->pic);
+        }
+
+        if ($this->request->filled('month')) {
+            $query->whereMonth('created_at', $this->request->month);
+        }
+
+        if ($this->request->filled('year')) {
+            $query->whereYear('created_at', $this->request->year);
         }
 
         return $query->latest();
@@ -51,37 +58,35 @@ class TicketsExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoS
     public function headings(): array
     {
         return [
-            'User ID',
-            'Full Name',
-            'Email Address',
-            'Department',
-            'Role',
+            'Ticket ID',
+            'Title',
+            'Submitted By',
+            'Category',
+            'Priority',
             'Status',
-            'Created At',
+            'PiC',
+            'Date Created',
         ];
     }
 
-    public function map($user): array
+    public function map($ticket): array
     {
-        $userId = $user->user_id ?? $user->id;
-        $fullName = $user->full_name ?? $user->name ?? '-';
-        $departmentName = $user->department->department_name ?? 'No Department';
-
         return [
-            $userId,
-            $fullName,
-            $user->email,
-            $departmentName,
-            $user->role,
-            $user->user_status ?? 'Active',
-            !empty($user->created_at) ? \Carbon\Carbon::parse($user->created_at)->format('d M Y, h:i A') : '-',
+            $ticket->ticket_id,
+            $ticket->title,
+            $ticket->user_name ?? ($ticket->user->name ?? 'User'),
+            $ticket->category,
+            $ticket->priority,
+            $ticket->status,
+            $ticket->picAdmin->full_name ?? $ticket->picAdmin->name ?? $ticket->pic ?? '-',
+            !empty($ticket->created_at) ? \Carbon\Carbon::parse($ticket->created_at)->format('d M Y') : '-',
         ];
     }
 
     public function styles(Worksheet $sheet)
     {
         return [
-            1 => ['font' => ['bold' => true, 'size' => 11]],
+            1 => ['font' => ['bold' => true]],
         ];
     }
 }

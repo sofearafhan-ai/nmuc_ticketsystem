@@ -41,7 +41,7 @@
                 <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Total Users</span>
                 <h3 class="text-2xl font-extrabold text-slate-800">{{ $userStats['total'] ?? 0 }}</h3>
                 <p class="text-[11px] text-purple-600 font-semibold flex items-center gap-1">
-                    <i class="fa-solid fa-user-shield"></i> {{ $userStats['admins'] ?? 0 }} Admins / {{ $userStats['staff'] ?? 0 }} Staff
+                    <i class="fa-solid fa-user-shield"></i> {{ $userStats['admins'] ?? 0 }} Admins / {{ $userStats['user'] ?? 0 }} User
                 </p>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-xl shadow-inner">

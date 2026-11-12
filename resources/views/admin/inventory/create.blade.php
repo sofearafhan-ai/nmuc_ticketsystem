@@ -24,8 +24,13 @@
         @csrf
 
         @if ($errors->any())
-            <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl text-xs text-red-700">
-                <p class="font-bold">Please review the form information. There are mandatory fields that have not been filled in correctly.</p>
+            <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl text-xs text-red-700 space-y-1">
+                <p class="font-bold">Please review the form information. There are mandatory fields that have not been filled in correctly:</p>
+                <ul class="list-disc pl-5">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
         @endif
 
@@ -50,72 +55,63 @@
                         </button>
                     </div>
 
-                    <!-- 01 — Basic Information -->
                     <div class="space-y-4 pt-2">
-                        <h3 class="text-sm font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
-                            <span class="text-orange-500 font-black">01 —</span> Basic Information
-                        </h3>
-
-                        <!-- Item Name (Full Width) -->
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Item Name <span class="text-red-500">*</span></label>
-                            <input type="text" :name="`items[${index}][item_name]`" x-model="item.item_name" required 
-                                   placeholder="e.g. Dell Latitude Laptop"
-                                   class="w-full px-4 py-2.5 bg-slate-50/60 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
-                        </div>
-
-                        <!-- Category & Model Grid -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Category <span class="text-red-500">*</span></label>
-                                <select :name="`items[${index}][item_category]`" x-model="item.item_category" required 
-                                        class="w-full px-4 py-2.5 bg-slate-50/60 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition cursor-pointer">
-                                    <option value="Hardware">Hardware</option>
-                                    <option value="Software">Software</option>
-                                    <option value="Network">Network</option>
-                                    <option value="Facility">Facility</option>
-                                    <option value="Others">Others</option>
-                                </select>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Item Name <span class="text-red-500">*</span></label>
+                                <input type="text" :name="`items[${index}][item_name]`" x-model="item.item_name" required 
+                                       class="w-full px-4 py-2.5 bg-slate-50/60 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Type <span class="text-red-500">*</span></label>
+                                <input type="text" :name="`items[${index}][item_type]`" x-model="item.item_type" required 
+                                    class="w-full px-4 py-2.5 bg-slate-50/60 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
+                            </div>
+                        </div>
+
+                        <!-- 2. Manufacturer & Model -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Manufacturer <span class="text-red-500">*</span></label>
+                                <input type="text" :name="`items[${index}][item_manufacturer]`" x-model="item.item_manufacturer" required 
+                                       class="w-full px-4 py-2.5 bg-slate-50/60 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1.5">Model <span class="text-red-500">*</span></label>
                                 <input type="text" :name="`items[${index}][item_model]`" x-model="item.item_model" required 
-                                       placeholder="e.g. Latitude 5440"
                                        class="w-full px-4 py-2.5 bg-slate-50/60 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
                             </div>
                         </div>
-                    </div>
 
-                    <!-- 02 — Location & Status -->
-                    <div class="space-y-4 pt-2">
-                        <h3 class="text-sm font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
-                            <span class="text-orange-500 font-black">02 —</span> Location & Status
-                        </h3>
+                        <!-- 3. Serial Number, Location & Status (Locked Active) -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Serial Number <span class="text-red-500">*</span></label>
+                                <input type="text" :name="`items[${index}][serial_number]`" x-model="item.serial_number" required 
+                                       class="w-full px-4 py-2.5 bg-slate-50/60 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
+                            </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1.5">Location <span class="text-red-500">*</span></label>
                                 <input type="text" :name="`items[${index}][item_location]`" x-model="item.item_location" required 
-                                       placeholder="e.g. IT Department"
                                        class="w-full px-4 py-2.5 bg-slate-50/60 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1.5">Status <span class="text-red-500">*</span></label>
-                                <select :name="`items[${index}][item_status]`" x-model="item.item_status" required 
-                                        class="w-full px-4 py-2.5 bg-slate-50/60 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition cursor-pointer">
-                                    <option value="Active">Active</option>
-                                    <option value="Inactive">Inactive</option>
-                                </select>
+                                <input type="hidden" :name="`items[${index}][item_status]`" value="Active">
+                                <input type="text" value="Active" readonly disabled
+                                       class="w-full px-4 py-2.5 bg-emerald-50/80 border border-emerald-200 rounded-xl text-xs text-emerald-700 font-bold cursor-not-allowed outline-none">
                             </div>
                         </div>
                     </div>
 
-                    <!-- 03 — Supporting Document (Dropzone Upload) -->
+                    <!-- 4. Supporting Document (Attachment) -->
                     <div class="space-y-4 pt-2">
                         <h3 class="text-sm font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
-                            <span class="text-orange-500 font-black">03 —</span> Supporting Document
+                            Supporting Document
                         </h3>
 
                         <div x-show="!item.filePreview && !item.fileName" 
@@ -146,7 +142,6 @@
                             x-cloak>
                             
                             <div class="flex items-center gap-3 overflow-hidden">
-
                                 <template x-if="item.isImage">
                                     <img :src="item.filePreview" 
                                         class="w-14 h-14 object-cover rounded-xl border border-slate-200 shrink-0 shadow-sm">
@@ -171,7 +166,6 @@
                                 <span>Remove</span>
                             </button>
                         </div>
-                    </div>
                     </div>
 
                 </div>
@@ -204,13 +198,15 @@
 </div>
 
 <script>
-    function inventoryForm() {
+function inventoryForm() {
     return {
         items: [
             { 
                 item_name: '', 
-                item_category: 'Hardware', 
-                item_model: '', 
+                item_type: '',
+                item_manufacturer: '',
+                item_model: '',
+                serial_number: '',
                 item_location: '', 
                 item_status: 'Active',
                 fileName: '',
@@ -221,8 +217,10 @@
         addItem() {
             this.items.push({
                 item_name: '',
-                item_category: 'Hardware',
+                item_type: '',
+                item_manufacturer: '',
                 item_model: '',
+                serial_number: '',
                 item_location: '',
                 item_status: 'Active',
                 fileName: '',
