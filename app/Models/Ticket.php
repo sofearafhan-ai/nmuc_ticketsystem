@@ -10,12 +10,11 @@ class Ticket extends Model
     use HasFactory;
 
     protected $primaryKey = 'ticket_id';
-    public $incrementing = false;
-    protected $keyType = 'string';
+    public $incrementing = true;
+    protected $keyType = 'int';
     public $timestamps = false;
 
     protected $fillable = [
-        'ticket_id',
         'user_id',
         'user_name',
         'user_email',
@@ -42,7 +41,7 @@ class Ticket extends Model
         return $this->belongsTo(User::class, 'pic', 'user_id');
     }
 
-   public function replies()
+    public function replies()
     {
         return $this->hasMany(TicketReply::class, 'ticket_id', 'ticket_id');
     }
@@ -51,5 +50,4 @@ class Ticket extends Model
     {
         return $this->belongsTo(Department::class, 'department_id', 'department_id');
     }
-
 }

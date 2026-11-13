@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\GuestTicketController;
+use App\Http\Controllers\NotificationController;
 
 
 Route::get('/guest/tickets/create', [GuestTicketController::class, 'create'])->name('guest.tickets.create');
@@ -32,6 +33,9 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::get('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.readAll');
 
     // ==========================================
     // ROUTE USER / AUTHENTICATION USER

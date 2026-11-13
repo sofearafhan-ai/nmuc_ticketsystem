@@ -27,7 +27,7 @@
                 <div class="relative flex-1 w-full">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                     <input type="text" name="search" value="{{ request('search') }}" 
-                           placeholder="Search by title or ticket ID..." 
+                           placeholder="Search..." 
                            class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
                 </div>
 
@@ -43,11 +43,11 @@
                        <i class="fa-solid fa-file-excel"></i> Export Excel
                     </a>
 
-                    @if(request()->hasAny(['search', 'category', 'type', 'priority', 'status', 'department_id', 'location', 'month', 'year']))
+                    @if(request()->hasAny(['search', 'category', 'type', 'priority', 'status', 'department_id', 'month', 'year']))
                         <a href="{{ route('tickets.index') }}" 
                            class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl transition flex items-center gap-1.5"
                            title="Reset Filters">
-                            <i class="fa-solid fa-rotate-right"></i> Reset
+                            <i class="fa-solid fa-rotate-right"></i>
                         </a>
                     @endif
                 </div>
@@ -118,23 +118,6 @@
                                 @php $deptVal = $dept->department_id ?? $dept->id; @endphp
                                 <option value="{{ $deptVal }}" {{ request('department_id') == $deptVal ? 'selected' : '' }}>
                                     {{ $dept->name ?? $dept->department_name }}
-                                </option>
-                            @endforeach
-                        @endif
-                    </select>
-                </div>
-
-                <!-- 6. LOCATION -->
-                <div>
-                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Location</label>
-                    <select name="location" onchange="this.form.submit()"
-                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer">
-                        <option value="">All Locations</option>
-                        @if(isset($locations))
-                            @foreach($locations as $loc)
-                                <option value="{{ is_object($loc) ? ($loc->name ?? $loc->location_name) : $loc }}" 
-                                        {{ request('location') == (is_object($loc) ? ($loc->name ?? $loc->location_name) : $loc) ? 'selected' : '' }}>
-                                    {{ is_object($loc) ? ($loc->name ?? $loc->location_name) : $loc }}
                                 </option>
                             @endforeach
                         @endif

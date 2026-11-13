@@ -61,7 +61,7 @@
                        <i class="fa-solid fa-file-excel"></i> Export Excel
                     </a>
 
-                    @if(request()->hasAny(['search', 'category', 'status']))
+                    @if(request()->hasAny(['search', 'status']))
                         <a href="{{ route('admin.inventory.index') }}" 
                            class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl transition flex items-center gap-1.5"
                            title="Reset Filters">

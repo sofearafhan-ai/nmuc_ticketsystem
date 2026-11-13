@@ -122,7 +122,7 @@
                             <span id="fileNameDisplay" class="font-semibold truncate">Selected file name</span>
                         </div>
                         <button type="button" id="cancelImageBtn" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg text-xs font-bold transition shrink-0 cursor-pointer" title="Cancel/Remove File">
-                            <i class="fa-solid fa-xmark mr-1"></i> Cancel
+                            <i class="fa-solid fa-xmark mr-1"></i>
                         </button>
                     </div>
                 </div>

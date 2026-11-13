@@ -190,18 +190,18 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="border-b border-slate-100 bg-slate-50/80 text-slate-400 uppercase text-[10px] font-extrabold tracking-wider">
-                            <th class="py-2 px-2 text-center">NO</th>
-                            <th class="py-2 px-2 text-center">NAME</th>
-                            <th class="py-2 px-2 text-center">TYPE</th>
-                            <th class="py-2 px-2 text-center">MANUFACTURER</th>
-                            <th class="py-2 px-2 text-center">MODEL</th>
-                            <th class="py-2 px-2 text-center">SERIAL NO.</th>
-                            <th class="py-2 px-2 text-center">LOCATION</th>
-                            <th class="py-2 px-2 text-center">STATUS</th>
-                            <th class="py-2 px-2 text-center">REGISTERED BY</th>
-                            <th class="py-2 px-2 text-center">ATTACHMENT</th>
-                            <th class="py-2 px-2 text-center">ACTIONS</th>
+                        <tr class="border-b border-orange-100 bg-orange-50 text-orange-400 uppercase text-[11px] font-bold tracking-wider">
+                            <th class="py-1 px-1 text-center">NO</th>
+                            <th class="py-1 px-1 text-center">NAME</th>
+                            <th class="py-1 px-1 text-center">TYPE</th>
+                            <th class="py-1 px-1 text-center">MANUFACTURER</th>
+                            <th class="py-1 px-1 text-center">MODEL</th>
+                            <th class="py-1 px-1 text-center">SERIAL NO.</th>
+                            <th class="py-1 px-1 text-center">LOCATION</th>
+                            <th class="py-1 px-1 text-center">STATUS</th>
+                            <th class="py-1 px-1 text-center">REGISTERED BY</th>
+                            <th class="py-1 px-1 text-center">ATTACHMENT</th>
+                            <th class="py-1 px-1 text-center">ACTIONS</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-700">

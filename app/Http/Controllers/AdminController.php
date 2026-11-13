@@ -7,12 +7,14 @@ use App\Models\Inventory;
 use App\Models\TicketReply;
 use App\Models\User;
 use App\Models\Department;
+use App\Models\Notification;
 use App\Exports\TicketsExport;
 use App\Exports\InventoryExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
@@ -251,6 +253,8 @@ class AdminController extends Controller
         $oldPic    = $ticket->pic;
         $newPic    = $request->pic;
 
+        $displayTicketNo = (str_starts_with($ticket->ticket_id, '#') ? '' : '#TC-') . $ticket->ticket_id;
+
         if ($oldPic != $newPic && !empty($newPic)) {
             $assignedUser = User::where('user_id', $newPic)->first();
             $picName = $assignedUser ? ($assignedUser->full_name ?? $assignedUser->name) : 'Admin';
@@ -262,6 +266,30 @@ class AdminController extends Controller
                 'sender_role' => 'System',
                 'message'     => 'PIC_CHANGE:' . $picName,
             ]);
+
+            if ($assignedUser) {
+                $picLink = ($assignedUser->role === 'Super Admin')
+                    ? route('superadmin.tickets.edit', $ticket->ticket_id)
+                    : route('admin.tickets.edit', $ticket->ticket_id);
+
+                Notification::create([
+                    'user_id'              => $assignedUser->user_id,
+                    'notification_type'    => 'pic_assigned',
+                    'notification_title'   => 'Ticket Assigned (' . $displayTicketNo . ')',
+                    'notification_message' => 'You have been assigned to ticket: ' . $ticket->title,
+                    'notification_link'    => $picLink,
+                ]);
+            }
+
+            if ($ticket->user_id && $ticket->user_id != Auth::id()) {
+                Notification::create([
+                    'user_id'              => $ticket->user_id,
+                    'notification_type'    => 'pic_assigned',
+                    'notification_title'   => 'PIC Assigned on ' . $displayTicketNo,
+                    'notification_message' => $picName . ' has taken over your ticket.',
+                    'notification_link'    => route('messages.index', ['ticket_id' => $ticket->ticket_id]),
+                ]);
+            }
         }
 
         if ($oldStatus !== $newStatus) {
@@ -272,6 +300,16 @@ class AdminController extends Controller
                 'sender_role' => 'System',
                 'message'     => 'STATUS_CHANGE:' . $newStatus,
             ]);
+
+            if ($ticket->user_id && $ticket->user_id != Auth::id()) {
+                Notification::create([
+                    'user_id'              => $ticket->user_id,
+                    'notification_type'    => 'status_update',
+                    'notification_title'   => 'Ticket ' . $displayTicketNo . ' Status Updated',
+                    'notification_message' => 'Your ticket status has been updated to ' . $newStatus . '.',
+                    'notification_link'    => route('messages.index', ['ticket_id' => $ticket->ticket_id]),
+                ]);
+            }
         }
 
         $ticket->update([
@@ -304,8 +342,8 @@ class AdminController extends Controller
             'category'      => 'required|string',
             'priority'      => 'required|string',
             'location'      => 'required|string|max:255',
-            'department_id' => 'nullable|exists:departments,department_id',
-            'image'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'department_id' => 'required|exists:departments,department_id',
+            'image'         => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
         ]);
 
         $user = Auth::user();
@@ -328,11 +366,36 @@ class AdminController extends Controller
             'department_id' => $request->department_id,
             'status'        => 'New',
             'date'          => now()->format('Y-m-d'),
-            'image_path'    => $imagePath,
+            'image'         => $imagePath,
         ]);
 
+        $recipients = \App\Models\User::where('role', 'Super Admin')
+            ->orWhere(function ($q) use ($ticket) {
+                $q->where('role', 'Admin')
+                ->where('department_id', $ticket->department_id);
+            })
+            ->get();
+
+        foreach ($recipients as $recipient) {
+            $recipientId = $recipient->user_id ?? $recipient->id;
+
+            if ($recipientId != \Illuminate\Support\Facades\Auth::id()) {
+                $link = ($recipient->role === 'Super Admin')
+                    ? route('superadmin.tickets.edit', $ticket->ticket_id)
+                    : route('admin.tickets.edit', $ticket->ticket_id);
+
+                \App\Models\Notification::create([
+                    'user_id'              => $recipientId,
+                    'notification_type'    => 'new_ticket',
+                    'notification_title'   => 'New Ticket #TC-' . $ticket->ticket_id,
+                    'notification_message' => ($ticket->user_name ?? 'A user') . ' submitted: ' . $ticket->title,
+                    'notification_link'    => $link,
+                ]);
+            }
+        }
+
         TicketReply::create([
-            'ticket_id'   => $ticket->ticket_id ?? $ticket->id,
+            'ticket_id'   => $ticket->ticket_id,
             'user_id'     => $user->user_id ?? $user->id,
             'sender_name' => 'System',
             'sender_role' => 'System',
@@ -392,6 +455,7 @@ class AdminController extends Controller
             'attachment' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048'
         ]);
 
+        $ticket = Ticket::where('ticket_id', $ticketId)->firstOrFail();
         $user = Auth::user();
 
         $attachmentPath = null;
@@ -399,14 +463,28 @@ class AdminController extends Controller
             $attachmentPath = $request->file('attachment')->store('chat_attachments', 'public');
         }
 
+        $senderName = $user->full_name ?? $user->name ?? 'Admin Support';
+
         TicketReply::create([
             'ticket_id'   => $ticketId,
             'user_id'     => $user->user_id ?? $user->id,
-            'sender_name' => $user->full_name ?? $user->name ?? 'Admin Support',
+            'sender_name' => $senderName,
             'sender_role' => $user->role ?? 'Admin',
             'message'     => $request->message,
             'attachment'  => $attachmentPath,
         ]);
+
+        $displayTicketNo = (str_starts_with($ticket->ticket_id, '#') ? '' : '#TC-') . $ticket->ticket_id;
+
+        if ($ticket->user_id && $ticket->user_id != ($user->user_id ?? $user->id)) {
+            Notification::create([
+                'user_id'              => $ticket->user_id,
+                'notification_type'    => 'admin_reply',
+                'notification_title'   => 'New Reply on ' . $displayTicketNo,
+                'notification_message' => $senderName . ' replied: ' . Str::limit(strip_tags($request->message), 60),
+                'notification_link'    => route('messages.index', ['ticket_id' => $ticket->ticket_id]),
+            ]);
+        }
 
         return redirect()->route('admin.messages.index', ['ticket_id' => $ticketId])
             ->with('success', 'Message sent successfully.');

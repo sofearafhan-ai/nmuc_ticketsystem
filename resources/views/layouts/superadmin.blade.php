@@ -60,19 +60,79 @@
             </span>
         </div>
 
-        <div class="flex items-center gap-5">
-            <!-- Notification Bell -->
-            <button class="text-white/80 hover:text-white text-base transition relative" title="Notifikasi">
-                <i class="fa-regular fa-bell"></i>
-                <span class="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full"></span>
-            </button>
+         <div class="flex items-center gap-5">
+            @php
+                $currentUserId = Auth::user()->user_id ?? Auth::id();
+                $userNotifs = \App\Models\Notification::where('user_id', $currentUserId)
+                    ->orderBy('created_at', 'desc')
+                    ->take(10)
+                    ->get();
+                $unreadCount = \App\Models\Notification::where('user_id', $currentUserId)
+                    ->where('is_read', 0)
+                    ->count();
+            @endphp
+
+            <!-- Notification Bell Dropdown -->
+            <div class="relative" x-data="{ notifOpen: false }" @click.away="notifOpen = false">
+                <button type="button" @click="notifOpen = !notifOpen"
+                        class="text-white/80 hover:text-white text-base transition relative p-1.5 rounded-xl hover:bg-white/10 focus:outline-none cursor-pointer"
+                        title="Notifications">
+                    <i class="fa-regular fa-bell text-lg"></i>
+                    @if($unreadCount > 0)
+                        <span class="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 bg-orange-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs">
+                            {{ $unreadCount > 9 ? '9+' : $unreadCount }}
+                        </span>
+                    @endif
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div x-show="notifOpen"
+                     x-transition
+                     style="display: none;"
+                     class="absolute right-0 mt-2.5 w-80 bg-white text-slate-800 rounded-2xl border border-slate-200 shadow-xl z-50 overflow-hidden">
+                    <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                        <span class="text-xs font-bold text-slate-800">Notifications ({{ $unreadCount }})</span>
+                        @if($unreadCount > 0)
+                            <form action="{{ route('notifications.readAll') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="text-[11px] font-semibold text-orange-600 hover:underline cursor-pointer">
+                                    Mark all read
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+
+                    <div class="max-h-80 overflow-y-auto custom-scrollbar divide-y divide-slate-100">
+                        @forelse($userNotifs as $notif)
+                            <a href="{{ route('notifications.read', $notif->notification_id) }}"
+                               class="block px-4 py-3 hover:bg-slate-50 transition {{ $notif->is_read == 0 ? 'bg-orange-50/50' : '' }}">
+                                <div class="flex items-start justify-between gap-2">
+                                    <p class="text-xs font-bold text-slate-800">{{ $notif->notification_title }}</p>
+                                    @if($notif->is_read == 0)
+                                        <span class="w-2 h-2 rounded-full bg-orange-500 shrink-0 mt-1"></span>
+                                    @endif
+                                </div>
+                                <p class="text-[11px] text-slate-500 mt-0.5 line-clamp-2">{{ $notif->notification_message }}</p>
+                                <span class="text-[10px] text-slate-400 mt-1 block">
+                                    {{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}
+                                </span>
+                            </a>
+                        @empty
+                            <div class="p-6 text-center text-xs text-slate-400">
+                                No notifications yet.
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
 
             <!-- User Avatar Circle -->
             <div class="flex items-center gap-2 pl-2">
                 <div class="w-9 h-9 rounded-full bg-purple-600 text-white font-bold flex items-center justify-center text-xs shadow-md">
-                    {{ strtoupper(substr(Auth::user()->full_name ?? Auth::user()->name ?? 'SA', 0, 2)) }}
+                    {{ strtoupper(substr(Auth::user()->full_name ?? Auth::user()->name ?? 'SY', 0, 2)) }}
                 </div>
             </div>
+        </div>
         </div>
     </header>
 

@@ -117,7 +117,7 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-slate-50/80 text-slate-400 uppercase text-[11px] font-bold tracking-wider border-b border-slate-100">
+                    <tr class="border-b border-orange-100 bg-orange-50 text-orange-400 uppercase text-[11px] font-bold tracking-wider">
                         <th class="py-2 px-3 text-center">TICKET ID</th>
                         <th class="py-2 px-3 text-center">TITLE</th>
                         <th class="py-2 px-3 text-center">SUBMITTED BY</th>

@@ -60,7 +60,7 @@
                         <a href="{{ route('admin.tickets.index') }}" 
                            class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl transition flex items-center gap-1.5"
                            title="Reset Filters">
-                            <i class="fa-solid fa-rotate-right"></i> Reset
+                            <i class="fa-solid fa-rotate-right"></i>
                         </a>
                     @endif
                 </div>
@@ -68,8 +68,7 @@
 
             <hr class="border-slate-100">
 
-            <!-- Bottom 7 Dropdown Filters Grid -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-3 pt-1">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-2">
                 
                 <!-- 1. CATEGORY -->
                 <div>
@@ -189,6 +188,7 @@
                             <th class="p-2 text-center">Title</th>
                             <th class="p-2 text-center">Submitted By</th>
                             <th class="p-2 text-center">Category</th>
+                            <th class="p-2 text-center">Type</th>
                             <th class="p-2 text-center">Priority</th>
                             <th class="p-2 text-center">Status</th>
                             <th class="p-2 text-center">PiC</th>
@@ -211,6 +211,7 @@
                                 </td>
                                 <td class="p-2 text-xs text-slate-600 font-medium text-center">{{ $ticket->user_name ?? ($ticket->user->name ?? 'User') }}</td>
                                 <td class="p-2 text-xs font-medium text-slate-600 text-center">{{ $ticket->category }}</td>
+                                <td class="p-2 text-xs font-medium text-slate-600 text-center">{{ $ticket->type }}</td>
                                 <td class="p-2 text-center">
                                     <span class="px-2 py-0.5 font-bold rounded-full text-[10px]
                                         @if($ticket->priority == 'Urgent') bg-red-100 text-red-800

@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Ticket;
 use App\Models\Department;
+use App\Models\User;
+use App\Models\Notification;
 use App\Exports\User\TicketsExport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -35,7 +38,7 @@ class UserController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                   ->orWhere('ticket_id', 'like', "%{$search}%");
             });
@@ -73,7 +76,7 @@ class UserController extends Controller
             'total'      => (clone $userTicketQuery)->count(),
         ];
 
-        return view('user.messages.index', compact('conversations', 'activeTicket', 'replyName', 'adminDept', 'userTicketStats' ));
+        return view('user.messages.index', compact('conversations', 'activeTicket', 'replyName', 'adminDept', 'userTicketStats'));
     }
 
     public function messagesReply(Request $request, $ticketId)
@@ -94,19 +97,49 @@ class UserController extends Controller
             $attachmentPath = $request->file('attachment')->store('replies', 'public');
         }
 
+        $senderName = Auth::user()->full_name ?? Auth::user()->name;
+
         $ticket->replies()->create([
             'user_id'     => Auth::id(),
-            'sender_name' => Auth::user()->full_name ?? Auth::user()->name,
+            'sender_name' => $senderName,
             'sender_role' => 'Staff',
             'message'     => $request->message,
             'attachment'  => $attachmentPath,
         ]);
 
+        $displayTicketNo = (str_starts_with($ticket->ticket_id, '#') ? '' : '#TC-') . $ticket->ticket_id;
+
+        if (!empty($ticket->pic)) {
+            $picUser = User::where('user_id', $ticket->pic)->first();
+            if ($picUser) {
+                $link = ($picUser->role === 'Super Admin')
+                    ? route('superadmin.messages.index', ['ticket_id' => $ticket->ticket_id])
+                    : route('admin.messages.show', $ticket->ticket_id);
+
+                Notification::create([
+                    'user_id'              => $picUser->user_id,
+                    'notification_type'    => 'new_reply',
+                    'notification_title'   => 'New Reply on ' . $displayTicketNo,
+                    'notification_message' => $senderName . ' replied: ' . Str::limit(strip_tags($request->message), 60),
+                    'notification_link'    => $link,
+                ]);
+            }
+        } else {
+            $superAdmins = User::where('role', 'Super Admin')->get();
+            foreach ($superAdmins as $sa) {
+                Notification::create([
+                    'user_id'              => $sa->user_id,
+                    'notification_type'    => 'new_reply',
+                    'notification_title'   => 'New Reply on ' . $displayTicketNo,
+                    'notification_message' => $senderName . ' replied: ' . Str::limit(strip_tags($request->message), 60),
+                    'notification_link'    => route('superadmin.messages.index', ['ticket_id' => $ticket->ticket_id]),
+                ]);
+            }
+        }
+
         return redirect()->route('messages.index', ['ticket_id' => $ticketId])
             ->with('success', 'Message sent successfully!');
     }
-
-
 
     // ==========================================
     // 3. TICKET LIST PAGE
@@ -117,9 +150,10 @@ class UserController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('ticket_id', 'like', "%{$search}%");
+                  ->orWhere('ticket_id', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%");
             });
         }
 
@@ -139,10 +173,6 @@ class UserController extends Controller
             $query->where('department_id', $request->department);
         }
 
-        if ($request->filled('location')) {
-            $query->where('location', $request->location);
-        }
-
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
@@ -157,10 +187,10 @@ class UserController extends Controller
 
         $tickets = $query->latest()->paginate(10)->withQueryString();
 
-        $categories = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
-        $types      = ['Incident', 'Request'];
-        $priorities = ['Low', 'Medium', 'High', 'Urgent'];
-        $statuses   = ['New', 'Processing', 'Pending', 'Close'];
+        $categories  = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
+        $types       = ['Incident', 'Request'];
+        $priorities  = ['Low', 'Medium', 'High', 'Urgent'];
+        $statuses    = ['New', 'Processing', 'Pending', 'Close'];
         $departments = Department::all();
 
         $locations = Ticket::whereNotNull('location')->distinct()->pluck('location');
@@ -170,7 +200,7 @@ class UserController extends Controller
 
     public function destroyTicket($ticketId)
     {
-        $ticket = Ticket::where('ticket_id', $id)->firstOrFail();
+        $ticket = Ticket::where('ticket_id', $ticketId)->firstOrFail();
         $ticket->delete();
 
         return redirect()->back()->with('success', 'Ticket successfully deleted!');
@@ -183,7 +213,7 @@ class UserController extends Controller
     {
         $departments = Department::all();
         $categories  = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
-        $types       = ['Incident', 'Request']; 
+        $types       = ['Incident', 'Request'];
         $priorities  = ['Low', 'Medium', 'High', 'Urgent'];
 
         return view('user.tickets.create', compact('departments', 'categories', 'types', 'priorities'));
@@ -194,12 +224,12 @@ class UserController extends Controller
         $request->validate([
             'title'         => 'required|string|max:255',
             'category'      => 'required|string',
-            'type'          => 'nullable|string', 
+            'type'          => 'nullable|string',
             'priority'      => 'required|string',
             'department_id' => 'required',
             'location'      => 'required|string',
             'description'   => 'required|string',
-            'image'         => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048', 
+            'image'         => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048',
         ]);
 
         $imagePath = null;
@@ -207,14 +237,16 @@ class UserController extends Controller
             $imagePath = $request->file('image')->store('tickets', 'public');
         }
 
+        $userName = Auth::user()->full_name ?? Auth::user()->name;
+
         $ticket = Ticket::create([
             'ticket_id'     => '#TC-' . strtoupper(uniqid()),
             'user_id'       => Auth::id(),
-            'user_name'     => Auth::user()->full_name ?? Auth::user()->name,
+            'user_name'     => $userName,
             'user_email'    => Auth::user()->email,
             'title'         => $request->title,
             'category'      => $request->category,
-            'type'          => $request->type ?? 'Incident', 
+            'type'          => $request->type ?? 'Incident',
             'priority'      => $request->priority,
             'department_id' => $request->department_id,
             'location'      => $request->location,
@@ -224,8 +256,33 @@ class UserController extends Controller
             'date'          => now(),
         ]);
 
+        $createdTicketId = $ticket->ticket_id;
+        $displayTicketNo = str_starts_with($createdTicketId, '#') ? $createdTicketId : '#TC-' . $createdTicketId;
+
+        $recipients = User::where('role', 'Super Admin')
+            ->orWhere(function ($q) use ($request) {
+                $q->where('role', 'Admin')
+                  ->where('department_id', $request->department_id);
+            })
+            ->get();
+
+        foreach ($recipients as $recipient) {
+            if ($recipient->user_id != Auth::id()) {
+                $link = ($recipient->role === 'Super Admin')
+                    ? route('superadmin.tickets.edit', $createdTicketId)
+                    : route('admin.tickets.edit', $createdTicketId);
+
+                Notification::create([
+                    'user_id'              => $recipient->user_id,
+                    'notification_type'    => 'new_ticket',
+                    'notification_title'   => 'New Ticket ' . $displayTicketNo,
+                    'notification_message' => $userName . ' submitted: ' . $request->title,
+                    'notification_link'    => $link,
+                ]);
+            }
+        }
+
         return redirect()->route('messages.index', ['ticket_id' => $ticket->ticket_id])
             ->with('success', 'New ticket successfully created!');
     }
-    
 }

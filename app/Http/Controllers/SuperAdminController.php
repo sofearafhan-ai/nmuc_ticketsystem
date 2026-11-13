@@ -7,6 +7,7 @@ use App\Models\Ticket;
 use App\Models\Inventory;
 use App\Models\Department;
 use App\Models\TicketReply;
+use App\Models\Notification;
 use App\Exports\SuperAdmin\UserExport;
 use App\Exports\SuperAdmin\TicketsExport;
 use App\Exports\SuperAdmin\InventoryExport;
@@ -399,7 +400,7 @@ class SuperAdminController extends Controller
     {
         $request->validate([
             'message'    => 'required|string',
-            'attachment' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048',
+            'attachment' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
         ]);
 
         $ticket = Ticket::where('ticket_id', $ticketId)->firstOrFail();
@@ -416,6 +417,16 @@ class SuperAdminController extends Controller
             'message'     => $request->message,
             'attachment'  => $attachmentPath,
         ]);
+
+        if ($ticket->user_id && $ticket->user_id != Auth::id()) {
+            Notification::create([
+                'user_id'              => $ticket->user_id,
+                'notification_type'    => 'admin_reply',
+                'notification_title'   => 'New Reply on #TC-' . $ticket->ticket_id,
+                'notification_message' => (Auth::user()->full_name ?? 'Super Admin') . ' replied: ' . \Illuminate\Support\Str::limit(strip_tags($request->message), 60),
+                'notification_link'    => route('messages.index', ['ticket_id' => $ticket->ticket_id]),
+            ]);
+        }
 
         return redirect()->route('superadmin.messages.index', ['ticket_id' => $ticketId])
             ->with('success', 'Reply sent successfully!');
@@ -472,6 +483,26 @@ class SuperAdminController extends Controller
                 'sender_role' => Auth::user()->role ?? 'Super Admin',
                 'message'     => 'PIC_CHANGE:' . $picName,
             ]);
+
+            if ($request->pic !=Auth::id()) {
+                Notification::create([
+                    'user_id'               => $request->pic,
+                    'notification_type'     => 'pic_assigned',
+                    'notification_title'    => 'New Ticket Assigned (#TC-' . $ticket->ticket_id . ')',
+                    'notification_message'  => 'You have been assigned to ticket: ' . $ticket->title,
+                    'notification_link'     => $picLink,
+                ]);
+            }
+
+            if ($ticket->user_id && $ticket->user_id != Auth::id()) {
+                Notification::create([
+                    'user_id'               => $ticket->user_id,
+                    'notification_type'     => 'pic_assigned',
+                    'notification_title'    => 'PIC Assigned on (#TC-' . $ticket->ticket_id . ')',
+                    'notification_message'  => $picName . 'has taken over your ticket.',
+                    'notification_link'     => route('messages.index', ['ticket_id' => $ticket->ticket_id]),
+                ]);
+            }
         }
 
         if ($request->filled('status') && $oldStatus != $request->status) {
@@ -482,6 +513,16 @@ class SuperAdminController extends Controller
                 'sender_role' => Auth::user()->role ?? 'Super Admin',
                 'message'     => 'STATUS_CHANGE:' . $request->status,
             ]);
+
+            if ($ticket->user_id && $ticket->user_id != Auth::id()) {
+                Notification::create([
+                    'user_id'              => $ticket->user_id,
+                    'notification_type'    => 'status_update',
+                    'notification_title'   => 'Ticket #TC-' . $ticket->ticket_id . ' Status Updated',
+                    'notification_message' => 'Your ticket status has been updated to ' . $request->status . '.',
+                    'notification_link'    => route('messages.index', ['ticket_id' => $ticket->ticket_id]),
+                ]);
+            }
         }
 
         return redirect()->back()->with('success', 'Ticket information updated successfully!');

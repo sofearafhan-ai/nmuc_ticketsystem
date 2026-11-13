@@ -230,21 +230,25 @@
                                 {!! $activeTicket->description !!}
                             </div>
 
-                            @if(!empty($attachment))
+                            @if(!empty($ticketMainAttachment) && $ticketMainAttachment !== 'no-image.png')
+                                @php
+                                    $mainExt = strtolower(pathinfo($ticketMainAttachment, PATHINFO_EXTENSION));
+                                    $isMainImg = in_array($mainExt, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                @endphp
                                 <div class="mt-2 pt-2 border-t border-slate-200/60">
-                                    @if($isImage)
-                                    <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="block group">
-                                        <img src="{{ asset('storage/' . $attachment) }}" alt="Attachment" class="max-w-xs max-h-56 rounded-xl border border-slate-200 object-cover shadow-2xs group-hover:opacity-90 transition">
-                                    </a>
-                                    @elseif($ext === 'pdf')
-                                    <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="inline-flex items-center gap-2.5 px-3 py-2 bg-white hover:bg-red-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition shadow-2xs">
-                                        <i class="fa-solid fa-file-pdf text-red-500 text-lg"></i>
-                                        <span class="truncate max-w-[180px]">{{ basename($attachment) }}</span>
-                                    </a>
+                                    @if($isMainImg)
+                                        <a href="{{ asset('storage/' . $ticketMainAttachment) }}" target="_blank" class="block group">
+                                            <img src="{{ asset('storage/' . $ticketMainAttachment) }}" alt="Ticket Attachment" class="max-w-xs max-h-56 rounded-xl border border-slate-200 object-cover shadow-2xs group-hover:opacity-95 transition">
+                                        </a>
+                                    @elseif($mainExt === 'pdf')
+                                        <a href="{{ asset('storage/' . $ticketMainAttachment) }}" target="_blank" class="inline-flex items-center gap-2.5 px-3 py-2 bg-white hover:bg-red-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition shadow-2xs">
+                                            <i class="fa-solid fa-file-pdf text-red-500 text-lg"></i>
+                                            <span class="truncate max-w-[180px]">{{ basename($ticketMainAttachment) }}</span>
+                                        </a>
                                     @else
-                                    <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="text-xs text-blue-600 hover:underline flex items-center gap-1.5">
-                                        <i class="fa-solid fa-paperclip"></i> Download File
-                                    </a>
+                                        <a href="{{ asset('storage/' . $ticketMainAttachment) }}" target="_blank" class="text-xs text-sky-600 hover:underline flex items-center gap-1.5 font-medium">
+                                            <i class="fa-solid fa-paperclip"></i> View Attachment
+                                        </a>
                                     @endif
                                 </div>
                             @endif

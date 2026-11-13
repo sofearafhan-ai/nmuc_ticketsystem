@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Ticket;
 use App\Models\User;
+use App\Models\Notification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 
 class GuestTicketController extends Controller
 {
@@ -17,21 +17,21 @@ class GuestTicketController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title'        => 'required|string|max:255',
-            'description'  => 'required|string',
-            'user_name'    => 'required|string|max:255',
-            'user_email'   => 'required|email|max:255',
-            'nmuc_email'   => 'required|email|exists:users,email',
-            'id'           => 'required|string|max:255',
-            'type'         => 'required|in:Incident,Request',
-            'category'     => 'required|string',
-            'priority'     => 'required|in:Low,Medium,High,Urgent',
-            'image'        => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'title'       => 'required|string|max:255',
+            'description' => 'required|string',
+            'user_name'   => 'required|string|max:255',
+            'user_email'  => 'required|email|max:255',
+            'nmuc_email'  => 'required|email|exists:users,email',
+            'id'          => 'required|string|max:255',
+            'type'        => 'required|in:Incident,Request',
+            'category'    => 'required|string',
+            'priority'    => 'required|in:Low,Medium,High,Urgent',
+            'image'       => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
         $nmucUser = User::where('email', $request->nmuc_email)->first();
 
-        $itDepartmentId = 2; 
+        $itDepartmentId = 2;
 
         $imageName = null;
         if ($request->hasFile('image')) {
@@ -45,7 +45,7 @@ class GuestTicketController extends Controller
 
         $ticket = Ticket::create([
             'user_name'     => $request->user_name,
-            'user_email'    => $request->user_email,  
+            'user_email'    => $request->user_email,
             'title'         => $request->title,
             'description'   => $fullDescription,
             'image'         => $imageName,
@@ -54,11 +54,34 @@ class GuestTicketController extends Controller
             'date'          => now()->format('Y-m-d'),
             'status'        => 'New',
             'priority'      => $request->priority,
-            'user_id'       => $nmucUser->user_id,     
-            'department_id' => 2,
-            'location'      => $request->location   
+            'user_id'       => $nmucUser->user_id,
+            'department_id' => $itDepartmentId,
+            'location'      => $request->location,
         ]);
 
-       return redirect()->back()->with('success', 'Your password reset ticket has been submitted successfully to IT Department.');
+        $createdTicketId = $ticket->ticket_id ?? $ticket->id;
+
+        $recipients = User::where('role', 'Super Admin')
+            ->orWhere(function ($q) use ($itDepartmentId) {
+                $q->where('role', 'Admin')
+                  ->where('department_id', $itDepartmentId);
+            })
+            ->get();
+
+        foreach ($recipients as $recipient) {
+            $link = ($recipient->role === 'Super Admin')
+                ? route('superadmin.tickets.edit', $createdTicketId)
+                : route('admin.tickets.edit', $createdTicketId);
+
+            Notification::create([
+                'user_id'              => $recipient->user_id,
+                'notification_type'    => 'new_ticket',
+                'notification_title'   => 'New Guest Ticket #TC-' . $createdTicketId,
+                'notification_message' => $request->user_name . ' submitted: ' . $request->title,
+                'notification_link'    => $link,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Your password reset ticket has been submitted successfully to IT Department.');
     }
 }

@@ -325,6 +325,11 @@
                                                     <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="block group">
                                                         <img src="{{ asset('storage/' . $attachment) }}" alt="Attachment" class="max-w-xs max-h-56 rounded-xl border border-blue-200 object-cover shadow-2xs group-hover:opacity-90 transition">
                                                     </a>
+                                                @elseif($ext === 'pdf')
+                                                    <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="inline-flex items-center gap-2.5 px-3 py-2 bg-white hover:bg-red-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition shadow-2xs">
+                                                        <i class="fa-solid fa-file-pdf text-red-500 text-lg"></i>
+                                                        <span class="truncate max-w-[180px]">{{ basename($attachment) }}</span>
+                                                    </a>
                                                 @else
                                                     <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="text-xs text-blue-600 hover:underline flex items-center gap-1.5">
                                                         <i class="fa-solid fa-paperclip"></i> Download File

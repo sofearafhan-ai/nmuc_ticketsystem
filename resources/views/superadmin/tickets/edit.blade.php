@@ -109,12 +109,17 @@
                         @if(!empty($ticketMainAttachment) && $ticketMainAttachment !== 'no-image.png')
                             @php
                                 $mainExt = strtolower(pathinfo($ticketMainAttachment, PATHINFO_EXTENSION));
-                                $isMainImg = in_array($mainExt, ['jpg', 'jpeg', 'png', 'pdf']);
+                                $isMainImg = in_array($mainExt, ['jpg', 'jpeg', 'png']);
                             @endphp
                             <div class="mt-2 pt-2 border-t border-slate-200/60">
                                 @if($isMainImg)
                                     <a href="{{ asset('storage/' . $ticketMainAttachment) }}" target="_blank" class="block group">
                                         <img src="{{ asset('storage/' . $ticketMainAttachment) }}" alt="Ticket Attachment" class="max-w-xs max-h-56 rounded-xl border border-slate-200 object-cover shadow-2xs group-hover:opacity-95 transition">
+                                    </a>
+                                @elseif($mainExt === 'pdf')
+                                    <a href="{{ asset('storage/' . $ticketMainAttachment) }}" target="_blank" class="inline-flex items-center gap-2.5 px-3 py-2 bg-white hover:bg-red-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition shadow-2xs">
+                                        <i class="fa-solid fa-file-pdf text-red-500 text-lg"></i>
+                                        <span class="truncate max-w-[180px]">{{ basename($ticketMainAttachment) }}</span>
                                     </a>
                                 @else
                                     <a href="{{ asset('storage/' . $ticketMainAttachment) }}" target="_blank" class="text-xs text-sky-600 hover:underline flex items-center gap-1.5 font-medium">
@@ -135,14 +140,14 @@
                     @foreach($ticket->replies as $reply)
                         @php
                             $replyName = $reply->sender_name ?? $reply->user_name ?? ($reply->user->name ?? 'User');
-                            $isAdmin = ($reply->sender_role ?? '') == 'Admin' || str_contains(strtolower($replyName), 'admin') || ($reply->user_id ?? null) == Auth::id();
+                            $isAdmin = ($reply->sender_role ?? '') == 'Admin' || ($reply->sender_role ?? '') == 'Super Admin' || str_contains(strtolower($replyName), 'admin') || ($reply->user_id ?? null) == Auth::id();
                             
                             $isSystemStatus = str_starts_with($reply->message, 'STATUS_CHANGE:');
                             $isSystemPic    = str_starts_with($reply->message, 'PIC_CHANGE:');
 
                             $attachment = $reply->attachment ?? null;
                             $ext = $attachment ? strtolower(pathinfo($attachment, PATHINFO_EXTENSION)) : '';
-                            $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'pdf']);
+                            $isImage = in_array($ext, ['jpg', 'jpeg', 'png']);
                         @endphp
 
                         @if($isSystemPic)
@@ -194,6 +199,11 @@
                                                 <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="block group">
                                                     <img src="{{ asset('storage/' . $attachment) }}" alt="Attachment" class="max-w-xs max-h-56 rounded-xl border border-blue-200 object-cover shadow-2xs group-hover:opacity-90 transition">
                                                 </a>
+                                            @elseif($ext === 'pdf')
+                                                <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="inline-flex items-center gap-2.5 px-3 py-2 bg-white hover:bg-red-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition shadow-2xs">
+                                                    <i class="fa-solid fa-file-pdf text-red-500 text-lg"></i>
+                                                    <span class="truncate max-w-[180px]">{{ basename($attachment) }}</span>
+                                                </a>
                                             @else
                                                 <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="text-xs text-blue-600 hover:underline flex items-center gap-1.5">
                                                     <i class="fa-solid fa-paperclip"></i> Download File
@@ -232,6 +242,11 @@
                                                 <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="block group">
                                                     <img src="{{ asset('storage/' . $attachment) }}" alt="Attachment" class="max-w-xs max-h-56 rounded-xl border border-slate-200 object-cover shadow-2xs group-hover:opacity-90 transition">
                                                 </a>
+                                            @elseif($ext === 'pdf')
+                                                <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="inline-flex items-center gap-2.5 px-3 py-2 bg-white hover:bg-red-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition shadow-2xs">
+                                                    <i class="fa-solid fa-file-pdf text-red-500 text-lg"></i>
+                                                    <span class="truncate max-w-[180px]">{{ basename($attachment) }}</span>
+                                                </a>
                                             @else
                                                 <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="text-xs text-sky-600 hover:underline flex items-center gap-1.5">
                                                     <i class="fa-solid fa-paperclip"></i> Download File
@@ -241,7 +256,7 @@
                                     @endif
 
                                     <div class="text-[10px] text-slate-400 font-medium pt-1">
-                                        {{ $reply->created_at ? \Carbon\Carbon::parse($reply->created_at)->format('h:i A') : '' }}
+                                        {{ $reply->created_at ? \Carbon\Carbon::parse($reply->created_at)->format('d M Y, h:i A') : '' }}
                                     </div>
                                 </div>
                             </div>
@@ -274,7 +289,7 @@
                             <!-- Attachment Button -->
                             <label class="p-2.5 text-slate-400 hover:text-orange-500 hover:bg-slate-100 rounded-xl transition cursor-pointer" title="Attach file or image">
                                 <i class="fa-solid fa-paperclip text-lg"></i>
-                                <input type="file" id="attachmentInputEdit" name="attachment" accept="image/*,.pdf,.doc,.docx" class="hidden">
+                                <input type="file" id="attachmentInputEdit" name="attachment" accept=".jpg,.jpeg,.png,.pdf" class="hidden">
                             </label>
 
                             <!-- Input Message Field -->

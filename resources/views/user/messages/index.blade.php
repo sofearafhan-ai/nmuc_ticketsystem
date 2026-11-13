@@ -98,17 +98,14 @@
             $currentSelectedId = request('ticket_id') ?? ($activeTicket->ticket_id ?? $activeTicket->id ?? null);
         @endphp
 
-        <!-- LEFT PANEL: Conversation List -->
         <div class="w-full md:w-80 lg:w-96 border-b md:border-b-0 md:border-r border-slate-200 bg-white flex-col shrink-0 h-full {{ $hasSelectedTicket ? 'hidden md:flex' : 'flex' }}">
             
-            <!-- Top Header & Filter Bar -->
             <div class="p-4 border-b border-slate-100 space-y-3 shrink-0">
                 <div class="flex items-center justify-between">
                     <h3 class="font-bold text-slate-800 text-sm">
                         Total ticket <span class="text-slate-500 font-semibold ml-1">{{ count($chatList) }}</span>
                     </h3>
 
-                    <!-- Dropdown Sort -->
                     <div class="relative">
                         <select onchange="location = this.value;" class="text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 outline-none cursor-pointer hover:bg-slate-100 transition">
                             <option value="{{ route('messages.index', array_merge(request()->query(), ['sort' => 'newest'])) }}" {{ request('sort') != 'oldest' ? 'selected' : '' }}>Newest</option>
@@ -117,7 +114,6 @@
                     </div>
                 </div>
 
-                <!-- Search Bar -->
                 <form action="{{ route('messages.index') }}" method="GET" class="relative">
                     @if(request('status'))
                         <input type="hidden" name="status" value="{{ request('status') }}">
@@ -126,8 +122,7 @@
                     <input type="text" id="chatSearchInput" name="search" value="{{ request('search') }}" placeholder="Search ticket..." 
                         class="w-full pl-9 pr-4 py-2 bg-slate-100/80 rounded-xl text-xs text-slate-800 placeholder-slate-400 border border-transparent focus:border-orange-500 focus:bg-white outline-none transition">
                 </form>
-                
-                <!-- Filter Status Buttons -->
+
                 <div class="flex items-center gap-1.5 text-xs pt-1 overflow-x-auto">
                     <a href="{{ route('messages.index', request()->only('search')) }}" 
                     class="px-3 py-1.5 rounded-xl font-bold cursor-pointer transition whitespace-nowrap {{ !request('status') ? 'bg-orange-500 text-white shadow-2xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
@@ -144,7 +139,6 @@
                 </div>
             </div>
 
-            <!-- Conversations Scrollable List -->
             <div class="flex-1 overflow-y-auto custom-scrollbar divide-y divide-slate-100" id="chatListContainer">
                 @forelse ($chatList as $index => $conv)
                     @php 
@@ -182,7 +176,7 @@
                     class="chat-item relative flex items-start gap-2.5 p-3.5 hover:bg-slate-50 transition cursor-pointer {{ $isActive ? 'bg-slate-100/90' : '' }}"
                     data-search="{{ strtolower($ticketTitle . ' ' . $convId) }}">
                         
-                        <div class="w-1.5 absolute left-0 top-0 bottom-0 {{ $isActive ? 'bg-orange-500 rounded-r-md' : 'bg-transparent' }}"></div>
+                        <div class="w-1.5 absolute left-0 top-0 bottom-0 {{ $isActive ? 'bg-slate-900 rounded-r-md' : 'bg-transparent' }}"></div>
 
                         <div class="relative shrink-0 mt-0.5">
                             <div class="w-9 h-9 rounded-full bg-slate-400 text-white font-bold flex items-center justify-center text-xs shadow-2xs">
@@ -221,7 +215,6 @@
 
         </div>
 
-        <!-- RIGHT PANEL: Active Chat Area -->
         <div class="flex-1 bg-white flex flex-col justify-between min-w-0 h-full">
             
             @if($activeTicket)
@@ -232,7 +225,6 @@
                     $isTicketClosed = in_array($activeTicket->status ?? '', ['Close', 'Closed']);
                 @endphp
 
-                <!-- Active Chat Header -->
                 <div class="px-4 md:px-6 py-3.5 bg-white border-b border-slate-200 flex items-center justify-between shadow-2xs shrink-0">
                     <div class="flex items-center gap-3 w-full min-w-0">
                         
@@ -268,16 +260,14 @@
                     </div>
                 </div>
 
-                <!-- Chat Messages Scroll Area -->
-                <div class="flex-1 p-4 md:p-6 overflow-y-auto custom-scrollbar space-y-4 bg-slate-50/30" id="messageScrollContainer">
-                    
-                    <!-- Original Ticket Description Box -->
+                <div class="flex-1 p-4 md:p-6 overflow-y-auto custom-scrollbar space-y-4 bg-white" id="messageScrollContainer">
+
                     <div class="flex items-end justify-end gap-2.5 max-w-[90%] md:max-w-[70%] ml-auto">
-                        <div class="bg-orange-500 text-white p-3 md:p-3.5 px-3.5 md:px-4 rounded-2xl rounded-br-xs space-y-1 shadow-xs">
-                            <div class="text-[11px] md:text-xs font-bold text-orange-100">
+                        <div class="bg-[#f1f6fd] text-slate-800 p-3 md:p-3.5 px-3.5 md:px-4 rounded-2xl rounded-br-xs space-y-1">
+                            <div class="text-[11px] md:text-xs font-bold text-blue-900">
                                 {{ Auth::user()->full_name ?? Auth::user()->name }} (You)
                             </div>
-                            <div class="text-xs md:text-sm leading-relaxed">
+                            <div class="text-xs md:text-sm leading-relaxed text-slate-700">
                                 {!! $activeTicket->description !!}
                             </div>
 
@@ -286,20 +276,25 @@
                                     $mainExt = strtolower(pathinfo($ticketMainAttachment, PATHINFO_EXTENSION));
                                     $isMainImg = in_array($mainExt, ['jpg', 'jpeg', 'png']);
                                 @endphp
-                                <div class="mt-2 pt-2 border-t border-orange-400/60">
+                                <div class="mt-2 pt-2 border-t border-blue-200/60">
                                     @if($isMainImg)
                                         <a href="{{ asset('storage/' . $ticketMainAttachment) }}" target="_blank" class="block group">
-                                            <img src="{{ asset('storage/' . $ticketMainAttachment) }}" alt="Attachment" class="max-w-xs max-h-48 md:max-h-56 rounded-xl border border-orange-300 object-cover shadow-2xs group-hover:opacity-95 transition">
+                                            <img src="{{ asset('storage/' . $ticketMainAttachment) }}" alt="Attachment" class="max-w-xs max-h-48 md:max-h-56 rounded-xl border border-slate-200 object-cover shadow-2xs group-hover:opacity-95 transition">
+                                        </a>
+                                    @elseif($mainExt === 'pdf')
+                                        <a href="{{ asset('storage/' . $ticketMainAttachment) }}" target="_blank" class="inline-flex items-center gap-2.5 px-3 py-2 bg-white hover:bg-red-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition shadow-2xs">
+                                            <i class="fa-solid fa-file-pdf text-red-500 text-lg"></i>
+                                            <span class="truncate max-w-[180px]">{{ basename($ticketMainAttachment) }}</span>
                                         </a>
                                     @else
-                                        <a href="{{ asset('storage/' . $ticketMainAttachment) }}" target="_blank" class="text-xs text-white underline flex items-center gap-1.5 font-medium">
+                                        <a href="{{ asset('storage/' . $ticketMainAttachment) }}" target="_blank" class="text-xs text-sky-600 hover:underline flex items-center gap-1.5 font-medium">
                                             <i class="fa-solid fa-paperclip"></i> View Attachment
                                         </a>
                                     @endif
                                 </div>
                             @endif
 
-                            <div class="text-[10px] text-orange-100 font-medium pt-1 text-right">
+                            <div class="text-[10px] text-slate-400 font-medium pt-1 text-right">
                                 {{ $activeTicket->created_at 
                                     ? (is_string($activeTicket->created_at) 
                                         ? \Carbon\Carbon::parse($activeTicket->created_at)->format('d M Y, h:i A') 
@@ -309,19 +304,18 @@
                         </div>
 
                         <div class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-slate-900 text-white text-[10px] md:text-xs font-bold flex items-center justify-center shrink-0 shadow-xs mb-1">
-                            {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
+                            {{ strtoupper(substr(Auth::user()->full_name ?? Auth::user()->name ?? 'U', 0, 2)) }}
                         </div>
                     </div>
 
-                    <!-- Replies Listing -->
                     @if(isset($activeTicket->replies) && $activeTicket->replies->count() > 0)
                         @foreach($activeTicket->replies as $reply)
                             @php
-                                $replyName = $reply->sender_name ?? $reply->user_name ?? ($reply->user->name ?? 'Admin');
-                                $isMe = ($reply->user_id ?? null) == Auth::id();
+                                $replyName = $reply->sender_name ?? $reply->user_name ?? ($reply->user->name ?? 'User');
+                                $isAdmin = ($reply->sender_role ?? '') == 'Admin' || ($reply->sender_role ?? '') == 'Super Admin' || str_contains(strtolower($replyName), 'admin') || (($reply->user_id ?? null) != Auth::id());
                                 
-                                $isSystemStatus = str_starts_with($reply->message, 'STATUS_CHANGE:');
-                                $isSystemPic    = str_starts_with($reply->message, 'PIC_CHANGE:');
+                                $isSystemStatus = str_starts_with(trim($reply->message), 'STATUS_CHANGE:');
+                                $isSystemPic    = str_starts_with(trim($reply->message), 'PIC_CHANGE:');
 
                                 $attachment = $reply->attachment ?? null;
                                 $ext = $attachment ? strtolower(pathinfo($attachment, PATHINFO_EXTENSION)) : '';
@@ -329,17 +323,19 @@
                             @endphp
 
                             @if($isSystemPic)
-                                @php $picAssignedName = str_replace('PIC_CHANGE:', '', $reply->message); @endphp
-                                <div class="flex items-center justify-center gap-2 py-2 my-1 text-[11px] md:text-xs text-slate-400 font-medium text-center">
-                                    <div class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-slate-600 text-white flex items-center justify-center text-[9px] md:text-[10px] shrink-0 shadow-2xs">
+                                @php
+                                    $picAssignedName = trim(str_replace('PIC_CHANGE:', '', $reply->message));
+                                @endphp
+                                <div class="flex items-center justify-center gap-2 py-2 my-2 text-xs text-slate-400 font-medium">
+                                    <div class="w-6 h-6 rounded-full bg-slate-600 text-white flex items-center justify-center text-[10px] shrink-0 shadow-2xs">
                                         <i class="fa-solid fa-user-check"></i>
                                     </div>
-                                    <span><strong class="text-slate-700 font-bold">{{ $picAssignedName }}</strong> has taken over this ticket</span>
+                                    <span><strong class="text-slate-700 font-bold">{{ $picAssignedName }}</strong> has taken over</span>
                                 </div>
 
                             @elseif($isSystemStatus)
                                 @php
-                                    $statusValue = str_replace('STATUS_CHANGE:', '', $reply->message);
+                                    $statusValue = trim(str_replace('STATUS_CHANGE:', '', $reply->message));
                                     $statusClasses = [
                                         'New'        => 'bg-emerald-100 text-emerald-700',
                                         'Processing' => 'bg-blue-100 text-blue-700',
@@ -349,70 +345,43 @@
                                     ];
                                     $badgeClass = $statusClasses[$statusValue] ?? 'bg-slate-100 text-slate-700';
                                 @endphp
-                                <div class="flex items-center justify-center gap-1.5 md:gap-2 py-2 my-1 text-[11px] md:text-xs text-slate-400 font-medium">
-                                    <div class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-blue-500 text-white flex items-center justify-center text-[9px] md:text-[10px] shrink-0 shadow-2xs">
+                                <div class="flex items-center justify-center gap-2 py-2 my-2 text-xs text-slate-400 font-medium">
+                                    <div class="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px] shrink-0 shadow-2xs">
                                         <i class="fa-solid fa-sliders"></i>
                                     </div>
                                     <span>Status updated to</span>
-                                    <span class="px-2 py-0.5 rounded-full font-bold text-[10px] md:text-[11px] {{ $badgeClass }}">
+                                    <span class="px-2.5 py-0.5 rounded-full font-bold text-[11px] {{ $badgeClass }}">
                                         {{ $statusValue }}
                                     </span>
                                 </div>
 
-                            @elseif($isMe)
-                                <div class="flex items-end justify-end gap-2.5 max-w-[90%] md:max-w-[70%] ml-auto">
-                                    <div class="bg-orange-500 text-white p-3 md:p-3.5 px-3.5 md:px-4 rounded-2xl rounded-br-xs space-y-1 shadow-xs">
-                                        <div class="text-[11px] md:text-xs font-bold text-orange-100">You</div>
-                                        <div class="text-xs md:text-sm leading-relaxed">
-                                            {!! $reply->message !!}
-                                        </div>
-
-                                        @if(!empty($attachment))
-                                            <div class="mt-2 pt-2 border-t border-orange-400/60">
-                                                @if($isImage)
-                                                    <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="block group">
-                                                        <img src="{{ asset('storage/' . $attachment) }}" alt="Attachment" class="max-w-xs max-h-48 md:max-h-56 rounded-xl border border-orange-300 object-cover shadow-2xs group-hover:opacity-90 transition">
-                                                    </a>
-                                                @else
-                                                    <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="text-xs text-white underline flex items-center gap-1.5 font-medium">
-                                                        <i class="fa-solid fa-paperclip"></i> Download File
-                                                    </a>
-                                                @endif
-                                            </div>
-                                        @endif
-
-                                        <div class="text-[10px] text-orange-100 font-medium pt-1 text-right">
-                                            {{ $reply->created_at ? \Carbon\Carbon::parse($reply->created_at)->format('d M Y, h:i A') : '' }}
-                                        </div>
+                            @elseif($isAdmin)
+                                <div class="flex items-end gap-2.5 max-w-[85%] md:max-w-[70%]">
+                                    <div class="w-8 h-8 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-xs mb-1">
+                                        {{ strtoupper(substr($replyName, 0, 2)) }}
                                     </div>
 
-                                    <div class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-slate-900 text-white text-[10px] md:text-xs font-bold flex items-center justify-center shrink-0 shadow-xs mb-1">
-                                        {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
-                                    </div>
-                                </div>
-
-                            @else
-                                <div class="flex items-end gap-2.5 max-w-[90%] md:max-w-[70%]">
-                                    <div class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-blue-600 text-white text-[10px] md:text-xs font-bold flex items-center justify-center shrink-0 shadow-xs mb-1">
-                                        <i class="fa-solid fa-user-shield text-[10px]"></i>
-                                    </div>
-
-                                    <div class="bg-blue-50/90 text-slate-800 p-3 md:p-3.5 px-3.5 md:px-4 rounded-2xl rounded-bl-xs space-y-1 border border-blue-100 shadow-2xs">
-                                        <div class="text-[11px] md:text-xs font-bold text-blue-900">
-                                            {{ $replyName ?? 'IT Support' }}{{ isset($adminDept) && $adminDept ? ' - ' . $adminDept : '' }}
+                                    <div class="bg-slate-100 text-slate-800 p-3.5 px-4 rounded-2xl rounded-bl-xs space-y-1">
+                                        <div class="text-xs font-bold text-slate-900">
+                                            {{ $replyName }}
                                         </div>
                                         <div class="text-xs md:text-sm leading-relaxed text-slate-700">
                                             {!! $reply->message !!}
                                         </div>
 
                                         @if(!empty($attachment))
-                                            <div class="mt-2 pt-2 border-t border-blue-200/60">
+                                            <div class="mt-2 pt-2 border-t border-slate-200/60">
                                                 @if($isImage)
                                                     <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="block group">
-                                                        <img src="{{ asset('storage/' . $attachment) }}" alt="Attachment" class="max-w-xs max-h-48 md:max-h-56 rounded-xl border border-blue-200 object-cover shadow-2xs group-hover:opacity-90 transition">
+                                                        <img src="{{ asset('storage/' . $attachment) }}" alt="Attachment" class="max-w-xs max-h-56 rounded-xl border border-slate-200 object-cover shadow-2xs group-hover:opacity-90 transition">
+                                                    </a>
+                                                @elseif($ext === 'pdf')
+                                                    <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="inline-flex items-center gap-2.5 px-3 py-2 bg-white hover:bg-red-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition shadow-2xs">
+                                                        <i class="fa-solid fa-file-pdf text-red-500 text-lg"></i>
+                                                        <span class="truncate max-w-[180px]">{{ basename($attachment) }}</span>
                                                     </a>
                                                 @else
-                                                    <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="text-xs text-blue-600 hover:underline flex items-center gap-1.5 font-medium">
+                                                    <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="text-xs text-sky-600 hover:underline flex items-center gap-1.5">
                                                         <i class="fa-solid fa-paperclip"></i> Download File
                                                     </a>
                                                 @endif
@@ -424,12 +393,50 @@
                                         </div>
                                     </div>
                                 </div>
+
+                            @else
+                                <div class="flex items-end justify-end gap-2.5 max-w-[85%] md:max-w-[70%] ml-auto">
+                                    <div class="bg-[#f1f6fd] text-slate-800 p-3.5 px-4 rounded-2xl rounded-br-xs space-y-1">
+                                        <div class="text-xs font-bold text-blue-900">
+                                            {{ Auth::user()->full_name ?? Auth::user()->name }} (You)
+                                        </div>
+                                        <div class="text-xs md:text-sm leading-relaxed text-slate-700">
+                                            {!! $reply->message !!}
+                                        </div>
+
+                                        @if(!empty($attachment))
+                                            <div class="mt-2 pt-2 border-t border-blue-200/60">
+                                                @if($isImage)
+                                                    <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="block group">
+                                                        <img src="{{ asset('storage/' . $attachment) }}" alt="Attachment" class="max-w-xs max-h-56 rounded-xl border border-slate-200 object-cover shadow-2xs group-hover:opacity-90 transition">
+                                                    </a>
+                                                @elseif($ext === 'pdf')
+                                                    <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="inline-flex items-center gap-2.5 px-3 py-2 bg-white hover:bg-red-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition shadow-2xs">
+                                                        <i class="fa-solid fa-file-pdf text-red-500 text-lg"></i>
+                                                        <span class="truncate max-w-[180px]">{{ basename($attachment) }}</span>
+                                                    </a>
+                                                @else
+                                                    <a href="{{ asset('storage/' . $attachment) }}" target="_blank" class="text-xs text-sky-600 hover:underline flex items-center gap-1.5">
+                                                        <i class="fa-solid fa-paperclip"></i> Download File
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        @endif
+
+                                        <div class="text-[10px] text-slate-400 font-medium pt-1 text-right">
+                                            {{ $reply->created_at ? \Carbon\Carbon::parse($reply->created_at)->format('d M Y, h:i A') : '' }}
+                                        </div>
+                                    </div>
+
+                                    <div class="w-8 h-8 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-xs mb-1">
+                                        {{ strtoupper(substr(Auth::user()->full_name ?? Auth::user()->name ?? 'U', 0, 2)) }}
+                                    </div>
+                                </div>
                             @endif
                         @endforeach
                     @endif
                 </div>
 
-                <!-- Bottom Chat Input Bar -->
                 <div class="p-3 md:p-4 bg-white border-t border-slate-200 shrink-0">
                     @if($isTicketClosed)
                         <div class="p-3 bg-slate-100 rounded-xl text-center text-xs font-semibold text-slate-500 flex items-center justify-center gap-2 border border-slate-200">
@@ -440,7 +447,6 @@
                         <form action="{{ route('messages.reply', $activeId) }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-2">
                             @csrf
                             
-                            <!-- File Preview Container -->
                             <div id="filePreviewContainer" class="hidden items-center justify-between bg-orange-50 px-3 py-1.5 rounded-xl border border-orange-200 text-xs text-orange-700">
                                 <div class="flex items-center gap-2 truncate pr-2">
                                     <i id="attachmentTypeIcon" class="fa-solid fa-paperclip text-orange-500"></i>
@@ -485,17 +491,14 @@
 
 </div>
 
-<!-- Client-side Script -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    // Auto Scroll Chat ke Bawah
     const msgContainer = document.getElementById('messageScrollContainer');
     if (msgContainer) {
         msgContainer.scrollTop = msgContainer.scrollHeight;
     }
 
-    // Live Search Chat Filter
     const searchInput = document.getElementById('chatSearchInput');
     const chatItems = document.querySelectorAll('.chat-item');
 
@@ -513,7 +516,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Attachment File Preview & Cancel
     const fileInput = document.getElementById('attachmentInput');
     const filePreviewContainer = document.getElementById('filePreviewContainer');
     const fileNameDisplay = document.getElementById('fileNameDisplay');

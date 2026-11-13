@@ -20,7 +20,7 @@
     @endif
     
     <!-- Form Container -->
-    <form action="{{ route('tickets.store') }}" method="POST" enctype="multipart/form-data"
+    <form id="createTicketForm" action="{{ route('admin.tickets.store') }}" method="POST" enctype="multipart/form-data"
           class="w-full bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[650px] text-slate-700">
         @csrf
 
@@ -101,11 +101,9 @@
 
                     <!-- Visual Text Box -->
                     <div id="visual-editor" contenteditable="true" 
-                        class="w-full min-h-[180px] max-h-[300px] overflow-y-auto bg-white border border-slate-300 rounded-b-xl p-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500 transition border-t-0">
-                        {!! old('description') !!}
-                    </div>
+                        class="w-full min-h-[180px] max-h-[300px] overflow-y-auto bg-white border border-slate-300 rounded-b-xl p-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500 transition border-t-0">{!! old('description') !!}</div>
 
-                    <input type="hidden" name="description" id="hidden-description" value="{{ old('description') }}" required>
+                    <input type="hidden" name="description" id="hidden-description" value="{{ old('description') }}">
                 </div>
 
                 <!-- Image Upload -->
@@ -122,7 +120,7 @@
                             <span id="fileNameDisplay" class="font-semibold truncate">Selected file name</span>
                         </div>
                         <button type="button" id="cancelImageBtn" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg text-xs font-bold transition shrink-0 cursor-pointer" title="Cancel/Remove File">
-                            <i class="fa-solid fa-xmark mr-1"></i> Cancel
+                            <i class="fa-solid fa-xmark mr-1"></i>
                         </button>
                     </div>
                 </div>
@@ -233,7 +231,7 @@
 
             <!-- Action Buttons -->
             <div class="pt-6 mt-6 border-t border-slate-100 flex items-center justify-end gap-2">
-                <a href="{{ route('tickets.index') }}" class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-xl text-xs font-semibold transition">
+                <a href="{{ route('admin.tickets.index') }}" class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-xl text-xs font-semibold transition">
                     Cancel
                 </a>
                 <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white font-bold px-5 py-2 rounded-xl text-sm transition flex items-center gap-1.5 shadow-sm cursor-pointer">
@@ -269,53 +267,63 @@
     editor.addEventListener('keyup', syncEditorContent);
     editor.addEventListener('blur', syncEditorContent);
 
-    document.querySelector('form').addEventListener('submit', function() {
-        syncEditorContent();
-    });
-
-    document.addEventListener('DOMContentLoaded', function () {
-    const fileInput = document.getElementById('ticketImageInput');
-    const previewContainer = document.getElementById('imagePreviewContainer');
-    const fileNameDisplay = document.getElementById('fileNameDisplay');
-    const fileTypeIcon = document.getElementById('fileTypeIcon');
-    const cancelBtn = document.getElementById('cancelImageBtn');
-
-    if (fileInput) {
-        fileInput.addEventListener('change', function () {
-            if (this.files && this.files[0]) {
-                const file = this.files[0];
-                const fileName = file.name;
-                const ext = fileName.split('.').pop().toLowerCase();
-                const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf'];
-
-                if (!allowedExtensions.includes(ext)) {
-                    alert('File format not allowed! Please select only JPG, JPEG, PNG, or PDF files.');
-                    this.value = '';
-                    previewContainer.classList.add('hidden');
-                    previewContainer.classList.remove('flex');
-                    return;
-                }
-
-                if (ext === 'pdf') {
-                    fileTypeIcon.className = 'fa-solid fa-file-pdf text-red-500 text-sm';
-                } else {
-                    fileTypeIcon.className = 'fa-solid fa-image text-orange-500 text-sm';
-                }
-
-                fileNameDisplay.textContent = fileName;
-                previewContainer.classList.remove('hidden');
-                previewContainer.classList.add('flex');
+    const ticketForm = document.getElementById('createTicketForm');
+    if (ticketForm) {
+        ticketForm.addEventListener('submit', function(e) {
+            syncEditorContent();
+            if (editor.textContent.trim() === '') {
+                e.preventDefault();
+                alert('Please enter the ticket description.');
+                editor.focus();
             }
         });
-
-        if (cancelBtn) {
-            cancelBtn.addEventListener('click', function () {
-                fileInput.value = ''; 
-                previewContainer.classList.add('hidden');
-                previewContainer.classList.remove('flex');
-            });
-        }
     }
-});
+
+    document.addEventListener('DOMContentLoaded', function () {
+        syncEditorContent();
+
+        const fileInput = document.getElementById('ticketImageInput');
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const fileTypeIcon = document.getElementById('fileTypeIcon');
+        const cancelBtn = document.getElementById('cancelImageBtn');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function () {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    const fileName = file.name;
+                    const ext = fileName.split('.').pop().toLowerCase();
+                    const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf'];
+
+                    if (!allowedExtensions.includes(ext)) {
+                        alert('File format not allowed! Please select only JPG, JPEG, PNG, or PDF files.');
+                        this.value = '';
+                        previewContainer.classList.add('hidden');
+                        previewContainer.classList.remove('flex');
+                        return;
+                    }
+
+                    if (ext === 'pdf') {
+                        fileTypeIcon.className = 'fa-solid fa-file-pdf text-red-500 text-sm';
+                    } else {
+                        fileTypeIcon.className = 'fa-solid fa-image text-orange-500 text-sm';
+                    }
+
+                    fileNameDisplay.textContent = fileName;
+                    previewContainer.classList.remove('hidden');
+                    previewContainer.classList.add('flex');
+                }
+            });
+
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function () {
+                    fileInput.value = ''; 
+                    previewContainer.classList.add('hidden');
+                    previewContainer.classList.remove('flex');
+                });
+            }
+        }
+    });
 </script>
 @endsection
