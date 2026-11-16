@@ -5,7 +5,6 @@
 @section('content')
 
 <style>
-    /* Styling Scrollbar */
     .custom-scrollbar::-webkit-scrollbar {
         width: 6px;
     }
@@ -325,12 +324,30 @@
                             @if($isSystemPic)
                                 @php
                                     $picAssignedName = trim(str_replace('PIC_CHANGE:', '', $reply->message));
+
+                                    $picDeptObj = $reply->sender_department 
+                                        ?? $reply->department 
+                                        ?? $reply->user->department 
+                                        ?? $activeTicket->department 
+                                        ?? null;
+
+                                    $picDepartment = is_object($picDeptObj) 
+                                        ? ($picDeptObj->department_code ?? $picDeptObj->code ?? null) 
+                                        : (is_array($picDeptObj) ? ($picDeptObj['department_code'] ?? $picDeptObj['code'] ?? null) : $picDeptObj);
                                 @endphp
-                                <div class="flex items-center justify-center gap-2 py-2 my-2 text-xs text-slate-400 font-medium">
+                                <div class="flex items-center justify-center flex-wrap gap-2 py-2 my-2 text-xs text-slate-400 font-medium">
                                     <div class="w-6 h-6 rounded-full bg-slate-600 text-white flex items-center justify-center text-[10px] shrink-0 shadow-2xs">
                                         <i class="fa-solid fa-user-check"></i>
                                     </div>
-                                    <span><strong class="text-slate-700 font-bold">{{ $picAssignedName }}</strong> has taken over</span>
+                                    <span class="flex items-center flex-wrap gap-1.5">
+                                        <strong class="text-slate-700 font-bold">{{ $picAssignedName }}</strong>
+                                        @if(!empty($picDepartment))
+                                            <span class="px-2 py-0.5 text-[10px] font-semibold bg-orange-100 text-orange-700 border border-orange-200 rounded-md">
+                                                {{ $picDepartment }}
+                                            </span>
+                                        @endif
+                                        <span>has taken over</span>
+                                    </span>
                                 </div>
 
                             @elseif($isSystemStatus)
@@ -355,16 +372,37 @@
                                     </span>
                                 </div>
 
-                            @elseif($isAdmin)
+                           @elseif($isAdmin)
+                                @php
+                                    $deptObj = $reply->sender_department 
+                                        ?? $reply->department 
+                                        ?? $reply->user->department 
+                                        ?? $activeTicket->department 
+                                        ?? null;
+
+                                    $replyDepartment = is_object($deptObj) 
+                                        ? ($deptObj->department_code ?? $deptObj->code ?? null) 
+                                        : (is_array($deptObj) ? ($deptObj['department_code'] ?? $deptObj['code'] ?? null) : $deptObj);
+                                @endphp
+
                                 <div class="flex items-end gap-2.5 max-w-[85%] md:max-w-[70%]">
                                     <div class="w-8 h-8 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-xs mb-1">
                                         {{ strtoupper(substr($replyName, 0, 2)) }}
                                     </div>
 
                                     <div class="bg-slate-100 text-slate-800 p-3.5 px-4 rounded-2xl rounded-bl-xs space-y-1">
-                                        <div class="text-xs font-bold text-slate-900">
-                                            {{ $replyName }}
+                                        <div class="flex items-center flex-wrap gap-1.5">
+                                            <span class="text-xs font-bold text-slate-900">
+                                                {{ $replyName }}
+                                            </span>
+
+                                            @if(!empty($replyDepartment))
+                                                <span class="px-2 py-0.5 text-[10px] font-semibold bg-orange-100 text-orange-700 border border-orange-200 rounded-md">
+                                                    {{ $replyDepartment }}
+                                                </span>
+                                            @endif
                                         </div>
+
                                         <div class="text-xs md:text-sm leading-relaxed text-slate-700">
                                             {!! $reply->message !!}
                                         </div>

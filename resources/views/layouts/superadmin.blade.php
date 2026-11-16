@@ -128,8 +128,8 @@
 
             <!-- User Avatar Circle -->
             <div class="flex items-center gap-2 pl-2">
-                <div class="w-9 h-9 rounded-full bg-purple-600 text-white font-bold flex items-center justify-center text-xs shadow-md">
-                    {{ strtoupper(substr(Auth::user()->full_name ?? Auth::user()->name ?? 'SY', 0, 2)) }}
+                <div class="w-9 h-9 rounded-full bg-orange-600 text-white font-bold flex items-center justify-center text-sm shadow-md">
+                    <i class="fa-solid fa-user"></i>
                 </div>
             </div>
         </div>

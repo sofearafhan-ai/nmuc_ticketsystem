@@ -10,7 +10,7 @@ class TicketReply extends Model
     use HasFactory;
 
     protected $table = 'ticket_replies';
-    protected $primaryKey = 'reply_id'; // Kunci utama jadual anda
+    protected $primaryKey = 'reply_id'; 
 
     protected $fillable = [
         'ticket_id',
@@ -28,6 +28,6 @@ class TicketReply extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'id');
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 }

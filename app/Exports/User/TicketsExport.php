@@ -62,6 +62,7 @@ class TicketsExport implements FromQuery, WithHeadings, WithMapping
             $ticket->ticket_id,
             $ticket->title,
             $ticket->category,
+            $ticket->type,
             $ticket->priority,
             $ticket->department_id,
             $ticket->location,
