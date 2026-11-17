@@ -42,7 +42,9 @@
         }
     </style>
 </head>
-<body x-data="{ sidebarOpen: true }" class="bg-[#faf6f0] font-sans text-slate-800 h-screen flex flex-col overflow-hidden">
+<body x-data="{ sidebarOpen: window.innerWidth >= 768 }"
+      @resize.window="if (window.innerWidth >= 768) sidebarOpen = true"
+      class="bg-[#faf6f0] font-sans text-slate-800 h-[100dvh] flex flex-col overflow-hidden">
 
     <!-- TOP HEADER BAR (Static / Fixed) -->
     <header class="w-full bg-[#0d1527] text-white h-16 px-6 flex items-center justify-between sticky top-0 z-50 shrink-0 shadow-md">
@@ -150,16 +152,17 @@
              x-transition:leave-end="opacity-0"
              class="fixed inset-0 bg-slate-950/60 z-40 md:hidden"></div>
 
-        <!-- LEFT SIDEBAR (Static / Fixed Height dengan Scroll Sendiri jika menu panjang) -->
+        <!-- LEFT SIDEBAR -->
         <aside :class="{
                    'translate-x-0 w-64': sidebarOpen,
                    '-translate-x-full md:translate-x-0 md:w-16': !sidebarOpen
                }" 
-               class="fixed md:static inset-y-0 left-0 top-16 md:top-auto h-full bg-[#0d1527] flex flex-col justify-between shrink-0 text-slate-100 transition-all duration-300 z-50 md:z-30 shadow-2xl md:shadow-none overflow-hidden"
+               class="fixed top-16 bottom-0 left-0 md:static md:h-full bg-[#0d1527] flex flex-col justify-between shrink-0 text-slate-100 transition-all duration-300 z-50 md:z-30 shadow-2xl md:shadow-none overflow-hidden"
                x-data="{ 
-                    openTickets: {{ request()->routeIs('admin.tickets.*') || request()->routeIs('admin.messages.*') ? 'true' : 'false' }},
-                    openInventory: {{ request()->routeIs('admin.inventory.*') ? 'true' : 'false' }}
-                }">
+                   openTickets: {{ request()->routeIs('superadmin.tickets.*') || request()->routeIs('superadmin.messages.*') ? 'true' : 'false' }},
+                   openInventory: {{ request()->routeIs('superadmin.inventory.*') ? 'true' : 'false' }},
+                   openUsers: {{ request()->routeIs('superadmin.users.*') ? 'true' : 'false' }}
+               }">
             
             <div class="w-64 md:w-auto flex-1 flex flex-col overflow-y-auto custom-scrollbar">
                 <!-- Sidebar Title Section -->

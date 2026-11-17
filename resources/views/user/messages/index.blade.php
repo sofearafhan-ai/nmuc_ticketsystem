@@ -20,12 +20,18 @@
     }
 </style>
 
-<div class="h-[130vh] flex flex-col space-y-4">
+@php
+    $chatList = $conversations ?? $tickets ?? [];
+    $hasSelectedTicket = request()->filled('ticket_id');
+    $currentSelectedId = request('ticket_id') ?? ($activeTicket->ticket_id ?? $activeTicket->id ?? null);
+@endphp
+
+<div class="h-[calc(100vh-100px)] md:h-[130vh] flex flex-col space-y-4">
 
     <!-- HEADER / QUICK OVERVIEW CARDS -->
-    <div class="bg-[#0d1527] p-5 rounded-3xl shadow-sm shrink-0">
+    <div class="bg-[#0d1527] p-5 rounded-3xl shadow-sm shrink-0 {{ $hasSelectedTicket ? 'hidden md:block' : 'block' }}">
         <div class="mb-3">
-            <h2 class="text-lg font-bold text-slate-800 text-white">Quick Overview</h2>
+            <h2 class="text-lg font-bold text-white">Quick Overview</h2>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -71,9 +77,9 @@
         </div>
     </div>
 
-        <!-- Success Flash Message Alert -->
+    <!-- Success Flash Message Alert -->
     @if(session('success'))
-        <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-xl shadow-sm text-emerald-800 flex items-start justify-between">
+        <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-xl shadow-sm text-emerald-800 flex items-start justify-between shrink-0">
             <div class="flex items-center gap-3 text-sm font-medium">
                 <i class="fa-solid fa-circle-check text-emerald-500 text-lg shrink-0"></i>
                 <div>
@@ -87,16 +93,10 @@
         </div>
     @endif
 
-
     <!-- MAIN CHAT CONTAINER (Responsive Layout) -->
     <div class="flex-1 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col md:flex-row h-full min-h-0">
 
-        @php
-            $chatList = $conversations ?? $tickets ?? [];
-            $hasSelectedTicket = request()->has('ticket_id') || (isset($activeTicket) && $activeTicket);
-            $currentSelectedId = request('ticket_id') ?? ($activeTicket->ticket_id ?? $activeTicket->id ?? null);
-        @endphp
-
+        <!-- LEFT PANEL: Conversation List -->
         <div class="w-full md:w-80 lg:w-96 border-b md:border-b-0 md:border-r border-slate-200 bg-white flex-col shrink-0 h-full {{ $hasSelectedTicket ? 'hidden md:flex' : 'flex' }}">
             
             <div class="p-4 border-b border-slate-100 space-y-3 shrink-0">
@@ -124,16 +124,16 @@
 
                 <div class="flex items-center gap-1.5 text-xs pt-1 overflow-x-auto">
                     <a href="{{ route('messages.index', request()->only('search')) }}" 
-                    class="px-3 py-1.5 rounded-xl font-bold cursor-pointer transition whitespace-nowrap {{ !request('status') ? 'bg-orange-500 text-white shadow-2xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
-                    All
+                       class="px-3 py-1.5 rounded-xl font-bold cursor-pointer transition whitespace-nowrap {{ !request('status') ? 'bg-orange-500 text-white shadow-2xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                        All
                     </a>
                     <a href="{{ route('messages.index', array_merge(request()->only('search'), ['status' => 'Open'])) }}" 
-                    class="px-3 py-1.5 rounded-xl font-semibold cursor-pointer transition whitespace-nowrap {{ request('status') == 'Open' ? 'bg-orange-500 text-white shadow-2xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
-                    Open Ticket
+                       class="px-3 py-1.5 rounded-xl font-semibold cursor-pointer transition whitespace-nowrap {{ request('status') == 'Open' ? 'bg-orange-500 text-white shadow-2xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                        Open Ticket
                     </a>
                     <a href="{{ route('messages.index', array_merge(request()->only('search'), ['status' => 'Closed'])) }}" 
-                    class="px-3 py-1.5 rounded-xl font-semibold cursor-pointer transition whitespace-nowrap {{ request('status') == 'Closed' ? 'bg-orange-500 text-white shadow-2xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
-                    Close Ticket
+                       class="px-3 py-1.5 rounded-xl font-semibold cursor-pointer transition whitespace-nowrap {{ request('status') == 'Closed' ? 'bg-orange-500 text-white shadow-2xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                        Close Ticket
                     </a>
                 </div>
             </div>
@@ -172,8 +172,8 @@
                     @endphp
 
                     <a href="{{ route('messages.index', array_merge(request()->only(['search', 'status', 'sort']), ['ticket_id' => $convId])) }}" 
-                    class="chat-item relative flex items-start gap-2.5 p-3.5 hover:bg-slate-50 transition cursor-pointer {{ $isActive ? 'bg-slate-100/90' : '' }}"
-                    data-search="{{ strtolower($ticketTitle . ' ' . $convId) }}">
+                       class="chat-item relative flex items-start gap-2.5 p-3.5 hover:bg-slate-50 transition cursor-pointer {{ $isActive ? 'bg-slate-100/90' : '' }}"
+                       data-search="{{ strtolower($ticketTitle . ' ' . $convId) }}">
                         
                         <div class="w-1.5 absolute left-0 top-0 bottom-0 {{ $isActive ? 'bg-slate-900 rounded-r-md' : 'bg-transparent' }}"></div>
 
@@ -214,9 +214,10 @@
 
         </div>
 
-        <div class="flex-1 bg-white flex flex-col justify-between min-w-0 h-full">
+        <!-- RIGHT PANEL: Active Chat Area -->
+        <div class="flex-1 bg-white flex-col justify-between min-w-0 h-full {{ $hasSelectedTicket ? 'flex' : 'hidden md:flex' }}">
             
-            @if($activeTicket)
+            @if(isset($activeTicket) && $activeTicket)
                 @php
                     $activeId = $activeTicket->ticket_id ?? $activeTicket->id;
                     $ticketMainAttachment = $activeTicket->image ?? $activeTicket->image_path ?? null;
@@ -224,6 +225,7 @@
                     $isTicketClosed = in_array($activeTicket->status ?? '', ['Close', 'Closed']);
                 @endphp
 
+                <!-- Active Chat Header -->
                 <div class="px-4 md:px-6 py-3.5 bg-white border-b border-slate-200 flex items-center justify-between shadow-2xs shrink-0">
                     <div class="flex items-center gap-3 w-full min-w-0">
                         
@@ -259,8 +261,10 @@
                     </div>
                 </div>
 
+                <!-- Messages Container -->
                 <div class="flex-1 p-4 md:p-6 overflow-y-auto custom-scrollbar space-y-4 bg-white" id="messageScrollContainer">
 
+                    <!-- 1. User's Initial Ticket Description -->
                     <div class="flex items-end justify-end gap-2.5 max-w-[90%] md:max-w-[70%] ml-auto">
                         <div class="bg-[#f1f6fd] text-slate-800 p-3 md:p-3.5 px-3.5 md:px-4 rounded-2xl rounded-br-xs space-y-1">
                             <div class="text-[11px] md:text-xs font-bold text-blue-900">
@@ -307,6 +311,7 @@
                         </div>
                     </div>
 
+                    <!-- 2. Replies Loop -->
                     @if(isset($activeTicket->replies) && $activeTicket->replies->count() > 0)
                         @foreach($activeTicket->replies as $reply)
                             @php
@@ -372,7 +377,7 @@
                                     </span>
                                 </div>
 
-                           @elseif($isAdmin)
+                            @elseif($isAdmin)
                                 @php
                                     $deptObj = $reply->sender_department 
                                         ?? $reply->department 
@@ -475,6 +480,7 @@
                     @endif
                 </div>
 
+                <!-- Bottom Chat Input Bar -->
                 <div class="p-3 md:p-4 bg-white border-t border-slate-200 shrink-0">
                     @if($isTicketClosed)
                         <div class="p-3 bg-slate-100 rounded-xl text-center text-xs font-semibold text-slate-500 flex items-center justify-center gap-2 border border-slate-200">
@@ -484,15 +490,14 @@
                     @else
                         <form action="{{ route('messages.reply', $activeId) }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-2">
                             @csrf
-                            
-                            <div id="filePreviewContainer" class="hidden items-center justify-between bg-orange-50 px-3 py-1.5 rounded-xl border border-orange-200 text-xs text-orange-700">
-                                <div class="flex items-center gap-2 truncate pr-2">
-                                    <i id="attachmentTypeIcon" class="fa-solid fa-paperclip text-orange-500"></i>
-                                    <span id="fileNameDisplay" class="font-semibold truncate">Selected file</span>
-                                </div>
-                                <button type="button" id="removeFileBtn" class="px-2 py-0.5 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg text-xs font-bold transition shrink-0 cursor-pointer">
-                                    <i class="fa-solid fa-xmark mr-1"></i> Cancel
-                                </button>
+
+                            <!-- File Preview Bar -->
+                            <div id="filePreviewContainer" class="hidden items-center justify-between bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-200 text-xs text-orange-700">
+                                <span class="truncate flex items-center gap-1.5">
+                                    <i id="attachmentTypeIcon" class="fa-solid fa-image text-orange-500"></i>
+                                    <span id="fileNameDisplay">Selected file</span>
+                                </span>
+                                <button type="button" id="removeFileBtn" class="text-orange-500 hover:text-red-500 ml-2 font-bold">&times;</button>
                             </div>
 
                             <div class="flex items-center gap-2">
@@ -502,9 +507,9 @@
                                 </label>
 
                                 <input type="text" name="message" required placeholder="Type a message..." 
-                                       class="flex-1 bg-slate-100 border border-transparent focus:border-orange-500 focus:bg-white rounded-xl px-3.5 py-2 md:px-4 md:py-2.5 text-xs md:text-sm text-slate-800 outline-none transition">
+                                       class="flex-1 bg-slate-100 border border-transparent focus:border-orange-500 focus:bg-white rounded-xl px-4 py-2.5 text-xs md:text-sm text-slate-800 outline-none transition">
 
-                                <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-4 md:px-5 py-2 md:py-2.5 rounded-xl text-xs font-bold transition shadow-md flex items-center gap-1.5 cursor-pointer shrink-0">
+                                <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-md flex items-center gap-2 cursor-pointer shrink-0">
                                     <span>Send</span>
                                     <i class="fa-solid fa-paper-plane text-[10px] md:text-[11px]"></i>
                                 </button>
@@ -514,12 +519,12 @@
                 </div>
 
             @else
-                <div class="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50/20">
+                <div class="flex-1 flex flex-col items-center justify-center p-8 text-center">
                     <div class="w-16 h-16 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center text-2xl mb-3 shadow-inner">
                         <i class="fa-solid fa-comments"></i>
                     </div>
                     <h3 class="text-base font-bold text-slate-800 mb-1">Select a Support Ticket</h3>
-                    <p class="text-xs text-slate-500 max-w-xs">Choose a ticket from the list on the left to start communicating with support.</p>
+                    <p class="text-xs text-slate-500 max-w-xs">Choose a ticket from the list to communicate with the support team.</p>
                 </div>
             @endif
 
@@ -531,7 +536,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-
     const msgContainer = document.getElementById('messageScrollContainer');
     if (msgContainer) {
         msgContainer.scrollTop = msgContainer.scrollHeight;
@@ -545,11 +549,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const query = e.target.value.toLowerCase().trim();
             chatItems.forEach(item => {
                 const searchData = item.getAttribute('data-search') || '';
-                if (searchData.includes(query)) {
-                    item.style.display = 'flex';
-                } else {
-                    item.style.display = 'none';
-                }
+                item.style.display = searchData.includes(query) ? 'flex' : 'none';
             });
         });
     }
@@ -557,13 +557,32 @@ document.addEventListener('DOMContentLoaded', function () {
     const fileInput = document.getElementById('attachmentInput');
     const filePreviewContainer = document.getElementById('filePreviewContainer');
     const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const attachmentTypeIcon = document.getElementById('attachmentTypeIcon');
     const removeFileBtn = document.getElementById('removeFileBtn');
 
     if (fileInput) {
         fileInput.addEventListener('change', function () {
             if (this.files && this.files[0]) {
                 const file = this.files[0];
-                fileNameDisplay.textContent = file.name;
+                const fileName = file.name;
+                const ext = fileName.split('.').pop().toLowerCase();
+                const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf'];
+
+                if (!allowedExtensions.includes(ext)) {
+                    alert('File format not allowed! Please select only JPG, JPEG, PNG, or PDF files.');
+                    this.value = '';
+                    filePreviewContainer.classList.add('hidden');
+                    filePreviewContainer.classList.remove('flex');
+                    return;
+                }
+
+                if (attachmentTypeIcon) {
+                    attachmentTypeIcon.className = ext === 'pdf'
+                        ? 'fa-solid fa-file-pdf text-red-500'
+                        : 'fa-solid fa-image text-orange-500';
+                }
+
+                fileNameDisplay.textContent = fileName;
                 filePreviewContainer.classList.remove('hidden');
                 filePreviewContainer.classList.add('flex');
             }

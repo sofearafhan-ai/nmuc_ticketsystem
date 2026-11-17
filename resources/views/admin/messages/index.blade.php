@@ -21,13 +21,15 @@
     }
 </style>
 
-<div class="h-[130vh] flex flex-col">
+<div class="h-[calc(100vh-100px)] md:h-[130vh] flex flex-col"
+     x-data="{ mobileChatOpen: {{ request()->filled('ticket_id') ? 'true' : 'false' }} }">
 
     <!-- MAIN CHAT CONTAINER -->
     <div class="flex-1 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col md:flex-row h-full">
 
-        <!-- LEFT PANEL: Conversation List (Width 1/3) -->
-        <div class="w-full md:w-80 lg:w-96 border-b md:border-b-0 md:border-r border-slate-200 bg-white flex flex-col shrink-0 h-full">
+        <!-- LEFT PANEL: Conversation List (Web kekal sama; di phone sembunyi bila chat dibuka) -->
+        <div :class="mobileChatOpen ? 'hidden md:flex' : 'flex'"
+             class="w-full md:w-80 lg:w-96 border-b md:border-b-0 md:border-r border-slate-200 bg-white flex-col shrink-0 h-full">
             
             <!-- Top Header & Filter Bar (Fixed Header) -->
             <div class="p-4 border-b border-slate-100 space-y-3 shrink-0">
@@ -115,6 +117,7 @@
                     @endphp
 
                     <a href="{{ route('admin.messages.index', array_merge(request()->only(['search', 'status', 'sort']), ['ticket_id' => $convId])) }}" 
+                       @click="mobileChatOpen = true"
                        class="chat-item relative flex items-start gap-2.5 p-3.5 pl-0 hover:bg-slate-50 transition cursor-pointer {{ $isActive ? 'bg-slate-100/90' : '' }}"
                        data-search="{{ strtolower($userName . ' ' . $ticketTitle . ' ' . $convId) }}">
                         
@@ -165,8 +168,9 @@
 
         </div>
 
-        <!-- RIGHT PANEL: Active Chat Area (Width 2/3) -->
-        <div class="flex-1 bg-white flex flex-col justify-between min-w-0 h-full">
+        <!-- RIGHT PANEL: Active Chat Area (Web kekal sama; di phone muncul penuh bila chat dipilih) -->
+        <div :class="mobileChatOpen ? 'flex' : 'hidden md:flex'"
+             class="flex-1 bg-white flex-col justify-between min-w-0 h-full">
             
             @if(isset($activeTicket) && $activeTicket)
                 @php
@@ -179,8 +183,16 @@
                 @endphp
 
                 <!-- Active Chat Header (Fixed Header) -->
-                <div class="px-6 py-4 bg-white border-b border-slate-200 flex items-center justify-between shadow-2xs shrink-0">
+                <div class="px-4 md:px-6 py-4 bg-white border-b border-slate-200 flex items-center justify-between shadow-2xs shrink-0">
                     <div class="flex items-center gap-3 min-w-0">
+                        <!-- Butang Back (Hanya muncul pada skrin phone, tersembunyi di web) -->
+                        <button type="button"
+                                @click="mobileChatOpen = false"
+                                class="md:hidden w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center shrink-0 transition cursor-pointer"
+                                title="Back to ticket list">
+                            <i class="fa-solid fa-arrow-left text-sm"></i>
+                        </button>
+
                         <div class="w-10 h-10 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-sm shrink-0 shadow-xs">
                             {{ strtoupper(substr($activeUserName, 0, 1)) }}
                         </div>

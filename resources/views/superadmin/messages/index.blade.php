@@ -20,13 +20,15 @@
     }
 </style>
 
-<div class="h-[130vh] flex flex-col">
+<div class="h-[calc(100vh-100px)] md:h-[130vh] flex flex-col"
+     x-data="{ mobileChatOpen: {{ request()->filled('ticket_id') ? 'true' : 'false' }} }">
 
     <!-- MAIN CHAT CONTAINER -->
     <div class="flex-1 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col md:flex-row h-full">
 
-        <!-- LEFT PANEL: Conversation List (Width 1/3) -->
-        <div class="w-full md:w-80 lg:w-96 border-b md:border-b-0 md:border-r border-slate-200 bg-white flex flex-col shrink-0 h-full">
+        <!-- LEFT PANEL: Conversation List  -->
+        <div :class="mobileChatOpen ? 'hidden md:flex' : 'flex'"
+             class="w-full md:w-80 lg:w-96 border-b md:border-b-0 md:border-r border-slate-200 bg-white flex-col shrink-0 h-full">
             
             <!-- Top Header & Filter Bar (Fixed Header) -->
             <div class="p-4 border-b border-slate-100 space-y-3 shrink-0">
@@ -109,6 +111,7 @@
                     @endphp
 
                     <a href="{{ route('superadmin.messages.index', array_merge(request()->only(['search', 'status', 'sort']), ['ticket_id' => $convId])) }}" 
+                       @click="mobileChatOpen = true"
                        class="chat-item relative flex items-start gap-2.5 p-3.5 pl-0 hover:bg-slate-50 transition cursor-pointer {{ $isActive ? 'bg-slate-100/90' : '' }}"
                        data-search="{{ strtolower($userName . ' ' . $ticketTitle . ' ' . $convId) }}">
                         
@@ -157,8 +160,9 @@
 
         </div>
 
-        <!-- RIGHT PANEL: Active Chat Area (Width 2/3) -->
-        <div class="flex-1 bg-white flex flex-col justify-between min-w-0 h-full">
+        <!-- RIGHT PANEL: Active Chat Area  -->
+        <div :class="mobileChatOpen ? 'flex' : 'hidden md:flex'"
+             class="flex-1 bg-white flex-col justify-between min-w-0 h-full">
             
             @if(isset($activeTicket) && $activeTicket)
                 @php
@@ -170,8 +174,15 @@
                     $isTicketClosed = in_array($activeTicket->status ?? '', ['Close', 'Closed']);
                 @endphp
 
-                <div class="px-6 py-4 bg-white border-b border-slate-200 flex items-center justify-between shadow-2xs shrink-0">
+                <div class="px-4 md:px-6 py-4 bg-white border-b border-slate-200 flex items-center justify-between shadow-2xs shrink-0">
                     <div class="flex items-center gap-3 min-w-0">
+                        <button type="button"
+                                @click="mobileChatOpen = false"
+                                class="md:hidden w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center shrink-0 transition cursor-pointer"
+                                title="Back to ticket list">
+                            <i class="fa-solid fa-arrow-left text-sm"></i>
+                        </button>
+
                         <div class="w-10 h-10 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-sm shrink-0 shadow-xs">
                             {{ strtoupper(substr($activeUserName, 0, 1)) }}
                         </div>
@@ -206,7 +217,7 @@
 
                 <div class="flex-1 p-5 md:p-6 overflow-y-auto custom-scrollbar space-y-4 bg-white" id="messageScrollContainer">
                     
-                    <!-- 1. First Ticket Message (Submission oleh User) -->
+                    <!-- 1. First Ticket Message -->
                     <div class="flex items-end gap-2.5 max-w-[85%] md:max-w-[70%]">
                         <div class="w-8 h-8 rounded-full bg-emerald-500 text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-xs mb-1">
                             {{ strtoupper(substr($activeUserName, 0, 1)) }}
@@ -445,16 +456,14 @@
 
 </div>
 
-<!-- Client-side Script -->
+<!-- Client-side Script  -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Auto Scroll Chat to Bottom
     const msgContainer = document.getElementById('messageScrollContainer');
     if (msgContainer) {
         msgContainer.scrollTop = msgContainer.scrollHeight;
     }
 
-    // Live Search Filter for Conversations
     const searchInput = document.getElementById('chatSearchInput');
     const chatItems = document.querySelectorAll('.chat-item');
 
@@ -472,7 +481,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Attachment File Preview & Validation
     const fileInput = document.getElementById('attachmentInput');
     const filePreviewContainer = document.getElementById('filePreviewContainer');
     const fileNameDisplay = document.getElementById('fileNameDisplay');
@@ -495,28 +503,27 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
-                if (attachmentTypeIcon) {
-                    if (ext === 'pdf') {
-                        attachmentTypeIcon.className = 'fa-solid fa-file-pdf text-red-500';
-                    } else {
-                        attachmentTypeIcon.className = 'fa-solid fa-image text-orange-500';
-                    }
+                fileNameDisplay.textContent = fileName;
+                if (ext === 'pdf') {
+                    attachmentTypeIcon.className = 'fa-solid fa-file-pdf text-red-500';
+                } else {
+                    attachmentTypeIcon.className = 'fa-solid fa-image text-orange-500';
                 }
 
-                fileNameDisplay.textContent = fileName;
                 filePreviewContainer.classList.remove('hidden');
                 filePreviewContainer.classList.add('flex');
             }
         });
+    }
 
-        if (removeFileBtn) {
-            removeFileBtn.addEventListener('click', function () {
-                fileInput.value = '';
-                filePreviewContainer.classList.add('hidden');
-                filePreviewContainer.classList.remove('flex');
-            });
-        }
+    if (removeFileBtn) {
+        removeFileBtn.addEventListener('click', function () {
+            fileInput.value = '';
+            filePreviewContainer.classList.add('hidden');
+            filePreviewContainer.classList.remove('flex');
+        });
     }
 });
 </script>
+
 @endsection
