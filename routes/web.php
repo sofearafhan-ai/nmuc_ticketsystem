@@ -8,7 +8,10 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\GuestTicketController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Auth\MicrosoftAuthController;
 
+Route::get('/auth/microsoft', [MicrosoftAuthController::class, 'redirectToMicrosoft'])->name('login.microsoft');
+Route::get('/auth/microsoft/callback', [MicrosoftAuthController::class, 'handleMicrosoftCallback']);
 
 Route::get('/guest/tickets/create', [GuestTicketController::class, 'create'])->name('guest.tickets.create');
 Route::post('/guest/tickets', [GuestTicketController::class, 'store'])->name('guest.tickets.store');

@@ -45,6 +45,13 @@
             </div>
         @endif
 
+        @if (session('error'))
+            <div class="p-3 bg-red-100 border border-red-300 text-red-800 rounded-lg text-xs flex items-center gap-2">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>{{ session('error') }}</span>
+            </div>
+        @endif
+
         <!-- Log In Form -->
         <form action="{{ route('login.post') }}" method="POST" class="space-y-4">
             @csrf
@@ -62,21 +69,40 @@
                 @enderror
             </div>
 
-                <!-- Password -->
-                <div class="space-y-1">
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
-                    <div class="relative flex items-center">
-                        <i class="fa-solid fa-lock absolute left-3 top-3 text-slate-400 text-sm"></i>
-                        <input type="password" name="password"
-                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition">
-                    </div>
+            <!-- Password -->
+            <div class="space-y-1">
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
+                <div class="relative flex items-center">
+                    <i class="fa-solid fa-lock absolute left-3 top-3 text-slate-400 text-sm"></i>
+                    <input type="password" name="password"
+                        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition">
                 </div>
+            </div>
 
-                <!-- Send Button -->
-                <button type="submit" class="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-lg shadow-md hover:shadow-lg transition cursor-pointer flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-right-to-bracket"></i> Log In
-                </button>
+            <!-- Send Button -->
+            <button type="submit" class="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-lg shadow-md hover:shadow-lg transition cursor-pointer flex items-center justify-center gap-2">
+                <i class="fa-solid fa-right-to-bracket"></i> Log In
+            </button>
         </form>
+
+        <!-- Divider -->
+        <div class="relative flex py-1 items-center">
+            <div class="grow border-t border-slate-200"></div>
+            <span class="shrink mx-3 text-[11px] font-semibold text-slate-400 uppercase">Or continue with</span>
+            <div class="grow border-t border-slate-200"></div>
+        </div>
+
+        <!-- Microsoft 365 Login Button -->
+        <a href="{{ route('login.microsoft') }}"
+           class="w-full py-3 bg-[#0d1527] hover:bg-slate-800 text-white font-bold text-sm rounded-lg shadow-md hover:shadow-lg transition flex items-center justify-center gap-3">
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
+                <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
+                <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
+                <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+            </svg>
+            <span>Sign in with Microsoft 365</span>
+        </a>
 
         <div class="text-center pt-2 border-t border-slate-100">
             <p class="text-xs text-slate-400">&copy; {{ date('Y') }} NMUC Helpdesk System</p>

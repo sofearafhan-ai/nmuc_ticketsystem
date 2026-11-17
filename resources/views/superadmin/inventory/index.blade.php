@@ -212,12 +212,12 @@
                             <tr class="hover:bg-slate-50/60 transition duration-150">
                                 
                                 <!-- No -->
-                                <td class="py-3.5 px-4 font-bold text-slate-900 text-center">
+                                <td class="py-3 px-4 font-bold text-slate-900 text-center">
                                     #{{ method_exists($inventories, 'firstItem') ? ($inventories->firstItem() + $index) : ($index + 1) }}
                                 </td>
 
                                 <!-- Item Name -->
-                                <td class="py-3.5 px-4 text-center">
+                                <td class="py-3 px-3 text-center">
                                     <div class="flex items-center gap-3">
                                         <div>
                                             <span class="font-bold text-slate-800 block text-xs">{{ $item->item_name }}</span>
@@ -226,29 +226,29 @@
                                 </td>
 
                                 <!-- Type -->
-                                <td class="py-3.5 px-4 text-center">
+                                <td class="py-3 px-3 text-center">
                                     <div class="flex items-center justify-center gap-1.5">
                                         <span class="text-xs text-slate-700 font-semibold">{{ $item->item_type }}</span>
                                     </div>
                                 </td>
 
                                 <!-- Manufacturer -->
-                                <td class="py-3.5 px-4 text-center">
+                                <td class="py-3 px-3 text-center">
                                     <span class="text-[10px] text-slate-400 block font-medium">{{ $item->item_manufacturer ?? '-' }}</span>
                                 </td>
 
                                 <!-- Model -->
-                                <td class="py-3.5 px-4 text-center">
+                                <td class="py-3 px-3 text-center">
                                     <span class="font-bold text-slate-800 block">{{ $item->item_model ?? '-' }}</span>
                                 </td>
 
                                  <!-- Serial Number -->
-                                <td class="py-2 text-xs text-center font-medium text-slate-500">
+                                <td class="py-3 text-xs text-center font-medium text-slate-500">
                                     {{ $item->serial_number ?? 'N/A' }}
                                 </td>
 
                                 <!-- Location -->
-                                <td class="p-2 text-xs text-slate-500 font-medium text-center">
+                                <td class="p-3 text-xs text-slate-500 font-medium text-center">
                                         {{ $item->item_location ?? 'N/A' }}
                                 </td>
 
@@ -305,7 +305,7 @@
                                 </td>
 
                                 <!-- Actions -->
-                                <td class="py-3.5 px-4 text-center">
+                                <td class="py-3 px-4 text-center">
                                     <div class="flex items-center justify-center gap-1.5">
                                         <form action="{{ route('superadmin.inventory.destroy', $item->item_id ?? $item->id) }}" method="POST" 
                                               onsubmit="return confirm('Are you sure you want to delete this asset record?');">

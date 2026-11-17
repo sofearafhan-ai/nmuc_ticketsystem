@@ -144,13 +144,13 @@
                             }
                         @endphp
                         <tr class="hover:bg-slate-50/50 transition">
-                            <td class="py-3 px-4 font-bold text-slate-900 text-center">{{ $formattedTicketNo }}</td>
-                            <td class="py-3 px-4 font-semibold text-slate-800 truncate max-w-xs text-center">{{ $ticket->title }}</td>
-                            <td class="py-3 px-4 text-slate-600 font-semibold text-center">{{ $ticket->user_name ?? ($ticket->user->name ?? 'User') }}</td>
-                            <td class="py-3 px-4 text-xs text-slate-700 font-medium text-center">
+                            <td class="py-2 px-3 font-bold text-slate-900 text-center">{{ $formattedTicketNo }}</td>
+                            <td class="py-2 px-3 font-semibold text-slate-800 truncate max-w-xs text-center">{{ $ticket->title }}</td>
+                            <td class="py-2 px-3 text-slate-600 font-semibold text-center">{{ $ticket->user_name ?? ($ticket->user->name ?? 'User') }}</td>
+                            <td class="py-2 px-3 text-xs text-slate-700 font-medium text-center">
                                 {{ $ticket->category }}
                             </td>
-                            <td class="py-3 px-4 text-center">
+                            <td class="py-2 px-3 text-center">
                                 <span class="px-2 py-0.5 font-bold rounded-full text-[10px]
                                     @if($ticket->priority == 'Urgent') bg-red-100 text-red-800
                                     @elseif($ticket->priority == 'High') bg-orange-200 text-orange-900
@@ -159,7 +159,7 @@
                                     {{ $ticket->priority }}
                                 </span>
                             </td>
-                            <td class="py-3 px-4 text-center text-slate-500 font-medium">
+                            <td class="py-2 px-3 text-center text-slate-500 font-medium">
                                 @php
                                     $rawDept = $ticket->department_name ?? $ticket->department ?? null;
 
@@ -181,7 +181,7 @@
 
                                 {{ $deptName ?? '-' }}
                             </td>
-                            <td class="py-3 px-4 text-center">
+                            <td class="py-2 px-3 text-center">
                                 <span class="px-3 py-1 text-xs font-semibold rounded-full inline-block
                                     @if($ticket->status == 'New') bg-emerald-100 text-emerald-700
                                     @elseif($ticket->status == 'Processing') bg-blue-100 text-blue-700
@@ -191,8 +191,8 @@
                                     {{ $ticket->status }}
                                 </span>
                             </td>
-                            <td class="py-3.5 px-4 text-center text-slate-500 font-medium">{{ $formattedDate }}</td>
-                            <td class="py-3.5 px-4 text-center">
+                            <td class="py-2 px-3 text-center text-slate-500 font-medium">{{ $formattedDate }}</td>
+                            <td class="py-2 px-3 text-center">
                                 <a href="{{ route('superadmin.tickets.edit', $ticketId) }}" 
                                    class="bg-orange-500 hover:bg-orange-600 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs transition inline-flex items-center gap-1.5 shadow-sm">
                                     <i class="fa-solid fa-user-plus text-[11px]"></i>
