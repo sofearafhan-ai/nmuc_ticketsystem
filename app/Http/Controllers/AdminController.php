@@ -206,7 +206,6 @@ class AdminController extends Controller
         return view('admin.tickets.create', compact('adminDept', 'departments', 'types', 'categories', 'priorities'));
     }
 
-    // Edit Ticket
     public function editTicket($id)
     {
         $user = Auth::user();
@@ -215,7 +214,12 @@ class AdminController extends Controller
         $ticket = Ticket::with(['replies', 'user', 'picAdmin'])->where('ticket_id', $id)->firstOrFail();
 
         $departments = Department::all();
-        $adminsInDept = User::whereIn('role', ['Admin', 'Super Admin'])->get();
+        $adminsInDept = User::whereIn('role', ['Admin', 'Super Admin'])
+                    ->where(function ($query) use ($ticket) {
+                        $query->where('user_status', 'Active')
+                            ->orWhere('user_id', $ticket->pic);
+                    })
+                    ->get();
 
         $categories = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
         $types      = ['Incident', 'Request'];
@@ -330,7 +334,6 @@ class AdminController extends Controller
         return $this->messages(request(), $id);
     }
 
-    // New Ticket Store
     public function storeTicket(Request $request)
     {
         $request->validate([
@@ -406,7 +409,6 @@ class AdminController extends Controller
             ->with('success', 'New support ticket created successfully!');
     }
 
-    // 3. MESSAGE HISTORY ADMIN 
     public function messages(Request $request, $ticketId = null)
     {
         $user = Auth::user();
@@ -490,7 +492,6 @@ class AdminController extends Controller
             ->with('success', 'Message sent successfully.');
     }
 
-    // 4. DEPARTMENT ADMIN INVENTORY LIST
     public function inventory(Request $request)
     {
         $user = Auth::user();

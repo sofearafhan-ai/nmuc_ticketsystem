@@ -47,7 +47,6 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
-        <!-- LEFT SIDE: Conversation / Chat Area (Width 2/3) -->
         <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col h-[650px]">
             
             @php
@@ -58,15 +57,12 @@
                 $isTicketClosed = in_array($ticket->status ?? '', ['Close', 'Closed']);
             @endphp
 
-            <!-- Active Chat Header -->
             <div class="px-6 py-4 bg-white border-b border-slate-200 flex items-center justify-between shadow-2xs shrink-0">
                 <div class="flex items-center gap-3 min-w-0">
-                    <!-- Avatar Initial -->
                     <div class="w-10 h-10 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-sm shrink-0 shadow-xs">
                         {{ strtoupper(substr($activeUserName, 0, 1)) }}
                     </div>
-                    
-                    <!-- Header Title & Status -->
+
                     <div class="flex-1 flex items-center justify-between gap-2 min-w-0">
                         <div class="min-w-0">
                             <h6 class="text-xs md:text-base font-bold text-slate-800 truncate">
@@ -89,10 +85,8 @@
                 </div>
             </div>
 
-            <!-- Chat Messages Scroll Area -->
             <div class="flex-1 p-5 md:p-6 overflow-y-auto custom-scrollbar space-y-4 bg-white" id="editMessageScrollContainer">
                 
-                <!-- Main Submission Message -->
                 <div class="flex items-end gap-2.5 max-w-[85%] md:max-w-[70%]">
                     <div class="w-8 h-8 rounded-full bg-emerald-500 text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-xs mb-1">
                         {{ strtoupper(substr($activeUserName, 0, 1)) }}
@@ -135,7 +129,6 @@
                     </div>
                 </div>
 
-                <!-- Replies Loop -->
                 @if(isset($ticket->replies) && $ticket->replies->count() > 0)
                     @foreach($ticket->replies as $reply)
                         @php
@@ -152,13 +145,31 @@
 
                         @if($isSystemPic)
                             @php
-                                $picAssignedName = str_replace('PIC_CHANGE:', '', $reply->message);
+                                $picAssignedName = trim(str_replace('PIC_CHANGE:', '', $reply->message));
+
+                                $picDeptObj = $reply->sender_department 
+                                    ?? $reply->department 
+                                    ?? $reply->user->department 
+                                    ?? $activeTicket->department 
+                                    ?? null;
+
+                                $picDepartment = is_object($picDeptObj) 
+                                    ? ($picDeptObj->department_code ?? $picDeptObj->code ?? null) 
+                                    : (is_array($picDeptObj) ? ($picDeptObj['department_code'] ?? $picDeptObj['code'] ?? null) : $picDeptObj);
                             @endphp
                             <div class="flex items-center justify-center gap-2 py-2 my-2 text-xs text-slate-400 font-medium">
                                 <div class="w-6 h-6 rounded-full bg-slate-600 text-white flex items-center justify-center text-[10px] shrink-0 shadow-2xs">
                                     <i class="fa-solid fa-user-check"></i>
                                 </div>
-                                <span><strong class="text-slate-700 font-bold">{{ $picAssignedName }}</strong> has taken over</span>
+                                <span class="flex items-center flex-wrap gap-1.5">
+                                    <strong class="text-slate-700 font-bold">{{ $picAssignedName }}</strong>
+                                    @if(!empty($picDepartment))
+                                        <span class="text-slate-700 font-bold">
+                                            ({{ $picDepartment }})
+                                        </span>
+                                    @endif
+                                    <span>has taken over</span>
+                                </span>
                             </div>
 
                         @elseif($isSystemStatus)
@@ -265,7 +276,6 @@
                 @endif
             </div>
 
-            <!-- Bottom Chat Input Bar -->
             <div class="p-4 bg-white border-t border-slate-200 shrink-0">
                 @if($isTicketClosed)
                     <div class="p-3 bg-slate-100 rounded-xl text-center text-xs font-semibold text-slate-500 flex items-center justify-center gap-2 border border-slate-200">
@@ -275,8 +285,7 @@
                 @else
                     <form action="{{ route('superadmin.messages.reply', $activeId) }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-2">
                         @csrf
-                        
-                        <!-- File Preview Name Indicator -->
+
                         <div id="filePreviewContainerEdit" class="hidden items-center justify-between bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-200 text-xs text-orange-700">
                             <span class="truncate flex items-center gap-1.5">
                                 <i class="fa-solid fa-image"></i>
@@ -286,17 +295,14 @@
                         </div>
 
                         <div class="flex items-center gap-2">
-                            <!-- Attachment Button -->
                             <label class="p-2.5 text-slate-400 hover:text-orange-500 hover:bg-slate-100 rounded-xl transition cursor-pointer" title="Attach file or image">
                                 <i class="fa-solid fa-paperclip text-lg"></i>
                                 <input type="file" id="attachmentInputEdit" name="attachment" accept=".jpg,.jpeg,.png,.pdf" class="hidden">
                             </label>
 
-                            <!-- Input Message Field -->
                             <input type="text" name="message" required placeholder="Type a message..." 
                                    class="flex-1 bg-slate-100 border border-transparent focus:border-orange-500 focus:bg-white rounded-xl px-4 py-2.5 text-xs md:text-sm text-slate-800 outline-none transition">
 
-                            <!-- Send Button -->
                             <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-md flex items-center gap-2 cursor-pointer shrink-0">
                                 <span>Send</span>
                                 <i class="fa-solid fa-paper-plane text-[11px]"></i>
@@ -391,20 +397,20 @@
                     </select>
                 </div>
 
-                <!-- ASSIGN TO (PIC) DROPDOWN -->
                 <div>
                     <label for="pic_select" class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Assign To (PIC)</label>
                     <select name="pic" id="pic_select" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none transition">
                         <option value="">-- Unassigned --</option>
                         @foreach($adminsInDept as $adm)
-                            <option value="{{ $adm->user_id }}" data-department-id="{{ $adm->department_id ?? '' }}" {{ $ticket->pic == $adm->user_id ? 'selected' : '' }}>
-                                {{ $adm->full_name ?? $adm->name }} ({{ $adm->role }})
-                            </option>
+                            @if(strtolower($adm->status ?? 'active') === 'active' || $ticket->pic == $adm->user_id)
+                                <option value="{{ $adm->user_id }}" data-department-id="{{ $adm->department_id ?? '' }}" {{ $ticket->pic == $adm->user_id ? 'selected' : '' }}>
+                                    {{ $adm->full_name ?? $adm->name }} ({{ $adm->role }})
+                                </option>
+                            @endif
                         @endforeach
                     </select>
                 </div>
 
-                <!-- Save Button -->
                 <div class="pt-3">
                     <button type="submit" class="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-xs shadow-md transition cursor-pointer">
                         Update Information

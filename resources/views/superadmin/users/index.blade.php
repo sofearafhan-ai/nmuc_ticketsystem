@@ -125,34 +125,28 @@
                                 $userId = $user->user_id ?? $user->id;
                             @endphp
                             <tr class="hover:bg-slate-50 transition">
-                                <!-- 1. No -->
-                                <td class="p-3 text-center font-bold text-xs text-slate-500">
+                                <td class="p-3 text-center font-medium text-xs text-slate-500">
                                     {{ method_exists($users, 'firstItem') ? ($users->firstItem() + $index) : ($index + 1) }}
                                 </td>
 
-                                <!-- 2. Name -->
                                 <td class="p-3">
                                     <span class="font-bold text-slate-800 text-xs block">
                                         {{ $user->full_name ?? $user->name }}
                                     </span>
                                 </td>
 
-                                <!-- 3. User ID -->
                                 <td class="p-3 text-center text-xs font-bold text-slate-500">
                                     {{ $user->nmuc_id }}
                                 </td>
 
-                                <!-- 4. Email -->
-                                <td class="p-3 text-xs text-slate-600 font-medium">
+                                <td class="p-3 text-xs text-slate-600 font-medium text-center">
                                     {{ $user->email }}
                                 </td>
 
-                                <!-- 5. Department -->
                                 <td class="p-3 text-xs font-bold text-slate-700 text-center">
                                     {{ $user->department->department_name ?? '-' }}
                                 </td>
 
-                                <!-- 6. Role -->
                                 <td class="p-3 text-center">
                                     <span class="px-2.5 py-1 text-xs font-bold rounded-md border inline-block
                                         @if($user->role == 'Super Admin') bg-purple-100 text-purple-700 border-purple-200
@@ -162,7 +156,6 @@
                                     </span>
                                 </td>
 
-                                <!-- 7. Status Badge -->
                                 <td class="p-2 text-xs text-slate-500 font-medium text-center">
                                     <span class="px-2.5 py-1 text-[10px] font-bold rounded-full inline-block uppercase tracking-wider border
                                         {{ $user->user_status == 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200' }}">

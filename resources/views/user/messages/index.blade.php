@@ -28,14 +28,12 @@
 
 <div class="h-[calc(100vh-100px)] md:h-[130vh] flex flex-col space-y-4">
 
-    <!-- HEADER / QUICK OVERVIEW CARDS -->
     <div class="bg-[#0d1527] p-5 rounded-3xl shadow-sm shrink-0 {{ $hasSelectedTicket ? 'hidden md:block' : 'block' }}">
         <div class="mb-3">
             <h2 class="text-lg font-bold text-white">Quick Overview</h2>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <!-- Card 1: Total Tickets -->
             <div class="bg-white/70 backdrop-blur-md p-3.5 rounded-2xl border border-white/60 shadow-sm flex flex-col justify-between">
                 <div>
                     <h3 class="text-xl font-black text-slate-800">{{ $userTicketStats['total'] ?? 0 }}</h3>
@@ -43,7 +41,6 @@
                 </div>
             </div>
 
-            <!-- Card 2: New Tickets -->
             <div class="bg-white/70 backdrop-blur-md p-3.5 rounded-2xl border border-white/60 shadow-sm flex flex-col justify-between">
                 <div>
                     <h3 class="text-xl font-black text-emerald-600">{{ $userTicketStats['new'] ?? 0 }}</h3>
@@ -51,7 +48,6 @@
                 </div>
             </div>
 
-            <!-- Card 3: Processing Tickets -->
             <div class="bg-white/70 backdrop-blur-md p-3.5 rounded-2xl border border-white/60 shadow-sm flex flex-col justify-between">
                 <div>
                     <h3 class="text-xl font-black text-blue-600">{{ $userTicketStats['processing'] ?? 0 }}</h3>
@@ -59,7 +55,6 @@
                 </div>
             </div>
 
-            <!-- Card 4: Pending Tickets -->
             <div class="bg-white/70 backdrop-blur-md p-3.5 rounded-2xl border border-white/60 shadow-sm flex flex-col justify-between">
                 <div>
                     <h3 class="text-xl font-black text-amber-600">{{ $userTicketStats['pending'] ?? 0 }}</h3>
@@ -67,7 +62,6 @@
                 </div>
             </div>
 
-            <!-- Card 5: Close Tickets -->
             <div class="bg-white/70 backdrop-blur-md p-3.5 rounded-2xl border border-white/60 shadow-sm flex flex-col justify-between">
                 <div>
                     <h3 class="text-xl font-black text-red-600">{{ $userTicketStats['close'] ?? 0 }}</h3>
@@ -77,7 +71,6 @@
         </div>
     </div>
 
-    <!-- Success Flash Message Alert -->
     @if(session('success'))
         <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-xl shadow-sm text-emerald-800 flex items-start justify-between shrink-0">
             <div class="flex items-center gap-3 text-sm font-medium">
@@ -93,10 +86,8 @@
         </div>
     @endif
 
-    <!-- MAIN CHAT CONTAINER (Responsive Layout) -->
     <div class="flex-1 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col md:flex-row h-full min-h-0">
 
-        <!-- LEFT PANEL: Conversation List -->
         <div class="w-full md:w-80 lg:w-96 border-b md:border-b-0 md:border-r border-slate-200 bg-white flex-col shrink-0 h-full {{ $hasSelectedTicket ? 'hidden md:flex' : 'flex' }}">
             
             <div class="p-4 border-b border-slate-100 space-y-3 shrink-0">
@@ -214,7 +205,6 @@
 
         </div>
 
-        <!-- RIGHT PANEL: Active Chat Area -->
         <div class="flex-1 bg-white flex-col justify-between min-w-0 h-full {{ $hasSelectedTicket ? 'flex' : 'hidden md:flex' }}">
             
             @if(isset($activeTicket) && $activeTicket)
@@ -225,7 +215,6 @@
                     $isTicketClosed = in_array($activeTicket->status ?? '', ['Close', 'Closed']);
                 @endphp
 
-                <!-- Active Chat Header -->
                 <div class="px-4 md:px-6 py-3.5 bg-white border-b border-slate-200 flex items-center justify-between shadow-2xs shrink-0">
                     <div class="flex items-center gap-3 w-full min-w-0">
                         
@@ -261,10 +250,8 @@
                     </div>
                 </div>
 
-                <!-- Messages Container -->
                 <div class="flex-1 p-4 md:p-6 overflow-y-auto custom-scrollbar space-y-4 bg-white" id="messageScrollContainer">
 
-                    <!-- 1. User's Initial Ticket Description -->
                     <div class="flex items-end justify-end gap-2.5 max-w-[90%] md:max-w-[70%] ml-auto">
                         <div class="bg-[#f1f6fd] text-slate-800 p-3 md:p-3.5 px-3.5 md:px-4 rounded-2xl rounded-br-xs space-y-1">
                             <div class="text-[11px] md:text-xs font-bold text-blue-900">
@@ -311,7 +298,6 @@
                         </div>
                     </div>
 
-                    <!-- 2. Replies Loop -->
                     @if(isset($activeTicket->replies) && $activeTicket->replies->count() > 0)
                         @foreach($activeTicket->replies as $reply)
                             @php
@@ -347,8 +333,8 @@
                                     <span class="flex items-center flex-wrap gap-1.5">
                                         <strong class="text-slate-700 font-bold">{{ $picAssignedName }}</strong>
                                         @if(!empty($picDepartment))
-                                            <span class="px-2 py-0.5 text-[10px] font-semibold bg-orange-100 text-orange-700 border border-orange-200 rounded-md">
-                                                {{ $picDepartment }}
+                                            <span class="text-slate-700 font-bold">
+                                                ({{ $picDepartment }})
                                             </span>
                                         @endif
                                         <span>has taken over</span>
@@ -402,8 +388,8 @@
                                             </span>
 
                                             @if(!empty($replyDepartment))
-                                                <span class="px-2 py-0.5 text-[10px] font-semibold bg-orange-100 text-orange-700 border border-orange-200 rounded-md">
-                                                    {{ $replyDepartment }}
+                                                <span class="text-xs font-bold text-slate-900">
+                                                    ({{ $replyDepartment }})
                                                 </span>
                                             @endif
                                         </div>
@@ -480,7 +466,6 @@
                     @endif
                 </div>
 
-                <!-- Bottom Chat Input Bar -->
                 <div class="p-3 md:p-4 bg-white border-t border-slate-200 shrink-0">
                     @if($isTicketClosed)
                         <div class="p-3 bg-slate-100 rounded-xl text-center text-xs font-semibold text-slate-500 flex items-center justify-center gap-2 border border-slate-200">
@@ -491,7 +476,6 @@
                         <form action="{{ route('messages.reply', $activeId) }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-2">
                             @csrf
 
-                            <!-- File Preview Bar -->
                             <div id="filePreviewContainer" class="hidden items-center justify-between bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-200 text-xs text-orange-700">
                                 <span class="truncate flex items-center gap-1.5">
                                     <i id="attachmentTypeIcon" class="fa-solid fa-image text-orange-500"></i>

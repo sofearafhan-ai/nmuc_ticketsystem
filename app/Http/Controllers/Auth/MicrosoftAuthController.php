@@ -31,15 +31,16 @@ class MicrosoftAuthController extends Controller
 
         if (!$user) {
             $user = User::create([
-                'name'      => $name,
-                'full_name' => $name,
-                'email'     => $email,
-                'password'  => Hash::make(Str::random(24)),
-                'role'      => 'Authetication User', 
+                'nmuc_id'     => strtoupper(explode('@', $email)[0]),
+                'full_name'   => $name,
+                'email'       => $email,
+                'password'    => Hash::make(Str::random(24)),
+                'role'        => 'Authentication User',
+                'user_status' => 'Active',
             ]);
         }
 
-        Auth::login($user, true);
+        Auth::login($user);
 
         if ($user->role === 'Super Admin') {
             return redirect()->route('superadmin.dashboard');

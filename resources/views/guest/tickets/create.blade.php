@@ -5,7 +5,6 @@
 @section('content')
 <div class="space-y-6 max-w-6xl mx-auto py-8 px-4">
 
-    <!-- Validation Error Alert -->
     @if($errors->any())
         <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl shadow-sm text-red-700">
             <div class="flex items-center gap-2 text-red-600 font-bold mb-1 text-sm">
@@ -19,16 +18,28 @@
         </div>
     @endif
 
-    <!-- Form Container -->
+    @if(session('success'))
+        <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-xl shadow-sm text-emerald-800 flex items-start justify-between shrink-0">
+            <div class="flex items-center gap-3 text-sm font-medium">
+                <i class="fa-solid fa-circle-check text-emerald-500 text-lg shrink-0"></i>
+                <div>
+                    <h4 class="font-bold text-emerald-900">Success!</h4>
+                    <p class="text-xs text-emerald-700 mt-0.5">{{ session('success') }}</p>
+                </div>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700 text-xs p-1">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    @endif
+
     <form action="{{ route('guest.tickets.store') }}" method="POST" enctype="multipart/form-data"
           class="w-full bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[650px] text-slate-700">
         @csrf
 
-        <!-- LEFT SECTION: Main Form -->
         <div class="lg:col-span-8 p-4 md:p-6 border-b lg:border-b-0 lg:border-r border-slate-200 bg-slate-50/50 flex flex-col justify-between">
 
             <div class="space-y-5">
-                <!-- Header User Info -->
                 <div class="flex items-center gap-4 mb-4">
                     <div class="w-12 h-12 rounded-xl bg-orange-500 text-white font-bold flex items-center justify-center text-lg shadow-sm shrink-0">
                         <span>{{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}</span>
@@ -43,18 +54,15 @@
                     <span>This ticket will automatically be submitted to the IT Department for password reset.</span>
                 </div>
 
-                <!-- Title Input -->
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Title <span class="text-red-500">*</span></label>
                     <input type="text" name="title" required value="{{ old('title', 'Forgot Password Request') }}" 
                         class="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition">
                 </div>
 
-                <!-- Description Editor -->
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Description <span class="text-red-500">*</span></label>
 
-                    <!-- Editor Toolbar -->
                     <div class="bg-white border border-slate-300 rounded-t-xl p-2 flex flex-wrap items-center gap-2 text-xs text-slate-600 border-b-0">
                         <select onchange="execCmdArg('formatBlock', this.value)" class="px-2 py-1 bg-slate-100 rounded text-slate-700 border border-slate-200 outline-none text-xs cursor-pointer font-medium">
                             <option value="p">Paragraph</option>
@@ -81,7 +89,6 @@
                         </button>
                     </div>
 
-                    <!-- Visual Text Box -->
                     <div id="visual-editor" contenteditable="true" 
                         class="w-full min-h-[180px] max-h-[300px] overflow-y-auto bg-white border border-slate-300 rounded-b-xl p-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500 transition border-t-0">
                         {!! old('description') !!}
@@ -90,14 +97,12 @@
                     <input type="hidden" name="description" id="hidden-description" value="{{ old('description') }}" required>
                 </div>
 
-                <!-- Image Upload -->
                 <div class="bg-white p-3.5 rounded-xl border border-slate-200 space-y-2">
                     <label class="block text-xs font-semibold text-slate-600">Attachments / Images (Optional)</label>
                     
                     <input type="file" id="ticketImageInput" name="image" accept=".jpg,.jpeg,.png,.pdf" 
                         class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer">
 
-                    <!-- Container Preview & Cancel File -->
                     <div id="imagePreviewContainer" class="hidden items-center justify-between bg-orange-50/80 px-3 py-2 rounded-xl border border-orange-200 text-xs text-orange-800">
                         <div class="flex items-center gap-2 truncate pr-2">
                             <i id="fileTypeIcon" class="fa-solid fa-file text-orange-500 text-sm"></i>
@@ -113,7 +118,6 @@
 
         </div>
 
-        <!-- RIGHT SECTION: Metadata Sidebar -->
         <div class="lg:col-span-4 p-4 md:p-6 bg-white flex flex-col justify-between">
             <div class="space-y-4">
                 
@@ -121,7 +125,6 @@
                     <span class="font-bold text-slate-700 text-sm flex items-center gap-2"> Ticket Details </span>
                 </div>
 
-                <!-- Opening Date -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Opening date</label>
                     <div class="relative">
@@ -131,35 +134,30 @@
                     </div>
                 </div>
 
-                <!-- Name -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Name <span class="text-red-500">*</span></label>
                     <input type="text" name="user_name" required value="{{ old('user_name') }}"
                         class="w-full border border-slate-300 rounded-xl p-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
                 </div>
 
-                <!-- Email Personal -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Email (Personal) <span class="text-red-500">*</span></label>
                     <input type="email" name="user_email" required value="{{ old('user_email') }}" placeholder="name@gmail.com"
                         class="w-full border border-slate-300 rounded-xl p-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
                 </div>
 
-                <!-- Email NMUC -->
                 <div> 
                     <label class="block text-xs font-semibold text-slate-500 mb-1">NMUC Email <span class="text-red-500">*</span></label>
                     <input type="email" name="nmuc_email" required value="{{ old('nmuc_email') }}" placeholder="name@nmuc.edu.my"
                         class="w-full border border-slate-300 rounded-xl p-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
                 </div>
 
-                <!-- Student ID -->
                 <div> 
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Student ID <span class="text-red-500">*</span></label>
                     <input type="text" name="id" required value="{{ old('id') }}"
                         class="w-full border border-slate-300 rounded-xl p-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
                 </div>
 
-                <!-- Department -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Submitted To (Department)</label>
                     <input type="text" readonly value="Information Technology" 
@@ -167,7 +165,6 @@
                     <input type="hidden" name="department_id" value="2">
                 </div>
 
-                <!-- Type -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Type <span class="text-red-500">*</span></label>
                     <select name="type" required class="w-full border border-slate-300 rounded-xl p-2.5 text-sm bg-white text-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none cursor-pointer">
@@ -176,14 +173,12 @@
                     </select>
                 </div>
 
-                <!-- Category -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Category <span class="text-red-500">*</span></label>
                     <input type="text" name="category" required value="Password Reset" readonly
                         class="w-full border border-slate-200 bg-slate-100/80 rounded-xl p-2.5 text-sm text-slate-600 font-semibold cursor-not-allowed outline-none select-none">
                 </div>
 
-                <!-- Priority -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Priority <span class="text-red-500">*</span></label>
                     <select name="priority" required class="w-full border border-slate-300 rounded-xl p-2.5 text-sm bg-white text-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none cursor-pointer">
@@ -194,14 +189,12 @@
                     </select>
                 </div>
 
-                <!-- Location -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Location <span class="text-red-500">*</span></label>
                     <input type="text" name="location" required value="-" readonly
                         class="w-full border border-slate-200 bg-slate-100/80 rounded-xl p-2.5 text-sm text-slate-600 font-semibold cursor-not-allowed outline-none select-none">
                 </div>
 
-                <!-- Status -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Status</label>
                     <div class="w-full border border-slate-300 rounded-xl p-2.5 bg-slate-50 text-sm font-medium text-slate-700 flex items-center gap-2">
@@ -211,7 +204,6 @@
 
             </div>
 
-            <!-- Action Buttons -->
             <div class="pt-6 mt-6 border-t border-slate-100 flex items-center justify-end gap-2">
                 <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
                     <i class="fa-solid fa-paper-plane text-xs"></i> Submit Ticket

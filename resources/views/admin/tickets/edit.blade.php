@@ -392,20 +392,20 @@
                     </select>
                 </div>
 
-                <!-- ASSIGN TO (PIC) DROPDOWN -->
                 <div>
                     <label for="pic_select" class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Assign To (PIC)</label>
                     <select name="pic" id="pic_select" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none transition">
                         <option value="">-- Unassigned --</option>
                         @foreach($adminsInDept as $adm)
-                            <option value="{{ $adm->user_id }}" data-department-id="{{ $adm->department_id ?? '' }}" {{ $ticket->pic == $adm->user_id ? 'selected' : '' }}>
-                                {{ $adm->full_name ?? $adm->name }} ({{ $adm->role }})
-                            </option>
+                            @if(strtolower($adm->status ?? 'active') === 'active' || $ticket->pic == $adm->user_id)
+                                <option value="{{ $adm->user_id }}" data-department-id="{{ $adm->department_id ?? '' }}" {{ $ticket->pic == $adm->user_id ? 'selected' : '' }}>
+                                    {{ $adm->full_name ?? $adm->name }} ({{ $adm->role }})
+                                </option>
+                            @endif
                         @endforeach
                     </select>
                 </div>
 
-                <!-- Save Button -->
                 <div class="pt-3">
                     <button type="submit" class="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-xs shadow-md transition cursor-pointer">
                         Update Information

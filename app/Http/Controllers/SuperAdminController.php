@@ -166,7 +166,7 @@ class SuperAdminController extends Controller
             'email'         => 'required|email|unique:users,email,' . $primaryKey . ',user_id',
             'role'          => 'required|string',
             'department_id' => 'nullable',
-            'user_status'   => 'required|string',
+            'user_status'   => 'required|in:Active,Inactive',
             'password'      => 'nullable|string|min:6|confirmed',
         ]);
 
@@ -442,7 +442,12 @@ class SuperAdminController extends Controller
         $priorities = ['Low', 'Medium', 'High', 'Urgent'];
 
         $departments = Department::all();
-        $adminsInDept = User::whereIn('role', ['Admin', 'Super Admin'])->get();
+        $adminsInDept = User::whereIn('role', ['Admin', 'Super Admin'])
+                    ->where(function ($query) use ($ticket) {
+                        $query->where('user_status', 'Active')
+                            ->orWhere('user_id', $ticket->pic);
+                    })
+                    ->get();
 
         return view('superadmin.tickets.edit', compact(
             'ticket', 
@@ -484,13 +489,23 @@ class SuperAdminController extends Controller
                 'message'     => 'PIC_CHANGE:' . $picName,
             ]);
 
-            if ($request->pic !=Auth::id()) {
+            $picUser = \App\Models\User::where('user_id', $request->pic)
+                ->orWhere('user_id', $request->pic)
+                ->first();
+
+            if ($picUser) {
+                $roleName = strtolower($picUser->role ?? $picUser->user_role ?? '');
+                $picLink = in_array($roleName, ['super admin', 'superadmin'])
+                    ? route('superadmin.messages.index', ['ticket_id' => $ticket->ticket_id])
+                    : route('admin.messages.index', ['ticket_id' => $ticket->ticket_id]);
+
                 Notification::create([
-                    'user_id'               => $request->pic,
-                    'notification_type'     => 'pic_assigned',
-                    'notification_title'    => 'New Ticket Assigned (#TC-' . $ticket->ticket_id . ')',
-                    'notification_message'  => 'You have been assigned to ticket: ' . $ticket->title,
-                    'notification_link'     => $picLink,
+                    'user_id'              => $picUser->user_id,
+                    'notification_type'    => 'pic_assigned',
+                    'notification_title'   => 'New Ticket Assigned (#TC-' . $ticket->ticket_id . ')',
+                    'notification_message' => 'You have been assigned to ticket: ' . $ticket->title,
+                    'notification_link'    => $picLink,
+                    'is_read'              => 0,
                 ]);
             }
 

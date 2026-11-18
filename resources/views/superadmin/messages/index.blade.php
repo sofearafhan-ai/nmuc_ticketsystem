@@ -287,15 +287,31 @@
 
                             @if($isSystemPic)
                                 @php
-                                    $picAssignedName = str_ireplace(['PIC_CHANGE:', 'has taken over'], '', $reply->message);
-                                    $picAssignedName = trim(str_replace(['.', ':'], '', $picAssignedName));
-                                    if(empty($picAssignedName)) $picAssignedName = $replyName;
+                                    $picAssignedName = trim(str_replace('PIC_CHANGE:', '', $reply->message));
+
+                                    $picDeptObj = $reply->sender_department 
+                                        ?? $reply->department 
+                                        ?? $reply->user->department 
+                                        ?? $activeTicket->department 
+                                        ?? null;
+
+                                    $picDepartment = is_object($picDeptObj) 
+                                        ? ($picDeptObj->department_code ?? $picDeptObj->code ?? null) 
+                                        : (is_array($picDeptObj) ? ($picDeptObj['department_code'] ?? $picDeptObj['code'] ?? null) : $picDeptObj);
                                 @endphp
                                 <div class="flex items-center justify-center gap-2 py-2 my-2 text-xs text-slate-400 font-medium">
                                     <div class="w-6 h-6 rounded-full bg-slate-600 text-white flex items-center justify-center text-[9px] shrink-0 shadow-2xs">
                                         <i class="fa-solid fa-user-check"></i>
                                     </div>
-                                    <span><strong class="text-slate-700 font-bold">{{ $picAssignedName }}</strong> has taken over</span>
+                                    <span class="flex items-center flex-wrap gap-1.5">
+                                        <strong class="text-slate-700 font-bold">{{ $picAssignedName }}</strong>
+                                        @if(!empty($picDepartment))
+                                            <span class="text-slate-700 font-bold">
+                                                ({{ $picDepartment }})
+                                            </span>
+                                        @endif
+                                        <span>has taken over</span>
+                                    </span>
                                 </div>
 
                             @elseif($isSystemStatus)
@@ -402,7 +418,6 @@
                     @endif
                 </div>
 
-                <!-- Bottom Chat Input Bar (Fixed Bottom) -->
                 <div class="p-3 md:p-4 bg-white border-t border-slate-200 shrink-0">
                     @if($isTicketClosed)
                         <div class="p-3 bg-slate-100 rounded-xl text-center text-xs font-semibold text-slate-500 flex items-center justify-center gap-2 border border-slate-200">
@@ -413,7 +428,6 @@
                         <form action="{{ route('superadmin.messages.reply', $activeId) }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-2">
                             @csrf
 
-                            <!-- File Preview Bar -->
                             <div id="filePreviewContainer" class="hidden items-center justify-between bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-200 text-xs text-orange-700">
                                 <span class="truncate flex items-center gap-1.5">
                                     <i id="attachmentTypeIcon" class="fa-solid fa-image text-orange-500"></i>

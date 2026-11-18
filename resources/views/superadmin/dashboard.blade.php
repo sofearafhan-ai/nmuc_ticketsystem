@@ -5,7 +5,6 @@
 @section('content')
 <div class="space-y-6">
 
-    <!-- Header Section -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-[#0d1527] p-6 rounded-2xl text-white shadow-md gap-4">
         <div>
             <div class="flex items-center gap-2">
@@ -18,10 +17,8 @@
         </div>
     </div>
 
-    <!-- TOP 4 CARDS: GLOBAL QUICK STATS -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
-        <!-- 1. Total Tickets -->
+
         <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
             <div class="space-y-1">
                 <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Total Tickets</span>
@@ -35,7 +32,6 @@
             </div>
         </div>
 
-        <!-- 2. Total Registered Users -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
             <div class="space-y-1">
                 <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Total Users</span>
@@ -49,7 +45,6 @@
             </div>
         </div>
 
-        <!-- 3. Global Assets / Inventory -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
             <div class="space-y-1">
                 <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Total Assets</span>
@@ -63,7 +58,6 @@
             </div>
         </div>
 
-        <!-- 4. Active Departments -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
             <div class="space-y-1">
                 <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Departments</span>
@@ -79,7 +73,6 @@
 
     </div>
 
-    <!-- TICKET STATUS BREAKDOWN -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center">
             <span class="text-xs font-bold text-emerald-700 uppercase">New Tickets</span>
@@ -99,7 +92,6 @@
         </div>
     </div>
 
-    <!-- RECENT UNASSIGNED TICKETS TABLE -->
     <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-4">
         <div class="flex justify-between items-start">
             <div>

@@ -5,7 +5,6 @@
 @section('content')
 <div class="space-y-6">
 
-    <!-- Header Section -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-[#0d1527] p-6 rounded-2xl text-white shadow-md gap-4">
         <div>
             <div class="flex items-center gap-2">
@@ -30,11 +29,9 @@
         </div>
     @endif
 
-    <!-- FILTER CARD SECTION -->
     <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80">
         <form action="{{ route('superadmin.tickets.index') }}" method="GET" class="space-y-4">
-            
-            <!-- Top Search Input & Filter / Reset Buttons -->
+
             <div class="flex flex-col sm:flex-row items-center gap-3">
                 <div class="relative flex-1 w-full">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
@@ -67,10 +64,8 @@
 
             <hr class="border-slate-100">
 
-            <!-- Bottom 6 Dropdown Filters Grid -->
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-3 pt-2">
-                
-                <!-- CATEGORY -->
+
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Category</label>
                     <select name="category" onchange="this.form.submit()" 
@@ -82,7 +77,6 @@
                     </select>
                 </div>
 
-                <!-- PRIORITY -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Priority</label>
                     <select name="priority" onchange="this.form.submit()" 
@@ -94,7 +88,6 @@
                     </select>
                 </div>
 
-                <!-- STATUS -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Status</label>
                     <select name="status" onchange="this.form.submit()" 
@@ -107,7 +100,6 @@
                     </select>
                 </div>
 
-                <!-- DEPARTMENT -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Department</label>
                     <select name="department_id" onchange="this.form.submit()" 
@@ -124,7 +116,6 @@
                     </select>
                 </div>
 
-                <!-- MONTH -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Month</label>
                     <select name="month" onchange="this.form.submit()" 
@@ -136,7 +127,6 @@
                     </select>
                 </div>
 
-                <!-- YEAR -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Year</label>
                     <select name="year" onchange="this.form.submit()" 
@@ -155,7 +145,6 @@
         </form>
     </div>
 
-    <!-- Tickets Table Card -->
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-6">
             <div class="overflow-x-auto">

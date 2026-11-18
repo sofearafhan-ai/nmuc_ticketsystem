@@ -53,7 +53,7 @@
 
                 <!-- Department Code / Abbreviation -->
                 <div>
-                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Department Code (Optional)</label>
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Department Code</label>
                     <input type="text" name="code"
                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:ring-2 focus:ring-orange-500 outline-none transition">
                 </div>

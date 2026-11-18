@@ -141,21 +141,21 @@
 
                                 <!-- Manufacturer -->
                                 <td class="py-3.5 px-4 text-center">
-                                    <span class="text-[10px] text-slate-400 block font-medium">{{ $item->item_manufacturer ?? '-' }}</span>
+                                    <span class="text-xs text-slate-700 font-semibold">{{ $item->item_manufacturer ?? '-' }}</span>
                                 </td>
 
                                 <!-- Model -->
                                 <td class="py-3.5 px-4 text-center">
-                                    <span class="font-bold text-slate-800 block">{{ $item->item_model ?? '-' }}</span>
+                                    <span class="text-xs text-slate-700 font-semibold">{{ $item->item_model ?? '-' }}</span>
                                 </td>
 
                                  <!-- Serial Number -->
-                                <td class="py-2 text-xs text-center font-medium text-slate-500">
+                                <td class="text-xs text-slate-700 font-semibold text-center">
                                     {{ $item->serial_number ?? 'N/A' }}
                                 </td>
 
                                 <!-- Location -->
-                                <td class="p-2 text-xs text-slate-500 font-medium text-center">
+                                <td class="text-xs text-slate-700 font-semibold text-center">
                                         {{ $item->item_location ?? 'N/A' }}
                                 </td>
 
@@ -168,7 +168,7 @@
                                 </td>
 
                                 <!-- Registered By -->
-                                <td class="p-2 text-xs text-slate-500 font-medium text-center">
+                                <td class="text-xs text-slate-700 font-semibold text-center">
                                     {{ $registeredUser }}
                                 </td>
 

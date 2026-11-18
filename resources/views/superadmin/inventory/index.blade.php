@@ -38,7 +38,6 @@
 
     @if(!request('department'))
 
-        <!-- DEPARTMENT SELECTION SECTION -->
         <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200/80 space-y-6">
             
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
@@ -70,8 +69,7 @@
                     </div>
                 </form>
             </div>
-            
-            <!-- Departments Grid -->
+
             <div class="grid grid-cols-1 gap-4">
                 @forelse($departments as $dept)
                     @php
@@ -118,7 +116,6 @@
 
     @else
 
-        <!-- FILTER & TOOLBAR CARD -->
         <div class="bg-white rounded-3xl p-5 md:p-6 shadow-sm border border-slate-200/80 space-y-4">
 
             <div class="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -136,8 +133,7 @@
 
             <div class="p-5 bg-white">
             <form action="{{ route('superadmin.inventory.index') }}" method="GET" class="space-y-4">
-                
-                <!-- Search & Action Buttons Row -->
+
                 <form action="{{ route('superadmin.inventory.index') }}" method="GET">
                     @if(request('department'))
                         <input type="hidden" name="department" value="{{ request('department') }}">
@@ -184,7 +180,6 @@
             </form>
         </div>
 
-        <!-- INVENTORY TABLE CARD -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-6">
             <div class="overflow-x-auto">
@@ -210,13 +205,11 @@
                                 $registeredUser = $item->user->full_name ?? $item->user->name ?? 'System Admin';
                             @endphp
                             <tr class="hover:bg-slate-50/60 transition duration-150">
-                                
-                                <!-- No -->
+              
                                 <td class="py-3 px-4 font-bold text-slate-900 text-center">
                                     #{{ method_exists($inventories, 'firstItem') ? ($inventories->firstItem() + $index) : ($index + 1) }}
                                 </td>
 
-                                <!-- Item Name -->
                                 <td class="py-3 px-3 text-center">
                                     <div class="flex items-center gap-3">
                                         <div>
@@ -225,34 +218,28 @@
                                     </div>
                                 </td>
 
-                                <!-- Type -->
                                 <td class="py-3 px-3 text-center">
                                     <div class="flex items-center justify-center gap-1.5">
                                         <span class="text-xs text-slate-700 font-semibold">{{ $item->item_type }}</span>
                                     </div>
                                 </td>
 
-                                <!-- Manufacturer -->
                                 <td class="py-3 px-3 text-center">
-                                    <span class="text-[10px] text-slate-400 block font-medium">{{ $item->item_manufacturer ?? '-' }}</span>
+                                    <span class="text-xs text-slate-700 font-semibold">{{ $item->item_manufacturer ?? '-' }}</span>
                                 </td>
 
-                                <!-- Model -->
                                 <td class="py-3 px-3 text-center">
-                                    <span class="font-bold text-slate-800 block">{{ $item->item_model ?? '-' }}</span>
+                                    <span class="text-xs text-slate-700 font-semibold">{{ $item->item_model ?? '-' }}</span>
                                 </td>
 
-                                 <!-- Serial Number -->
-                                <td class="py-3 text-xs text-center font-medium text-slate-500">
+                                <td class="py-3 text-xs text-slate-700 font-semibold text-center">
                                     {{ $item->serial_number ?? 'N/A' }}
                                 </td>
 
-                                <!-- Location -->
-                                <td class="p-3 text-xs text-slate-500 font-medium text-center">
+                                <td class="p-3 text-xs text-slate-700 font-semibold text-center">
                                         {{ $item->item_location ?? 'N/A' }}
                                 </td>
 
-                                <!-- Status Badge -->
                                 <td class="p-2 text-xs text-slate-500 font-medium text-center">
                                     <span class="px-2.5 py-1 text-[10px] font-bold rounded-full inline-block uppercase tracking-wider border
                                         {{ $item->item_status == 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200' }}">
@@ -260,12 +247,10 @@
                                     </span>
                                 </td>
 
-                                <!-- Registered By -->
-                                <td class="p-2 text-xs text-slate-500 font-medium text-center">
+                                <td class="py-3 text-xs text-slate-700 font-semibold text-center">
                                     {{ $registeredUser }}
                                 </td>
 
-                                <!-- Attachment Preview Button -->
                                 <td class="py-3.5 px-4 text-center">
                                     @if ($item->item_attachment)
                                         <div x-data="{ open: false }" class="flex justify-center">
@@ -276,7 +261,6 @@
                                                 <i class="fa-solid fa-eye text-[11px]"></i>
                                             </button>
 
-                                            <!-- Modal Backdrop & Window -->
                                             <div x-show="open" 
                                                  x-cloak
                                                  @keydown.escape.window="open = false" 
@@ -304,7 +288,6 @@
                                     @endif
                                 </td>
 
-                                <!-- Actions -->
                                 <td class="py-3 px-4 text-center">
                                     <div class="flex items-center justify-center gap-1.5">
                                         <form action="{{ route('superadmin.inventory.destroy', $item->item_id ?? $item->id) }}" method="POST" 
@@ -334,7 +317,6 @@
                 </table>
             </div>
 
-            <!-- Pagination Container -->
             @if (method_exists($inventories, 'hasPages') && $inventories->hasPages())
                 <div class="p-4 border-t border-slate-100 bg-slate-50/50">
                     {{ $inventories->links() }}
