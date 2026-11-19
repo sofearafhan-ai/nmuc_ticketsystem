@@ -6,6 +6,7 @@ use App\Models\Ticket;
 use App\Models\User;
 use App\Models\TicketReply;
 use App\Models\Department;
+use App\Services\OutlookMailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -47,7 +48,6 @@ class TicketController extends Controller
             $query->where('status', $request->status);
         }
 
-        // 7. Tapis mengikut Bulan & Tahun
         if ($request->filled('month')) {
             $query->whereMonth('date', $request->month);
         }
@@ -57,7 +57,6 @@ class TicketController extends Controller
 
         $tickets = $query->latest()->paginate(10)->withQueryString();
 
-    // Senarai pilihan untuk dropdown filter
         $categories = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
         $types      = ['Incident', 'Request'];
         $priorities = ['Low', 'Medium', 'High', 'Urgent'];
@@ -73,13 +72,11 @@ class TicketController extends Controller
         $types = $this->getEnumValues('tickets', 'type');
         $priorities = $this->getEnumValues('tickets', 'priority');
         
-        // Senarai kategori
         $categories = ['Hardware', 'Software', 'Network', 'Facility', 'Others'];
 
         return view('tickets.create', compact('types', 'priorities', 'categories', 'departments'));
     }
 
-    // Fungsi khas untuk mengekstrak pilihan ENUM terus dari jadual MySQL
     private function getEnumValues($table, $column)
     {
         $type = DB::select("SHOW COLUMNS FROM {$table} WHERE Field = '{$column}'")[0]->Type;
@@ -129,7 +126,7 @@ class TicketController extends Controller
             }
         }
 
-        Ticket::create([
+        $ticket = Ticket::create([
             'user_name'   => $user->full_name ?? $user->name ?? $request->user_name ?? 'User',
             'user_email'  => $user->email ?? $request->user_email ?? 'user@nmuc.edu.my',
             'title'       => $request->title,
@@ -144,49 +141,78 @@ class TicketController extends Controller
             'location'    => $request->location,
         ]);
 
-        return redirect()->route('tickets.index')->with('success', 'Tiket aduan berjaya dihantar!');
+        if ($ticket->user_email) {
+            $mailService = new OutlookMailService();
+            $ticketNo = $ticket->ticket_id ?? $ticket->id;
+
+            $subject = "[TC-{$ticketNo}] {$ticket->title}";
+            $body = "Dear {$ticket->user_name},\n\n"
+                  . "Your complaint ticket has been successfully recorded in our system.\n\n"
+                  . "Ticket ID  : TC-{$ticketNo}\n"
+                  . "Title      : {$ticket->title}\n"
+                  . "Category   : {$ticket->category} ({$ticket->type})\n"
+                  . "Priority   : {$ticket->priority}\n"
+                  . "Location   : {$ticket->location}\n\n"
+                  . "The IT team will review and respond to your complaint as soon as possible.";
+
+            $mailService->sendEmail($ticket->user_email, $subject, $body);
+        }
+
+        return redirect()->route('tickets.index')->with('success', 'Complaint ticket successfully submitted!');
     }
 
     public function show($id)
-{
-    // Contoh jika anda mahu susun mengikut lajur created_at atau lajur lain yang wujud:
-    $ticket = Ticket::with(['replies' => function ($query) {
-        $query->orderBy('created_at', 'asc'); // Tukar 'created_at' mengikut lajur yang wujud
-    }])->findOrFail($id);
-    $statuses = ['New', 'Processing', 'Pending', 'Closed'];
+    {
 
-    return view('tickets.show', compact('ticket', 'statuses'));
-}
+        $ticket = Ticket::with(['replies' => function ($query) {
+            $query->orderBy('created_at', 'asc'); 
+        }])->findOrFail($id);
+        $statuses = ['New', 'Processing', 'Pending', 'Closed'];
 
-// Simpan Mesej Balasan & Kemaskini Status
-public function storeReply(Request $request, $id)
-{
-    $request->validate([
-        'message' => 'required|string',
-        'attachment' => 'nullable|file|mimes:jpeg,png,jpg,pdf,doc,docx|max:4096',
-    ]);
-
-    $ticket = Ticket::findOrFail($id);
-    $user = Auth::user();
-
-    $attachmentPath = null;
-    if ($request->hasFile('attachment')) {
-        $attachmentPath = $request->file('attachment')->store('ticket_replies', 'public');
+        return view('tickets.show', compact('ticket', 'statuses'));
     }
 
-    $senderName = $user->full_name ?? $user->name ?? $ticket->user_name ?? 'User';
-    $senderRole = 'User';
+    public function storeReply(Request $request, $id)
+    {
+        $request->validate([
+            'message'    => 'required|string',
+            'attachment' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:4096',
+        ]);
 
-    TicketReply::create([
-        'ticket_id'   => $ticket->ticket_id,
-        'user_id'     => $user->user_id ?? $user->id ?? null,
-        'sender_name' => $senderName,
-        'sender_role' => $senderRole,
-        'message'     => $request->message,
-        'attachment'  => $attachmentPath,
-    ]);
+        $ticket = Ticket::findOrFail($id);
+        $user = Auth::user();
 
-    return redirect()->back()->with('success', 'Reply message sent successfully!');
-}
+        $attachmentPath = null;
+        if ($request->hasFile('attachment')) {
+            $attachmentPath = $request->file('attachment')->store('ticket_replies', 'public');
+        }
+
+        $senderName = $user->full_name ?? $user->name ?? $ticket->user_name ?? 'User';
+        $senderRole = 'User';
+
+        TicketReply::create([
+            'ticket_id'   => $ticket->ticket_id,
+            'user_id'     => $user->user_id ?? $user->id ?? null,
+            'sender_name' => $senderName,
+            'sender_role' => $senderRole,
+            'message'     => $request->message,
+            'attachment'  => $attachmentPath,
+        ]);
+
+        if ($ticket->user_email) {
+                $mailService = new OutlookMailService();
+                $ticketNo = $ticket->ticket_id ?? $ticket->id;
+
+                $subject = "Re: [TC-{$ticketNo}] {$ticket->title}";
+                $body = "Dear {$ticket->user_name},\n\n"
+                    . "There is a new reply from {$senderName} to your ticket:\n\n"
+                    . "\"{$request->message}\"\n\n"
+                    . "Please log in to the ticketing system to view further details.";
+
+                $mailService->sendEmail($ticket->user_email, $subject, $body);
+            }
+
+        return redirect()->back()->with('success', 'Reply message sent successfully!');
+    }
 
 }

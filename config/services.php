@@ -15,10 +15,10 @@ return [
     */
 
     'mailgun' => [
-        'domain' => env('MAILGUN_DOMAIN'),
-        'secret' => env('MAILGUN_SECRET'),
-        'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
-        'scheme' => 'https',
+        'domain'    => env('MAILGUN_DOMAIN'),
+        'secret'    => env('MAILGUN_SECRET'),
+        'endpoint'  => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
+        'scheme'    => 'https',
     ],
 
     'postmark' => [
@@ -36,6 +36,13 @@ return [
         'client_secret' => env('MICROSOFT_CLIENT_SECRET'),
         'redirect'      => env('MICROSOFT_REDIRECT_URI'),
         'tenant'        => env('MICROSOFT_TENANT_ID', 'common'),
+    ],
+
+    'msgraph' => [
+        'tenant_id'     => env('MSGRAPH_TENANT_ID'),
+        'client_id'     => env('MSGRAPH_CLIENT_ID'),
+        'client_secret' => env('MSGRAPH_CLIENT_SECRET'),
+        'support_email' => env('MSGRAPH_SUPPORT_EMAIL'),
     ],
 
 ];
