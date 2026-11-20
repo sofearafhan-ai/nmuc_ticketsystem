@@ -73,7 +73,7 @@ class InventoryExport implements FromQuery, WithHeadings, WithMapping, ShouldAut
             $item->serial_number ?? '-',
             $item->item_location ?? $item->location ?? '-',
             $item->item_status ?? $item->status ?? '-',
-            $item->user_id ?? '-',
+            $item->user->full_name ?? '-',
             !empty($item->created_at) ? \Carbon\Carbon::parse($item->created_at)->format('d M Y') : '-',
         ];
     }

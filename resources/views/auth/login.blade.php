@@ -29,7 +29,6 @@
 
     <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-orange-200 p-8 space-y-6">
 
-        <!-- Header -->
         <div class="text-center space-y-2">
             <div class="inline-flex p-3 rounded-full bg-orange-100 text-orange-600 mb-2">
                 <i class="fa-solid fa-headset text-3xl"></i>
@@ -52,11 +51,9 @@
             </div>
         @endif
 
-        <!-- Log In Form -->
         <form action="{{ route('login.post') }}" method="POST" class="space-y-4">
             @csrf
 
-            <!-- Email -->
             <div class="space-y-1">
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Email</label>
                 <div class="relative flex items-center">
@@ -69,7 +66,6 @@
                 @enderror
             </div>
 
-            <!-- Password -->
             <div class="space-y-1">
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
                 <div class="relative flex items-center">
@@ -79,20 +75,17 @@
                 </div>
             </div>
 
-            <!-- Send Button -->
             <button type="submit" class="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-lg shadow-md hover:shadow-lg transition cursor-pointer flex items-center justify-center gap-2">
                 <i class="fa-solid fa-right-to-bracket"></i> Log In
             </button>
         </form>
 
-        <!-- Divider -->
         <div class="relative flex py-1 items-center">
             <div class="grow border-t border-slate-200"></div>
             <span class="shrink mx-3 text-[11px] font-semibold text-slate-400 uppercase">Or continue with</span>
             <div class="grow border-t border-slate-200"></div>
         </div>
 
-        <!-- Microsoft 365 Login Button -->
         <a href="{{ route('login.microsoft') }}"
            class="w-full py-3 bg-[#0d1527] hover:bg-slate-800 text-white font-bold text-sm rounded-lg shadow-md hover:shadow-lg transition flex items-center justify-center gap-3">
             <svg class="w-4 h-4 shrink-0" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">

@@ -61,14 +61,17 @@ class UserExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize
         ];
     }
 
+    private int $rowNumber = 0;
+
     public function map($user): array
     {
-        $userId = $user->user_id ?? $user->id;
+        $this->rowNumber++;
+
         $fullName = $user->full_name ?? $user->name ?? '-';
         $departmentName = $user->department->department_name ?? 'No Department';
 
         return [
-            $userId,
+            $this->rowNumber, 
             $fullName,
             $user->email,
             $departmentName,

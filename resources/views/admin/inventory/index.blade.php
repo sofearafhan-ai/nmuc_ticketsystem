@@ -5,7 +5,6 @@
 @section('content')
 <div class="space-y-6">
 
-    <!-- Header Section -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-[#0d1527] p-6 rounded-2xl text-white shadow-md gap-4">
         <div>
             <div class="flex items-center gap-2">
@@ -15,7 +14,6 @@
             <p class="text-xs text-slate-400 mt-1">Managing the list of devices and assets under the {{ Auth::user()->department->department_code ?? Auth::user()->department->code ?? 'all' }} Department.</p>
         </div>
 
-        <!-- Link to New Inventory Form Page -->
         <a href="{{ route('admin.inventory.create') }}" class="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-xs rounded-xl transition shadow-md flex items-center gap-2 cursor-pointer">
             <i class="fa-solid fa-plus"></i> Add Asset
         </a>
@@ -36,11 +34,9 @@
         </div>
     @endif
 
-    <!-- FILTER CARD SECTION -->
     <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80">
         <form action="{{ route('admin.inventory.index') }}" method="GET" class="space-y-4">
-            
-            <!-- Top Search Input & Filter Button -->
+
             <div class="flex flex-col sm:flex-row items-center gap-3">
                 <div class="relative flex-1 w-full">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
@@ -73,10 +69,8 @@
 
             <hr class="border-slate-100">
 
-            <!-- Bottom Dropdown Filters -->
             <div class="grid grid-cols-1 sm:grid-cols-1 gap-3 pt-1">
-             
-                <!-- Status Filter -->
+
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Status</label>
                     <select name="status" onchange="this.form.submit()" 
@@ -91,7 +85,6 @@
         </form>
     </div>
 
-    <!-- Inventory Table Card -->
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-6">
             <div class="overflow-x-auto">
@@ -103,10 +96,10 @@
                             <th class="py-1 px-1 text-center">TYPE</th>
                             <th class="py-1 px-1 text-center">MANUFACTURER</th>
                             <th class="py-1 px-1 text-center">MODEL</th>
-                            <th class="py-1 px-1 text-center">SERIAL NO.</th>
-                            <th class="py-1 px-1 text-center">LOCATION</th>
-                            <th class="py-1 px-1 text-center">STATUS</th>
-                            <th class="py-1 px-1 text-center">REGISTERED BY</th>
+                            <th class="py-2 px-2 text-center">SERIAL NO.</th>
+                            <th class="py-2 px-2 text-center">LOCATION</th>
+                            <th class="py-3 px-3 text-center">STATUS</th>
+                            <th class="py-2 px-2 text-center">REGISTERED BY</th>
                             <th class="py-1 px-1 text-center">ATTACHMENT</th>
                             <th class="py-1 px-1 text-center">ACTIONS</th>
                         </tr>
@@ -117,13 +110,11 @@
                                 $registeredUser = $item->user->full_name ?? $item->user->name ?? 'System Admin';
                             @endphp
                             <tr class="hover:bg-slate-50/60 transition duration-150">
-                                
-                                <!-- No -->
+
                                 <td class="py-3.5 px-4 font-bold text-slate-900 text-center">
-                                    #{{ method_exists($inventories, 'firstItem') ? ($inventories->firstItem() + $index) : ($index + 1) }}
+                                    {{ method_exists($inventories, 'firstItem') ? ($inventories->firstItem() + $index) : ($index + 1) }}
                                 </td>
 
-                                <!-- Item Name -->
                                 <td class="py-3.5 px-4 text-center">
                                     <div class="flex items-center gap-3">
                                         <div>
@@ -132,47 +123,39 @@
                                     </div>
                                 </td>
 
-                                <!-- Type -->
                                 <td class="py-3.5 px-4 text-center">
                                     <div class="flex items-center justify-center gap-1.5">
                                         <span class="text-xs text-slate-700 font-semibold">{{ $item->item_type }}</span>
                                     </div>
                                 </td>
 
-                                <!-- Manufacturer -->
                                 <td class="py-3.5 px-4 text-center">
                                     <span class="text-xs text-slate-700 font-semibold">{{ $item->item_manufacturer ?? '-' }}</span>
                                 </td>
 
-                                <!-- Model -->
                                 <td class="py-3.5 px-4 text-center">
                                     <span class="text-xs text-slate-700 font-semibold">{{ $item->item_model ?? '-' }}</span>
                                 </td>
 
-                                 <!-- Serial Number -->
-                                <td class="text-xs text-slate-700 font-semibold text-center">
+                                <td class="text-xs text-slate-700 font-semibold text-center truncate max-w-xs">
                                     {{ $item->serial_number ?? 'N/A' }}
                                 </td>
 
-                                <!-- Location -->
                                 <td class="text-xs text-slate-700 font-semibold text-center">
                                         {{ $item->item_location ?? 'N/A' }}
                                 </td>
 
-                                <!-- Status Badge -->
                                 <td class="p-2 text-xs text-slate-500 font-medium text-center">
-                                    <span class="px-2.5 py-1 text-[10px] font-bold rounded-full inline-block uppercase tracking-wider border
-                                        {{ $item->item_status == 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200' }}">
+                                    <span class="px-2.5 py-1 rounded-full font-bold text-[10px]
+                                        {{ $item->item_status == 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700' }}">
                                         {{ $item->item_status }}
                                     </span>
                                 </td>
 
-                                <!-- Registered By -->
                                 <td class="text-xs text-slate-700 font-semibold text-center">
                                     {{ $registeredUser }}
                                 </td>
 
-                                <!-- Attachment Preview Button -->
                                 <td class="py-3.5 px-4 text-center">
                                     @if ($item->item_attachment)
                                         @php
@@ -188,7 +171,6 @@
                                                 <i class="fa-solid fa-eye text-[11px]"></i>
                                             </button>
 
-                                            <!-- Modal Backdrop & Window -->
                                             <div x-show="open" 
                                                 x-cloak
                                                 @keydown.escape.window="open = false" 
@@ -230,13 +212,12 @@
                                 </td>
                                 <td class="p-3">
                                     <div class="flex items-center justify-center gap-2">
-                                        <!-- Edit Button -->
+
                                        <a href="{{ route('admin.inventory.edit', ['id' => $item->item_id, 'row_num' => $inventories->firstItem() + $index]) }}" 
                                           class="px-2.5 py-1.5 bg-slate-100 hover:bg-orange-500 text-slate-600 hover:text-white rounded-lg text-xs font-semibold transition border border-slate-200 hover:border-orange-500 flex items-center gap-1 cursor-pointer">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
 
-                                        <!-- Delete Button -->
                                         <form action="{{ route('admin.inventory.destroy', $item->item_id) }}" method="POST" 
                                               onsubmit="return confirm('Are you sure you want to delete this asset?');">
                                             @csrf

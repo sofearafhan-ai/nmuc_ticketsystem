@@ -170,8 +170,8 @@
                                 $formattedTicketNo = '#TC-' . $ticketId;
                             @endphp
                             <tr class="hover:bg-orange-50/40 transition">
-                                <td class="p-2 text-xs font-bold text-slate-900 text-center">{{ $formattedTicketNo }}</td>
-                                <td class="p-2 text-xs font-medium text-slate-900">
+                                <td class="p-2 text-xs font-bold text-slate-900 text-center truncate max-w-xs">{{ $formattedTicketNo }}</td>
+                                <td class="p-2 font-semibold text-slate-800 text-center text-xs">
                                     <a href="{{ route('superadmin.messages.index', ['ticket_id' => $ticketId]) }}" class="hover:text-orange-600 hover:underline">
                                         {{ $ticket->title }}
                                     </a>
@@ -200,7 +200,7 @@
                                     {{ $ticket->picAdmin->full_name ?? $ticket->picAdmin->name ?? $ticket->pic ?? '-' }}
                                 </td>
                                 <td class="p-2 text-xs text-slate-500 font-medium text-center">{{ $ticket->department->department_name ?? $ticket->department ?? '-' }}</td>
-                                <td class="p-2 text-xs text-slate-500 font-medium text-center">
+                                <td class="p-2 text-xs text-slate-500 font-medium text-center truncate max-w-xs">
                                     @if(!empty($ticket->created_at))
                                         {{ is_string($ticket->created_at) ? \Carbon\Carbon::parse($ticket->created_at)->format('d M Y') : $ticket->created_at->format('d M Y') }}
                                     @else

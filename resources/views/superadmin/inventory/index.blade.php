@@ -170,7 +170,7 @@
         
                 <div class="grid grid-cols-1 sm:grid-cols-1 gap-3 pt-1">
 
-                    <select name="status" class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-orange-500 transition cursor-pointer">
+                    <select name="status" onchange="this.form.submit()" class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-orange-500 transition cursor-pointer">
                         <option value="">All Statuses</option>
                         <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Active</option>
                         <option value="Inactive" {{ request('status') == 'Inactive' ? 'selected' : '' }}>Inactive</option>
@@ -207,7 +207,7 @@
                             <tr class="hover:bg-slate-50/60 transition duration-150">
               
                                 <td class="py-3 px-4 font-bold text-slate-900 text-center">
-                                    #{{ method_exists($inventories, 'firstItem') ? ($inventories->firstItem() + $index) : ($index + 1) }}
+                                    {{ method_exists($inventories, 'firstItem') ? ($inventories->firstItem() + $index) : ($index + 1) }}
                                 </td>
 
                                 <td class="py-3 px-3 text-center">
@@ -232,7 +232,7 @@
                                     <span class="text-xs text-slate-700 font-semibold">{{ $item->item_model ?? '-' }}</span>
                                 </td>
 
-                                <td class="py-3 text-xs text-slate-700 font-semibold text-center">
+                                <td class="py-3 text-xs text-slate-700 font-semibold text-center truncate max-w-xs">
                                     {{ $item->serial_number ?? 'N/A' }}
                                 </td>
 
@@ -241,8 +241,8 @@
                                 </td>
 
                                 <td class="p-2 text-xs text-slate-500 font-medium text-center">
-                                    <span class="px-2.5 py-1 text-[10px] font-bold rounded-full inline-block uppercase tracking-wider border
-                                        {{ $item->item_status == 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200' }}">
+                                    <span class="px-2.5 py-1 rounded-full font-bold text-[10px]
+                                        {{ $item->item_status == 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700' }}">
                                         {{ $item->item_status }}
                                     </span>
                                 </td>

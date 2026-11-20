@@ -5,7 +5,6 @@
 @section('content')
 <div class="space-y-6">
 
-    <!-- Header Section -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-[#0d1527] p-6 rounded-2xl text-white shadow-md gap-4">
         <div>
             <div class="flex items-center gap-2">
@@ -31,11 +30,9 @@
         </div>
     @endif
 
-    <!-- FILTER CARD SECTION -->
     <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80">
         <form action="{{ route('admin.tickets.index') }}" method="GET" class="space-y-4">
-            
-            <!-- Top Search Input & Filter / Reset Buttons -->
+
             <div class="flex flex-col sm:flex-row items-center gap-3">
                 <div class="relative flex-1 w-full">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
@@ -70,7 +67,6 @@
 
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-2">
                 
-                <!-- 1. CATEGORY -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Category</label>
                     <select name="category" onchange="this.form.submit()" 
@@ -84,7 +80,6 @@
                     </select>
                 </div>
 
-                <!-- 2. TYPE -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Type</label>
                     <select name="type" onchange="this.form.submit()" 
@@ -95,7 +90,6 @@
                     </select>
                 </div>
 
-                <!-- 3. PRIORITY -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Priority</label>
                     <select name="priority" onchange="this.form.submit()" 
@@ -108,7 +102,6 @@
                     </select>
                 </div>
 
-                <!-- 4. STATUS -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Status</label>
                     <select name="status" onchange="this.form.submit()" 
@@ -121,7 +114,6 @@
                     </select>
                 </div>
 
-                <!-- 5. PiC -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">PiC</label>
                     <select name="pic" onchange="this.form.submit()"
@@ -137,7 +129,6 @@
                     </select>
                 </div>
 
-                <!-- 6. MONTH -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Month</label>
                     <select name="month" onchange="this.form.submit()" 
@@ -158,7 +149,6 @@
                     </select>
                 </div>
 
-                <!-- 7. YEAR -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Year</label>
                     <select name="year" onchange="this.form.submit()" 
@@ -177,7 +167,6 @@
         </form>
     </div>
 
-    <!-- Tickets Table Card -->
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-6">
             <div class="overflow-x-auto">
@@ -203,8 +192,8 @@
                                 $ticketNo = '#TC-' . $tId;
                             @endphp
                             <tr class="hover:bg-orange-50/40 transition">
-                                <td class="p-2 font-bold text-slate-900 text-center">{{ $ticketNo }}</td>
-                                <td class="p-2 font-medium text-slate-900">
+                                <td class="p-2 font-bold text-slate-900 text-center text-xs truncate max-w-xs">{{ $ticketNo }}</td>
+                                <td class="p-2 text-slate-900 text-center text-xs font-semibold">
                                     <a href="{{ route('admin.messages.index', ['ticket_id' => $tId]) }}" class="hover:text-orange-600 hover:underline">
                                         {{ $ticket->title }}
                                     </a>
@@ -230,10 +219,10 @@
                                         {{ $ticket->status }}
                                     </span>
                                 </td>
-                                <td class="p-2 text-xs text-slate-500 font-medium text-center">
+                                <td class="p-2 text-xs text-slate-500 font-bold text-center">
                                     {{ $ticket->picAdmin->full_name ?? $ticket->picAdmin->name ?? $ticket->pic ?? 'Unassigned' }}
                                 </td>
-                                <td class="p-2 text-xs text-slate-500 font-medium text-center whitespace-nowrap">
+                                <td class="p-2 text-xs text-slate-500 font-medium text-center whitespace-nowrap truncate max-w-xs">
                                     @if(!empty($ticket->created_at))
                                         {{ is_string($ticket->created_at) ? \Carbon\Carbon::parse($ticket->created_at)->format('d M Y') : $ticket->created_at->format('d M Y') }}
                                     @else

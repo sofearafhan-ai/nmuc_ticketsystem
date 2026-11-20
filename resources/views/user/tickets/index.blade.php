@@ -4,8 +4,7 @@
 
 @section('content')
 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-5">
-    
-    <!-- Title Bar & Filter -->
+
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
         <div>
             <h2 class="text-base font-bold text-slate-800">My Ticket List</h2>
@@ -18,11 +17,9 @@
         </a>
     </div>
 
-    <!-- FILTER CARD SECTION -->
     <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80">
         <form action="{{ route('tickets.index') }}" method="GET" class="space-y-4">
-            
-            <!-- Top Search Input & Filter / Export / Reset Buttons -->
+
             <div class="flex flex-col sm:flex-row items-center gap-3">
                 <div class="relative flex-1 w-full">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
@@ -55,10 +52,8 @@
 
             <hr class="border-slate-100">
 
-            <!-- Bottom Dropdown Filters Grid -->
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-2">
-                
-                <!-- 1. CATEGORY -->
+
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Category</label>
                     <select name="category" onchange="this.form.submit()" 
@@ -70,7 +65,6 @@
                     </select>
                 </div>
 
-                <!-- 2. TYPE -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Type</label>
                     <select name="type" onchange="this.form.submit()" 
@@ -82,7 +76,6 @@
                     </select>
                 </div>
 
-                <!-- 3. PRIORITY -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Priority</label>
                     <select name="priority" onchange="this.form.submit()" 
@@ -94,7 +87,6 @@
                     </select>
                 </div>
 
-                <!-- 4. STATUS -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Status</label>
                     <select name="status" onchange="this.form.submit()" 
@@ -107,7 +99,6 @@
                     </select>
                 </div>
 
-                <!-- 5. DEPARTMENT -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Department</label>
                     <select name="department_id" onchange="this.form.submit()" 
@@ -124,7 +115,6 @@
                     </select>
                 </div>
 
-                <!-- 7. MONTH -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Month</label>
                     <select name="month" onchange="this.form.submit()" 
@@ -136,7 +126,6 @@
                     </select>
                 </div>
 
-                <!-- 8. YEAR -->
                 <div>
                     <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Year</label>
                     <select name="year" onchange="this.form.submit()" 
@@ -155,23 +144,22 @@
         </form>
     </div>
 
-    <!-- Table List -->
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-6">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-orange-50 text-[11px] font-extrabold uppercase text-orange-400 tracking-wider border-b border-orange-100">
-                            <th class="p-4 text-center">Ticket ID</th>
-                            <th class="p-3 text-left">Title</th>
-                            <th class="p-3 text-center">Category</th>
-                            <th class="p-3 text-center">Type</th>
-                            <th class="p-3 text-center">Priority</th>
-                            <th class="p-3 text-center">Location</th>
-                            <th class="p-3 text-center">To Department</th>
-                            <th class="p-3 text-center">Status</th>
-                            <th class="p-3 text-center">Date</th>
-                            <th class="p-3 pr-4 text-center">Action</th>
+                            <th class="p-2 text-center">Ticket ID</th>
+                            <th class="p-2 text-center">Title</th>
+                            <th class="p-2 text-center">Category</th>
+                            <th class="p-2 text-center">Type</th>
+                            <th class="p-2 text-center">Priority</th>
+                            <th class="p-2 text-center">Location</th>
+                            <th class="p-2 text-center">To Department</th>
+                            <th class="p-2 text-center">Status</th>
+                            <th class="p-2 text-center">Date</th>
+                            <th class="p-2 pr-4 text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
@@ -180,15 +168,15 @@
                                 $formattedTicketNo = '#TC-' . str_replace('TK-', 'TC-', $ticket->ticket_id);
                             @endphp
                         <tr class="hover:bg-slate-50/80 transition">
-                            <td class="p-4 pl-4 font-bold text-slate-900 text-center">{{ $formattedTicketNo }}</td>
-                            <td class="p-3 font-semibold text-slate-800 text-left">
+                            <td class="p-3 pl-4 font-bold text-slate-900 text-center truncate max-w-xs">{{ $formattedTicketNo }}</td>
+                            <td class="p-3 font-semibold text-slate-800 text-center">
                                 <a href="{{ route('messages.index', ['ticket_id' => $ticket->ticket_id]) }}"  class="hover:text-orange-600 hover:underline">
                                     {{ $ticket->title }}
                                 </a>
                             </td>
-                            <td class="p-3 text-center">{{ $ticket->category }}</td>
-                            <td class="p-3 text-center">{{ $ticket->type ?? '-' }}</td>
-                            <td class="p-3 text-center">
+                            <td class="p-2 text-center">{{ $ticket->category }}</td>
+                            <td class="p-2 text-center">{{ $ticket->type ?? '-' }}</td>
+                            <td class="p-2 text-center">
                                 <span class="px-2 py-0.5 rounded-full font-bold text-[10px]
                                     @if($ticket->priority == 'Urgent') bg-red-100 text-red-800
                                     @elseif($ticket->priority == 'High') bg-orange-200 text-orange-900
@@ -197,11 +185,11 @@
                                     {{ $ticket->priority }}
                                 </span>
                             </td>
-                            <td class="p-3 text-center">{{ $ticket->location }}</td>
-                            <td class="p-3 text-center">
+                            <td class="p-2 text-center">{{ $ticket->location }}</td>
+                            <td class="p-2 text-center">
                                 {{ $ticket->department->name ?? $ticket->department->department_name ?? $ticket->department_name ?? $ticket->department_id ?? '-' }}
                             </td>
-                            <td class="p-3 text-center">
+                            <td class="p-2 text-center">
                                 <span class="px-2.5 py-1 rounded-full font-bold text-[10px]
                                     @if($ticket->status == 'New') bg-emerald-100 text-emerald-700
                                     @elseif($ticket->status == 'Processing') bg-blue-100 text-blue-700
@@ -210,20 +198,19 @@
                                     {{ $ticket->status }}
                                 </span>
                             </td>
-                            <td class="p-3 text-center">
+                            <td class="p-2 text-center truncate max-w-xs">
                                 @if(!empty($ticket->created_at))
                                     {{ is_string($ticket->created_at) ? \Carbon\Carbon::parse($ticket->created_at)->format('d M Y') : $ticket->created_at->format('d M Y') }}
                                 @else
                                     {{ $ticket->date ? \Carbon\Carbon::parse($ticket->date)->format('d M Y') : '-' }}
                                 @endif
                             </td>
-                            <td class="p-3 pr-4 text-center">
+                            <td class="p-2 pr-4 text-center">
                                 <div class="flex items-center justify-center gap-2">
                                     <a href="{{ route('messages.index', ['ticket_id' => $ticket->ticket_id]) }}" 
                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition"
                                        title="View Messages">
                                         <i class="fa-solid fa-comments text-orange-500"></i>
-                                    </a>
 
                                     <form action="{{ route('tickets.destroy', $ticket->ticket_id) }}" method="POST" 
                                           onsubmit="return confirm('Are you sure you want to delete this ticket?');" class="inline-block">
@@ -247,7 +234,6 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
             @if (method_exists($tickets, 'hasPages') && $tickets->hasPages())
                 <div class="mt-6">
                     {{ $tickets->links() }}

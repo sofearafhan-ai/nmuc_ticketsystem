@@ -197,13 +197,13 @@
                         $tId = $ticket->ticket_id ?? $ticket->id;
                     @endphp
                     <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
-                        <td class="py-3 px-4 text-xs font-extrabold text-slate-900 text-center">
+                        <td class="py-3 px-4 text-xs font-extrabold text-slate-900 text-center truncate max-w-xs">
                             #TC-{{ $tId }}
                         </td>
                         <td class="py-3 px-4 text-xs text-slate-700 font-medium">
                             {{ $ticket->title }}
                         </td>
-                        <td class="py-3 px-4 text-xs text-slate-700 font-medium text-center">
+                        <td class="py-3 px-4 text-xs text-slate-700 font-semibold text-center">
                             {{ $ticket->user_name ?? ($ticket->user->name ?? 'User') }}
                         </td>
                         <td class="py-3 px-4 text-xs text-slate-700 font-medium text-center">
@@ -220,11 +220,11 @@
                             </span>
                         </td>
                         <td class="py-3 px-4 text-center">
-                            <span class="px-2.5 py-1 rounded-full font-bold text-xs bg-emerald-100 text-emerald-700">
+                            <span class="px-2.5 py-1 rounded-full font-bold text-[10px] bg-emerald-100 text-emerald-700">
                                 {{ $ticket->status }}
                             </span>
                         </td>
-                        <td class="py-3 px-4 text-xs text-slate-500 text-center">
+                        <td class="py-3 px-4 text-xs text-slate-500 text-center truncate max-w-xs">
                             @if(!empty($ticket->created_at))
                                 {{ is_string($ticket->created_at) ? \Carbon\Carbon::parse($ticket->created_at)->format('d M Y') : $ticket->created_at->format('d M Y') }}
                             @else
